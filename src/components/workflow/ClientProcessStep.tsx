@@ -101,11 +101,13 @@ function StepIndicator({ nodes }: { nodes: ProcessNodeView[] }) {
 function DishSelectionStep({
   node,
   eventId,
+  token,
   variants,
   onDone,
 }: {
   node: ProcessNodeView;
   eventId: string;
+  token: string;
   variants: MenuVariantOption[];
   onDone: () => void;
 }) {
@@ -143,6 +145,7 @@ function DishSelectionStep({
           note,
         },
         "CLIENT",
+        token,
       );
       onDone();
     } finally {
@@ -212,12 +215,14 @@ function DishSelectionStep({
 function MenuSelectionStep({
   node,
   eventId,
+  token,
   variants,
   initialSelection,
   onDone,
 }: {
   node: ProcessNodeView;
   eventId: string;
+  token: string;
   variants: MenuVariantOption[];
   initialSelection: { variantId: string; guests: number }[];
   onDone: () => void;
@@ -258,7 +263,8 @@ function MenuSelectionStep({
             : "",
           menuSummary: variantLabels,
         },
-        "CLIENT"
+        "CLIENT",
+        token
       );
       onDone();
     } finally {
@@ -337,10 +343,12 @@ function MenuSelectionStep({
 function ApprovalStep({
   node,
   eventId,
+  token,
   onDone,
 }: {
   node: ProcessNodeView;
   eventId: string;
+  token: string;
   onDone: () => void;
 }) {
   const [comment, setComment] = useState("");
@@ -349,7 +357,7 @@ function ApprovalStep({
   async function submit() {
     setBusy(true);
     try {
-      await completeProcessNode(eventId, node.id, { approved: true, comment }, "CLIENT");
+      await completeProcessNode(eventId, node.id, { approved: true, comment }, "CLIENT", token);
       onDone();
     } finally {
       setBusy(false);
@@ -388,10 +396,12 @@ function ApprovalStep({
 function GenericClientStep({
   node,
   eventId,
+  token,
   onDone,
 }: {
   node: ProcessNodeView;
   eventId: string;
+  token: string;
   onDone: () => void;
 }) {
   const fields = node.fields ?? [];
@@ -407,7 +417,7 @@ function GenericClientStep({
     setBusy(true);
     try {
       const payload = fields.length > 0 ? { ...fieldValues } : { answer };
-      await completeProcessNode(eventId, node.id, payload, "CLIENT");
+      await completeProcessNode(eventId, node.id, payload, "CLIENT", token);
       onDone();
     } finally {
       setBusy(false);
@@ -489,11 +499,13 @@ function GenericClientStep({
 
 export function ClientProcessStep({
   eventId,
+  token,
   processState,
   variants,
   initialMenuSelection,
 }: {
   eventId: string;
+  token: string;
   processState: ProcessStateView;
   variants: MenuVariantOption[];
   initialMenuSelection: { variantId: string; guests: number }[];
@@ -558,6 +570,7 @@ export function ClientProcessStep({
               <DishSelectionStep
                 node={currentNode}
                 eventId={eventId}
+                token={token}
                 variants={variants}
                 onDone={reload}
               />
@@ -565,15 +578,16 @@ export function ClientProcessStep({
               <MenuSelectionStep
                 node={currentNode}
                 eventId={eventId}
+                token={token}
                 variants={variants}
                 initialSelection={initialMenuSelection}
                 onDone={reload}
               />
             )
           ) : currentNode.actionType === "APPROVAL" ? (
-            <ApprovalStep node={currentNode} eventId={eventId} onDone={reload} />
+            <ApprovalStep node={currentNode} eventId={eventId} token={token} onDone={reload} />
           ) : (
-            <GenericClientStep node={currentNode} eventId={eventId} onDone={reload} />
+            <GenericClientStep node={currentNode} eventId={eventId} token={token} onDone={reload} />
           )}
           </div>
         </div>

@@ -28,10 +28,20 @@ const store: {
   nodes: Node[];
   historia: Array<{ fromStage?: string; toStage: string }>;
   powiadomienia: Array<{ title: string }>;
-} = { agenda: {}, state: null, nodes: [], historia: [], powiadomienia: [] };
+  eventDostepny: boolean;
+} = { agenda: {}, state: null, nodes: [], historia: [], powiadomienia: [], eventDostepny: true };
+
+const sesja: { user: { id: string } | null; orgId: string | null } = {
+  user: { id: "manager-1" },
+  orgId: "org-1",
+};
 
 jest.mock("@/lib/auth/utils", () => ({
-  getCurrentUser: jest.fn(async () => ({ id: "manager-1", email: "m@sala.pl", name: "Manager" })),
+  getCurrentUser: jest.fn(async () => sesja.user),
+}));
+
+jest.mock("@/lib/auth/active-org", () => ({
+  getActiveOrgId: jest.fn(async () => sesja.orgId),
 }));
 
 jest.mock("next/cache", () => ({ revalidatePath: jest.fn() }));
@@ -59,7 +69,9 @@ jest.mock("@/lib/prisma", () => ({
     },
     event: {
       update: jest.fn(async () => ({})),
-      findFirst: jest.fn(async () => ({ organizationId: "org-1", name: "Wesele Kowalskich" })),
+      findFirst: jest.fn(async () =>
+        store.eventDostepny ? { organizationId: "org-1", name: "Wesele Kowalskich" } : null,
+      ),
     },
     eventWorkflowHistory: {
       create: jest.fn(async ({ data }: { data: { fromStage?: string; toStage: string } }) => {
@@ -97,6 +109,7 @@ function ustawProces(nodes: Node[], currentNodeId = nodes[0].id) {
   store.historia = [];
   store.powiadomienia = [];
   store.nodes = nodes;
+  store.eventDostepny = true;
   store.state = {
     eventId: EVENT,
     workflowId: "wf-1",
@@ -110,7 +123,13 @@ function agenda(): Record<string, unknown> {
   return store.agenda[EVENT] ? JSON.parse(store.agenda[EVENT]) : {};
 }
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => {
+  jest.clearAllMocks();
+  sesja.user = { id: "manager-1" };
+  sesja.orgId = "org-1";
+});
+
+const TOKEN = "token-klienta-abcdef0123456789";
 
 describe("pola kroku trafiają do agendy", () => {
   it("wartość pola ląduje pod wskazanym kluczem agendy", async () => {
@@ -239,6 +258,7 @@ describe("wybór menu", () => {
       "n1",
       { menuSummary: "Wariant Złoty — 80 os., Wariant Srebrny — 40 os.", selectedDishes: ["Rosół", "Schab"] },
       "CLIENT",
+      TOKEN,
     );
 
     expect(agenda()["agenda.menu"]).toContain("Wariant Złoty");
@@ -248,7 +268,7 @@ describe("wybór menu", () => {
   it("ukończenie kroku przez klienta powiadamia obiekt", async () => {
     ustawProces([node({ id: "n1", name: "Wybór menu", actionType: "MENU_SELECTION" })]);
 
-    await completeProcessNode(EVENT, "n1", { menuSummary: "Wariant Złoty" }, "CLIENT");
+    await completeProcessNode(EVENT, "n1", { menuSummary: "Wariant Złoty" }, "CLIENT", TOKEN);
 
     expect(store.powiadomienia).toHaveLength(1);
     expect(store.powiadomienia[0].title).toContain("Wybór menu");
@@ -293,7 +313,7 @@ describe("przejście do następnego kroku", () => {
       node({ id: "n-srebrny", name: "Ścieżka srebrna", sortOrder: 2 }),
     ]);
 
-    const wynik = await completeProcessNode(EVENT, "n1", { selectedVariantLabel: "Srebrny" }, "CLIENT");
+    const wynik = await completeProcessNode(EVENT, "n1", { selectedVariantLabel: "Srebrny" }, "CLIENT", TOKEN);
 
     expect(wynik.nextNodeId).toBe("n-srebrny");
   });
@@ -307,5 +327,36 @@ describe("przejście do następnego kroku", () => {
     await expect(completeProcessNode(EVENT, "n2", {}, "ORGANIZER")).rejects.toThrow(
       /is not the current node/,
     );
+  });
+});
+
+describe("kto może zamknąć krok", () => {
+  it("klient bez tokenu nie zamknie kroku", async () => {
+    ustawProces([node({ id: "n1", name: "Wybór menu", actionType: "MENU_SELECTION" })]);
+
+    await expect(completeProcessNode(EVENT, "n1", {}, "CLIENT")).rejects.toThrow(/tokenu/i);
+  });
+
+  it("klient z tokenem, którego event nie zna, nie zamknie kroku", async () => {
+    ustawProces([node({ id: "n1", name: "Wybór menu", actionType: "MENU_SELECTION" })]);
+    store.eventDostepny = false;
+
+    await expect(
+      completeProcessNode(EVENT, "n1", {}, "CLIENT", "nie-ten-token"),
+    ).rejects.toThrow(/nieaktualny/i);
+  });
+
+  it("obsługa bez sesji nie zamknie kroku", async () => {
+    ustawProces([node({ id: "n1", name: "Zaliczka" })]);
+    sesja.user = null;
+
+    await expect(completeProcessNode(EVENT, "n1", {}, "ORGANIZER")).rejects.toThrow(/Unauthorized/);
+  });
+
+  it("obsługa nie zamknie kroku eventu spoza swojej przestrzeni", async () => {
+    ustawProces([node({ id: "n1", name: "Zaliczka" })]);
+    store.eventDostepny = false;
+
+    await expect(completeProcessNode(EVENT, "n1", {}, "ORGANIZER")).rejects.toThrow(/Forbidden/);
   });
 });

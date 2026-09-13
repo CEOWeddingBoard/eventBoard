@@ -3,6 +3,7 @@
 import { createHash } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth/utils";
+import { getActiveOrgId } from "@/lib/auth/active-org";
 import { revalidatePath } from "next/cache";
 import {
   SCHEDULE_AGENDA_KEY,
@@ -322,12 +323,56 @@ function resolveNextNode(
   return null;
 }
 
+/**
+ * Kto może zamknąć krok procesu.
+ *
+ * `completeProcessNode` jest akcją serwerową, czyli zwykłym endpointem HTTP —
+ * bez tego sprawdzenia wystarczyło znać ID eventu, żeby zamykać kroki cudzego
+ * przyjęcia. Klient końcowy nie ma konta, więc jego przepustką jest token
+ * z linku; zespół obiektu — sesja i przynależność eventu do jego przestrzeni.
+ */
+async function assertCanCompleteNode(
+  eventId: string,
+  role: "CLIENT" | "ORGANIZER",
+  clientToken?: string,
+): Promise<void> {
+  if (role === "CLIENT") {
+    if (!clientToken) throw new Error("Brak tokenu dostępu do tego przyjęcia.");
+    const hashed = createHash("sha256").update(clientToken).digest("hex");
+    const event = await prisma.event.findFirst({
+      where: {
+        id: eventId,
+        OR: [{ clientLinkTokenHash: hashed }, { weddingBoardToken: clientToken }],
+      },
+      select: { clientLinkExpiresAt: true },
+    });
+    if (!event) throw new Error("Link jest nieaktualny.");
+    if (event.clientLinkExpiresAt && event.clientLinkExpiresAt < new Date()) {
+      throw new Error("Link wygasł.");
+    }
+    return;
+  }
+
+  const user = await getCurrentUser();
+  if (!user) throw new Error("Unauthorized");
+  const organizationId = await getActiveOrgId(user.id);
+  if (!organizationId) throw new Error("Forbidden");
+  const event = await prisma.event.findFirst({
+    where: { id: eventId, organizationId },
+    select: { id: true },
+  });
+  if (!event) throw new Error("Forbidden");
+}
+
 export async function completeProcessNode(
   eventId: string,
   nodeId: string,
   data: Record<string, unknown>,
-  completedByRole: "CLIENT" | "ORGANIZER"
+  completedByRole: "CLIENT" | "ORGANIZER",
+  clientToken?: string
 ): Promise<{ nextNodeId: string | null; done: boolean }> {
+  await assertCanCompleteNode(eventId, completedByRole, clientToken);
+
   const user = await getCurrentUser();
   const completedBy = user?.id ?? "client";
 

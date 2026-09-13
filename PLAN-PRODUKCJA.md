@@ -80,15 +80,22 @@ po produkcie weselnym.
 
 ### Etap 1 — Portal klienta (P0)
 
-- [ ] **1.1 Trasa `/{locale}/portal/[token]`** — weryfikacja tokenu, obsługa wygasłego
+- [x] **1.1 Trasa `/{locale}/portal/[token]`** — weryfikacja tokenu, obsługa wygasłego
       i unieważnionego linku, `notFound()` dla śmieci. Bez sesji: middleware musi ją
       przepuszczać (dopisać do `isRegistrationFlowRoute` albo do publicznych).
-- [ ] **1.2 Renderowanie kroków klienta** — podpiąć `ClientProcessStep` pod stan
+- [x] **1.2 Renderowanie kroków klienta** — podpiąć `ClientProcessStep` pod stan
       z `getEventProcessStateForPortal`, pokazywać tylko kroki roli `CLIENT`/`BOTH`.
-- [ ] **1.3 Test E2E i jednostkowy** — token ważny / wygasły / unieważniony / obcy.
+- [x] **1.3 Testy autoryzacji** — jednostkowe; E2E czeka na środowisko — token ważny / wygasły / unieważniony / obcy.
 
-**Gotowe, gdy:** wygenerowany link otwiera się w trybie incognito i da się przez niego
-ukończyć krok, a obiekt dostaje powiadomienie.
+**Zrobione.** Przy okazji znalazła się dziura, której nie było w analizie:
+`completeProcessNode` **nie sprawdzał niczego** — znając ID eventu dało się zamknąć
+dowolny krok cudzego przyjęcia, w dowolnej roli. Server action to zwykły endpoint HTTP,
+więc było to wykonalne bez portalu. Teraz klient legitymuje się tokenem z linku
+(z kontrolą wygaśnięcia), a zespół obiektu sesją i przynależnością eventu do swojej
+przestrzeni. Cztery testy pilnują obu ścieżek.
+
+**Do sprawdzenia po wdrożeniu:** otworzyć wygenerowany link w trybie incognito
+i ukończyć krok — tego nie da się zweryfikować bez bazy.
 
 ### Etap 2 — Uruchomić powiadomienia (P0)
 
