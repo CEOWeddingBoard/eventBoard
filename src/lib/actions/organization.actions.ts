@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { assertModuleEdit } from "@/lib/permissions/guard";
 import { requireOrgId } from "@/lib/auth/active-org";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth/utils";
@@ -108,6 +109,7 @@ export async function getOrganization(organizationId: string) {
 }
 
 export async function updateOrganization(organizationId: string, data: Partial<CreateOrganizationInput>) {
+  await assertModuleEdit("settings");
   const user = await getCurrentUser();
   if (!user) throw new Error("Unauthorized");
 
@@ -127,6 +129,7 @@ export async function updateOrganization(organizationId: string, data: Partial<C
 
 /** Zapisuje skróty pulpitu organizacji. */
 export async function updateDashboardShortcuts(shortcuts: Array<{ label: string; href: string }>) {
+  await assertModuleEdit("settings");
   const user = await getCurrentUser();
   if (!user) throw new Error("Unauthorized");
 

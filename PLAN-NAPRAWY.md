@@ -215,26 +215,36 @@ złożona klientowi jest tylko częściowo prawdziwa.
 
 **Szacunek:** 1 dzień
 
-- [ ] **6.1 Zablokuj zapis w akcjach serwerowych**
+- [x] **6.1 Zablokuj zapis w akcjach serwerowych**
 
   Helper `canEditModule` jest gotowy w `src/lib/permissions/guard.ts` — trzeba go wywołać
   w akcjach zapisu (finanse, eventy, menu, ustawienia). Sama blokada w interfejsie nie
   wystarczy, bo akcję można wywołać bezpośrednio.
 
-  **Gotowe, gdy:** konto z poziomem „Podgląd" nie zapisze zmiany nawet przy bezpośrednim
-  wywołaniu akcji.
+  **Zrobione:** `assertModuleEdit(moduleKey)` w `src/lib/permissions/guard.ts` rzuca
+  `ModulePermissionError`. Podpięte w 40 akcjach zapisu: eventy (event.actions,
+  menu-variant, zadania, szablony, terminy), finanse (płatności, wycena),
+  zapytania (status, konwersja), kalendarz (blokady dat), konfiguracja (sale,
+  procesy, szablony agendy), ustawienia (profil organizacji, skróty pulpitu).
+  `createOrgLead` świadomie bez bramki — to publiczny formularz zapytania.
 
-- [ ] **6.2 Ukryj przyciski zapisu przy samym podglądzie**
+  **Przy okazji:** `/app/settings/*` nie miało w ogóle strażnika podglądu (tylko
+  `settings/configuration` go miał) — dołożone `layout.tsx` dla agenda-templates,
+  document-templates, menu, menu-parser, venues, workflows i strony głównej ustawień.
+
+- [x] **6.2 Ukryj przyciski zapisu przy samym podglądzie** — eventy, kalendarz, ustawienia
 
   Pokazywanie przycisku, który zawsze kończy się błędem, to zła robota.
 
   **Gotowe, gdy:** przy poziomie „Podgląd" nie ma widocznych przycisków zapisu.
 
-- [ ] **6.3 Test uprawnień**
+- [x] **6.3 Test uprawnień**
 
   Plik: `e2e/permissions.spec.ts` — wszystkie trzy poziomy: brak, podgląd, edycja.
 
-  **Gotowe, gdy:** test pokrywa trzy poziomy i przechodzi.
+  **Zrobione:** `src/lib/permissions/__tests__/guard.test.ts` — 7 testów (brak/podgląd/
+  edycja + reguły macierzy), przechodzą w `npm test`. `e2e/permissions.spec.ts`
+  sprawdza to samo w przeglądarce; wymaga trzech kont testowych, bez nich się pomija.
 
 ---
 

@@ -44,6 +44,7 @@ export function EventBoardCalendar({
   categories,
   monthsWithEntries = [],
   currentMonth,
+  canEdit = true,
 }: {
   locale: string;
   monthLabel: string;
@@ -55,6 +56,8 @@ export function EventBoardCalendar({
   categories: { id: string; name: string }[];
   monthsWithEntries?: string[];
   currentMonth?: string;
+  /** Poziom „Podgląd" — kalendarz tylko do oglądania. */
+  canEdit?: boolean;
 }) {
   const router = useRouter();
   const today = new Date().toISOString().slice(0, 10);
@@ -79,6 +82,7 @@ export function EventBoardCalendar({
   }
 
   const openForDay = (iso: string) => {
+    if (!canEdit) return;
     setForm({ name: "", date: iso, guests: "", isWedding: false, categoryId: "" });
     setNewOpen(true);
   };
@@ -166,22 +170,26 @@ export function EventBoardCalendar({
           >
             <ChevronRight className="h-4 w-4" />
           </Link>
-          <Button
-            size="sm"
-            variant="outline"
-            className="ml-2"
-            onClick={() => {
-              setBlockForm({ date: today, reason: "" });
-              setBlockOpen(true);
-            }}
-          >
-            <Lock className="mr-1 h-3.5 w-3.5" />
-            Blokada
-          </Button>
-          <Button size="sm" className="ml-2" onClick={() => openForDay(today)}>
-            <Plus className="mr-1 h-4 w-4" />
-            Nowy event
-          </Button>
+          {canEdit && (
+            <>
+              <Button
+                size="sm"
+                variant="outline"
+                className="ml-2"
+                onClick={() => {
+                  setBlockForm({ date: today, reason: "" });
+                  setBlockOpen(true);
+                }}
+              >
+                <Lock className="mr-1 h-3.5 w-3.5" />
+                Blokada
+              </Button>
+              <Button size="sm" className="ml-2" onClick={() => openForDay(today)}>
+                <Plus className="mr-1 h-4 w-4" />
+                Nowy event
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
@@ -233,7 +241,7 @@ export function EventBoardCalendar({
                 <button
                   key={idx}
                   type="button"
-                  onClick={() => handleRemoveBlock(block)}
+                  onClick={() => canEdit && handleRemoveBlock(block)}
                   title={block.reason ? `Blokada: ${block.reason} (kliknij, aby usunąć)` : "Blokada (kliknij, aby usunąć)"}
                   className="min-h-[92px] border-b border-r border-neutral-100 bg-red-50/60 p-1.5 text-left align-top hover:bg-red-100 cursor-pointer"
                 >

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { prisma } from "@/lib/prisma";
 import { getActiveMembership } from "@/lib/auth/active-org";
+import { canEditModule } from "@/lib/permissions/guard";
 import { EventBoardEventsList } from "@/components/eventboard/event-board-events-list";
 
 export const metadata = { robots: { index: false, follow: false } };
@@ -16,6 +17,7 @@ export default async function EventsPage({
   if (!user) redirect(`/${locale}/auth`);
 
   const membership = await getActiveMembership(user.id);
+  const canEdit = await canEditModule("events");
 
   const events = membership
     ? await prisma.event.findMany({
@@ -82,6 +84,7 @@ export default async function EventsPage({
   return (
     <EventBoardEventsList
       locale={locale}
+      canEdit={canEdit}
       events={events.map((e) => ({
         id: e.id,
         name: e.name,

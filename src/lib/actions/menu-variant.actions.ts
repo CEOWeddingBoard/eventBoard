@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { assertModuleEdit } from "@/lib/permissions/guard";
 import { getActiveOrgId, requireOrgId } from "@/lib/auth/active-org";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth/utils";
@@ -25,6 +26,7 @@ export async function getMenuVariants(eventId: string) {
 }
 
 export async function createMenuVariant(eventId: string, label: string, extra?: { description?: string | null; imageUrl?: string | null; notes?: string | null }) {
+  await assertModuleEdit("events");
   const user = await getCurrentUser();
   if (!user) throw new Error("Unauthorized");
 
@@ -52,6 +54,7 @@ export async function createMenuVariant(eventId: string, label: string, extra?: 
 }
 
 export async function updateMenuVariant(variantId: string, data: { label?: string; description?: string | null; imageUrl?: string | null; notes?: string | null; pricePerPerson?: number | null }) {
+  await assertModuleEdit("events");
   const user = await getCurrentUser();
   if (!user) throw new Error("Unauthorized");
 
@@ -72,6 +75,7 @@ export async function updateMenuVariant(variantId: string, data: { label?: strin
 }
 
 export async function deleteMenuVariant(variantId: string) {
+  await assertModuleEdit("events");
   const user = await getCurrentUser();
   if (!user) throw new Error("Unauthorized");
 
@@ -82,6 +86,7 @@ export async function deleteMenuVariant(variantId: string) {
 }
 
 export async function addVariantCourse(variantId: string, input: VariantCourseInput) {
+  await assertModuleEdit("events");
   const user = await getCurrentUser();
   if (!user) throw new Error("Unauthorized");
 
@@ -110,6 +115,7 @@ export async function addVariantCourse(variantId: string, input: VariantCourseIn
 }
 
 export async function updateVariantCourse(courseId: string, input: Partial<VariantCourseInput>) {
+  await assertModuleEdit("events");
   const user = await getCurrentUser();
   if (!user) throw new Error("Unauthorized");
 
@@ -124,6 +130,7 @@ export async function updateVariantCourse(courseId: string, input: Partial<Varia
 }
 
 export async function deleteVariantCourse(courseId: string) {
+  await assertModuleEdit("events");
   const user = await getCurrentUser();
   if (!user) throw new Error("Unauthorized");
 
@@ -174,6 +181,7 @@ export async function createMenuVariantsForEvents(input: {
   notes?: string | null;
   eventIds: string[];
 }) {
+  await assertModuleEdit("events");
   const user = await getCurrentUser();
   if (!user) throw new Error("Unauthorized");
 

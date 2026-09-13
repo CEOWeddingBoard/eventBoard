@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { prisma } from "@/lib/prisma";
 import { getActiveMembership } from "@/lib/auth/active-org";
+import { canEditModule } from "@/lib/permissions/guard";
 import { ensureEventP1Columns } from "@/lib/events/event-schema-migration";
 import {
   EventBoardCalendar,
@@ -28,6 +29,7 @@ export default async function CalendarPage({
   if (!user) redirect(`/${locale}/auth`);
 
   const membership = await getActiveMembership(user.id);
+  const canEdit = await canEditModule("calendar");
   if (!membership) redirect(`/${locale}/app/dashboard`);
   await ensureEventP1Columns();
 
@@ -131,6 +133,7 @@ export default async function CalendarPage({
 
   return (
     <EventBoardCalendar
+      canEdit={canEdit}
       locale={locale}
       monthLabel={monthLabel}
       prevHref={`/${locale}/app/calendar?month=${monthKey(prev)}`}

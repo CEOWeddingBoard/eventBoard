@@ -3,6 +3,7 @@
 import { getCurrentUser } from "@/lib/auth/utils";
 import { getActiveOrgId, requireOrgId } from "@/lib/auth/active-org";
 import { prisma } from "@/lib/prisma"
+import { assertModuleEdit } from "@/lib/permissions/guard";
 import { revalidatePath } from "next/cache"
 import { validate } from "@/lib/validations/validation-utils"
 import { createEventSimpleSchema } from "@/lib/validations/event"
@@ -549,6 +550,7 @@ export async function createEvent(data: {
   customFieldValues?: Record<string, string>;
   workflowId?: string;
 }) {
+  await assertModuleEdit("events");
   const validated = validate(createEventSimpleSchema, data, { action: "create_event" });
   const date = validated.date instanceof Date ? validated.date : new Date(validated.date);
 
@@ -692,6 +694,7 @@ export async function updateEvent(eventId: string, data: {
   categoryId?: string;
   hallId?: string;
 }) {
+  await assertModuleEdit("events");
   const validated = validate(createEventSimpleSchema.partial(), data, { action: "update_event" });
 
   const updateData: any = {};
@@ -815,6 +818,7 @@ export async function updateEvent(eventId: string, data: {
 
 /** Duplikuje event (dane + harmonogram + warianty menu) w ramach organizacji. */
 export async function duplicateEvent(eventId: string) {
+  await assertModuleEdit("events");
   const user = await getCurrentUser();
   if (!user) throw new Error("Unauthorized");
 

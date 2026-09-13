@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { assertModuleEdit } from "@/lib/permissions/guard";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { getActiveOrgId } from "@/lib/auth/active-org";
@@ -21,6 +22,7 @@ export async function listOrgBlockedDates(organizationId: string) {
 }
 
 export async function createOrgBlockedDate(input: { date: string; reason?: string }) {
+  await assertModuleEdit("calendar");
   const organizationId = await getUserOrgId();
   if (!organizationId) throw new Error("Unauthorized");
   await ensureEventP1Columns();
@@ -39,6 +41,7 @@ export async function createOrgBlockedDate(input: { date: string; reason?: strin
 }
 
 export async function deleteOrgBlockedDate(blockedDateId: string) {
+  await assertModuleEdit("calendar");
   const organizationId = await getUserOrgId();
   if (!organizationId) throw new Error("Unauthorized");
 

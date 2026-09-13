@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { assertModuleEdit } from "@/lib/permissions/guard";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { getActiveOrgId } from "@/lib/auth/active-org";
@@ -60,6 +61,7 @@ export async function createAgendaTemplate(input: {
     }>;
   }>;
 }) {
+  await assertModuleEdit("configuration");
   const organizationId = await getUserOrgId();
   if (!organizationId) throw new Error("Forbidden");
 
@@ -99,6 +101,7 @@ export async function updateAgendaTemplate(
     isDefault?: boolean;
   }
 ) {
+  await assertModuleEdit("configuration");
   const organizationId = await getUserOrgId();
   if (!organizationId) throw new Error("Forbidden");
 
@@ -124,6 +127,7 @@ export async function updateAgendaTemplate(
 }
 
 export async function deleteAgendaTemplate(id: string) {
+  await assertModuleEdit("configuration");
   const organizationId = await getUserOrgId();
   if (!organizationId) throw new Error("Forbidden");
 

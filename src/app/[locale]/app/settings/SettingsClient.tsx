@@ -25,7 +25,7 @@ export interface OrgProfile {
   priceRange: string;
 }
 
-export function SettingsClient({ orgId, orgName: initialName, orgSlug, profile: initialProfile }: { orgId: string; orgName: string; orgSlug: string; profile: OrgProfile }) {
+export function SettingsClient({ orgId, orgName: initialName, orgSlug, profile: initialProfile, canEdit = true }: { orgId: string; orgName: string; orgSlug: string; profile: OrgProfile; canEdit?: boolean }) {
   const t = useTranslations("eventboard");
   const [name, setName] = useState(initialName);
   const [saving, setSaving] = useState(false);
@@ -46,7 +46,7 @@ export function SettingsClient({ orgId, orgName: initialName, orgSlug, profile: 
         <CardContent>
           <div className="flex items-end gap-3">
             <div className="flex-1"><Label className="text-sm font-medium">Nazwa organizacji</Label><Input value={name} onChange={(e) => setName(e.target.value)} className="mt-1" /></div>
-            <Button onClick={async () => { setSaving(true); await updateOrganization(orgId, { name: name.trim() }); setSaving(false); }} disabled={saving} className="bg-slate-900 hover:bg-slate-800 text-white">
+            <Button onClick={async () => { setSaving(true); await updateOrganization(orgId, { name: name.trim() }); setSaving(false); }} disabled={saving} hidden={!canEdit} className="bg-slate-900 hover:bg-slate-800 text-white">
               <Save className="h-4 w-4 mr-1" />{saving ? "..." : "Zapisz"}
             </Button>
           </div>
@@ -139,6 +139,7 @@ export function SettingsClient({ orgId, orgName: initialName, orgSlug, profile: 
             <div className="mt-3 flex justify-end">
               <Button
                 type="button"
+                hidden={!canEdit}
                 onClick={async () => {
                   setSavingProfile(true);
                   try {

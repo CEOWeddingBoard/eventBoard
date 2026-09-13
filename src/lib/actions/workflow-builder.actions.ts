@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { assertModuleEdit } from "@/lib/permissions/guard";
 import { getActiveOrgId } from "@/lib/auth/active-org";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { revalidatePath } from "next/cache";
@@ -162,6 +163,7 @@ export async function createWorkflowWithNodes(input: {
   isDefault?: boolean;
   nodes: WorkflowNodeData[];
 }): Promise<string> {
+  await assertModuleEdit("configuration");
   const orgId = await getOrgId();
   await assertCanManage(orgId);
 
@@ -209,6 +211,7 @@ export async function updateWorkflowWithNodes(
     nodes: WorkflowNodeData[];
   }
 ): Promise<void> {
+  await assertModuleEdit("configuration");
   const orgId = await getOrgId();
   await assertCanManage(orgId);
 
@@ -281,6 +284,7 @@ export async function updateWorkflowWithNodes(
 }
 
 export async function deleteWorkflow(workflowId: string): Promise<void> {
+  await assertModuleEdit("configuration");
   const orgId = await getOrgId();
   await assertCanManage(orgId);
   await prisma.organizationWorkflow.delete({
@@ -290,6 +294,7 @@ export async function deleteWorkflow(workflowId: string): Promise<void> {
 }
 
 export async function duplicateWorkflow(workflowId: string): Promise<string> {
+  await assertModuleEdit("configuration");
   const orgId = await getOrgId();
   await assertCanManage(orgId);
 

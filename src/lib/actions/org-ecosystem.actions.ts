@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { assertModuleEdit } from "@/lib/permissions/guard";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { getActiveOrgId } from "@/lib/auth/active-org";
@@ -82,6 +83,7 @@ export async function listOrgTemplates() {
 }
 
 export async function saveEventAsTemplate(eventId: string, name: string) {
+  await assertModuleEdit("events");
   if (!(await canManageEvent(eventId))) throw new Error("Forbidden");
   const organizationId = await getUserOrgId();
   if (!organizationId) throw new Error("Forbidden");
@@ -136,6 +138,7 @@ export async function saveEventAsTemplate(eventId: string, name: string) {
 }
 
 export async function applyTemplateToEvent(templateId: string, eventId: string) {
+  await assertModuleEdit("events");
   if (!(await canManageEvent(eventId))) throw new Error("Forbidden");
   await ensureEventP1Columns();
 
@@ -220,6 +223,7 @@ export async function createEventTask(
   eventId: string,
   input: { title: string; dueDate?: string; assigneeId?: string },
 ) {
+  await assertModuleEdit("events");
   if (!(await canManageEvent(eventId))) throw new Error("Forbidden");
   const task = await prisma.task.create({
     data: {
@@ -236,6 +240,7 @@ export async function createEventTask(
 }
 
 export async function toggleEventTask(taskId: string) {
+  await assertModuleEdit("events");
   const task = await prisma.task.findUnique({ where: { id: taskId } });
   if (!task?.eventId || !(await canManageEvent(task.eventId))) {
     throw new Error("Forbidden");
@@ -249,6 +254,7 @@ export async function toggleEventTask(taskId: string) {
 }
 
 export async function deleteEventTask(taskId: string) {
+  await assertModuleEdit("events");
   const task = await prisma.task.findUnique({ where: { id: taskId } });
   if (!task?.eventId || !(await canManageEvent(task.eventId))) {
     throw new Error("Forbidden");
@@ -272,6 +278,7 @@ export async function addEventPayment(
   eventId: string,
   input: { label: string; amount: number; dueDate?: string; notes?: string },
 ) {
+  await assertModuleEdit("finances");
   if (!(await canManageEvent(eventId))) throw new Error("Forbidden");
   await ensureEventP1Columns();
   const payment = await prisma.eventPayment.create({
@@ -288,6 +295,7 @@ export async function addEventPayment(
 }
 
 export async function markEventPaymentPaid(paymentId: string, method?: string) {
+  await assertModuleEdit("finances");
   const payment = await prisma.eventPayment.findUnique({ where: { id: paymentId } });
   if (!payment || !(await canManageEvent(payment.eventId))) throw new Error("Forbidden");
   const updated = await prisma.eventPayment.update({
@@ -299,6 +307,7 @@ export async function markEventPaymentPaid(paymentId: string, method?: string) {
 }
 
 export async function markEventPaymentPending(paymentId: string) {
+  await assertModuleEdit("finances");
   const payment = await prisma.eventPayment.findUnique({ where: { id: paymentId } });
   if (!payment || !(await canManageEvent(payment.eventId))) throw new Error("Forbidden");
   const updated = await prisma.eventPayment.update({
@@ -310,6 +319,7 @@ export async function markEventPaymentPending(paymentId: string) {
 }
 
 export async function deleteEventPayment(paymentId: string) {
+  await assertModuleEdit("finances");
   const payment = await prisma.eventPayment.findUnique({ where: { id: paymentId } });
   if (!payment || !(await canManageEvent(payment.eventId))) throw new Error("Forbidden");
   await prisma.eventPayment.delete({ where: { id: paymentId } });
@@ -391,6 +401,7 @@ export async function saveEventQuote(
   eventId: string,
   input: { items: Array<{ label: string; amount: number }>; notes?: string },
 ) {
+  await assertModuleEdit("finances");
   if (!(await canManageEvent(eventId))) throw new Error("Forbidden");
   await prisma.event.update({
     where: { id: eventId },
@@ -404,6 +415,7 @@ export async function saveEventDeadlines(
   eventId: string,
   input: { menuDeadlineAt?: string | null; guestListDeadlineAt?: string | null },
 ) {
+  await assertModuleEdit("events");
   if (!(await canManageEvent(eventId))) throw new Error("Forbidden");
   await prisma.event.update({
     where: { id: eventId },
@@ -465,6 +477,7 @@ export async function listOrgLeads() {
 }
 
 export async function updateOrgLeadStatus(leadId: string, status: string) {
+  await assertModuleEdit("leads");
   const organizationId = await getUserOrgId();
   if (!organizationId) throw new Error("Forbidden");
   const allowed = ["NEW", "CONTACTED", "WON", "LOST"];
@@ -478,6 +491,7 @@ export async function updateOrgLeadStatus(leadId: string, status: string) {
 }
 
 export async function convertLeadToEvent(leadId: string) {
+  await assertModuleEdit("leads");
   const organizationId = await getUserOrgId();
   if (!organizationId) throw new Error("Forbidden");
 

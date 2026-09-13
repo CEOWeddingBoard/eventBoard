@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { assertModuleEdit } from "@/lib/permissions/guard";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { getActiveOrgId } from "@/lib/auth/active-org";
@@ -33,6 +34,7 @@ export async function createVenue(input: {
   capacity?: number;
   description?: string;
 }) {
+  await assertModuleEdit("configuration");
   const organizationId = await getUserOrgId();
   if (!organizationId) throw new Error("Forbidden");
 
@@ -73,6 +75,7 @@ export async function updateVenue(
     description?: string;
   }
 ) {
+  await assertModuleEdit("configuration");
   const organizationId = await getUserOrgId();
   if (!organizationId) throw new Error("Forbidden");
 
@@ -97,6 +100,7 @@ export async function updateVenue(
 }
 
 export async function deleteVenue(venueId: string) {
+  await assertModuleEdit("configuration");
   const organizationId = await getUserOrgId();
   if (!organizationId) throw new Error("Forbidden");
 
@@ -114,6 +118,7 @@ export async function createVenueHall(
   venueId: string,
   input: { name: string; capacity: number }
 ) {
+  await assertModuleEdit("configuration");
   const organizationId = await getUserOrgId();
   if (!organizationId) throw new Error("Forbidden");
 
@@ -138,6 +143,7 @@ export async function updateVenueHall(
   hallId: string,
   input: { name?: string; capacity?: number }
 ) {
+  await assertModuleEdit("configuration");
   const organizationId = await getUserOrgId();
   if (!organizationId) throw new Error("Forbidden");
 
@@ -159,6 +165,7 @@ export async function updateVenueHall(
 }
 
 export async function deleteVenueHall(hallId: string) {
+  await assertModuleEdit("configuration");
   const organizationId = await getUserOrgId();
   if (!organizationId) throw new Error("Forbidden");
 

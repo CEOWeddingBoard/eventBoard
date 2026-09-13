@@ -16,3 +16,24 @@ export async function canEditModule(moduleKey: string): Promise<boolean> {
   const access = await getMyModuleAccess();
   return canEdit(access[moduleKey]);
 }
+
+/** Brak uprawnienia do zapisu — akcja serwerowa przerywa się z tym błędem. */
+export class ModulePermissionError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ModulePermissionError";
+  }
+}
+
+/**
+ * Bramka zapisu dla akcji serwerowych.
+ *
+ * Ukrycie przycisku w interfejsie nic nie chroni — akcję serwerową można wywołać
+ * bezpośrednio. Poziom „Podgląd" musi być egzekwowany tutaj, po stronie serwera.
+ */
+export async function assertModuleEdit(moduleKey: string): Promise<void> {
+  const access = await getMyModuleAccess();
+  if (!canEdit(access[moduleKey])) {
+    throw new ModulePermissionError("Nie masz uprawnień do zapisu w tym module.");
+  }
+}

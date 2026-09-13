@@ -90,10 +90,13 @@ export function EventBoardEventsList({
   locale,
   events,
   halls = [],
+  canEdit = true,
 }: {
   locale: string;
   events: EventItem[];
   halls?: VenueHalls[];
+  /** Poziom „Podgląd" — chowamy akcje zapisu zamiast pokazywać przyciski, które zawsze kończą się błędem. */
+  canEdit?: boolean;
 }) {
   const hallCount = halls.reduce((sum, v) => sum + v.halls.length, 0);
   const router = useRouter();
@@ -296,10 +299,12 @@ export function EventBoardEventsList({
             Zarządzaj imprezami. Flaga „Wesele” odblokowuje portal dla pary.
           </p>
         </div>
-        <Button size="sm" onClick={() => setNewOpen(true)}>
-          <Plus className="mr-1.5 h-4 w-4" />
-          Nowy event
-        </Button>
+        {canEdit && (
+          <Button size="sm" onClick={() => setNewOpen(true)}>
+            <Plus className="mr-1.5 h-4 w-4" />
+            Nowy event
+          </Button>
+        )}
       </div>
 
       <div className="flex items-center gap-1 border-b border-neutral-200">
@@ -326,7 +331,7 @@ export function EventBoardEventsList({
 
       {events.length === 0 ? (
         <div className="border border-neutral-200 text-center py-16 text-sm text-neutral-400">
-          Brak eventów. Kliknij „Nowy event” aby utworzyć pierwszy.
+          {canEdit ? "Brak eventów. Kliknij „Nowy event” aby utworzyć pierwszy." : "Brak eventów."}
         </div>
       ) : visibleEvents.length === 0 ? (
         <div className="border border-neutral-200 text-center py-16 text-sm text-neutral-400">
@@ -429,6 +434,7 @@ export function EventBoardEventsList({
                 Otwórz
               </Link>
 
+              {canEdit && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -473,8 +479,9 @@ export function EventBoardEventsList({
                   )}
                 </DropdownMenuContent>
               </DropdownMenu>
+              )}
 
-              {!event.isWedding && (
+              {canEdit && !event.isWedding && (
                 <EventClientLinkButton
                   locale={locale}
                   eventId={event.id}
