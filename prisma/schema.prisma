@@ -1,0 +1,1768 @@
+// Full Prisma schema for Wedding Planner App
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model for authentication
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  password     String
+  name         String?
+  clerkId      String?  @unique
+  role         String   @default("STAFF") // ADMIN | STAFF
+  isActive     Boolean  @default(true)
+  metadataJson String? // JSON: billing/trial (stripeCustomerId, plan, trialEndsAt...)
+  // Akceptacja regulaminu — wersja i moment. Brak/nieaktualna = brama akceptacji.
+  acceptedTermsVersion String?
+  acceptedTermsAt      DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  weddings            Wedding[]
+  participants        WeddingParticipant[]
+  tasks               Task[]
+  createdEvents       Event[]
+  eventParticipants   EventParticipant[]
+  googleCalendar      GoogleCalendarConnection?
+  organizationMembers OrganizationMember[]
+  ownedOrganizations  Organization[]            @relation("OrganizationOwner")
+
+  @@map("users")
+}
+
+// Blokady terminów organizacji (kalendarz EventBoard)
+model OrgBlockedDate {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  date           DateTime
+  reason         String?
+  createdAt      DateTime     @default(now())
+
+  @@unique([organizationId, date])
+  @@index([organizationId, date])
+  @@map("org_blocked_dates")
+}
+
+// Szablony agendy i menu organizacji (reuse między eventami)
+model OrgTemplate {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name           String
+  kind           String       @default("AGENDA") // AGENDA | MENU
+  contentJson    String // { schedule:[{time,title,description,location}], menuVariants:[{label,courses:[...]}] }
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([organizationId, kind])
+  @@map("org_templates")
+}
+
+// Powiadomienia in-app organizacji
+model OrgNotification {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  type           String       @default("INFO") // INFO | CLIENT_REPLY | PAYMENT | DEADLINE | LEAD
+  title          String
+  body           String?
+  link           String?
+  read           Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+
+  @@index([organizationId, read, createdAt])
+  @@map("org_notifications")
+}
+
+// Płatności klienta — manualny cashflow (bez bramki płatniczej)
+model EventPayment {
+  id        String    @id @default(cuid())
+  eventId   String
+  event     Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  label     String // np. "Zadatek", "Rata 1", "Dopłata końcowa"
+  amount    Float
+  dueDate   DateTime?
+  status    String    @default("PENDING") // PENDING | PAID
+  paidAt    DateTime?
+  method    String? // gotówka / przelew / karta
+  notes     String?
+  createdAt DateTime  @default(now())
+
+  @@index([eventId, status])
+  @@map("event_payments")
+}
+
+// Zapytania ofertowe z publicznego profilu organizatora
+model OrgLead {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name           String
+  email          String?
+  phone          String?
+  eventDate      DateTime?
+  guestCount     Int?
+  message        String?
+  status         String       @default("NEW") // NEW | CONTACTED | WON | LOST
+  createdAt      DateTime     @default(now())
+
+  @@index([organizationId, status])
+  @@map("org_leads")
+}
+
+// =============================================================================
+// EVENT CLOUD: Organizacja (firma / sala / biznes eventowy)
+// =============================================================================
+
+model Organization {
+  id                     String    @id @default(cuid())
+  name                   String
+  slug                   String    @unique
+  ownerId                String // User.id właściciela
+  owner                  User      @relation("OrganizationOwner", fields: [ownerId], references: [id])
+  logo                   String?
+  address                String?
+  phone                  String?
+  email                  String?
+  // Pola profilu publicznego (/org/<slug>) — strona odpytywała je,
+  // zanim istniały w modelu, przez co render kończył się błędem 500.
+  city                   String?
+  postalCode             String?
+  website                String?
+  description            String?
+  capacity               Int?
+  priceRange             String?
+  plan                   String    @default("FREE") // FREE | BASIC | PRO | ENTERPRISE
+  planExpires            DateTime?
+  // Limity licencji ustawiane per przestrzeń przez admina platformy.
+  // null = domyślny limit z planu. SERVICE nie liczy się do żadnego.
+  maxAdmins              Int?
+  maxUsers               Int?
+  // Własne role operacyjne tej przestrzeni (poza stałymi Manager/Kuchnia/...).
+  // JSON: [{value, label}]. Admin platformy definiuje je per klient.
+  customRolesJson        String?
+  // Uprawnienia modułowe per rola: { [roleValue]: { [moduleKey]: none|view|edit } }.
+  modulePermissionsJson  String?
+  // Powiadomienia o krokach czekających na akceptację.
+  notifyDaysBefore       Int?     @default(7) // ile dni przed eventem wysyłać
+  notifyEmail            Boolean  @default(true)
+  notifySms              Boolean  @default(false)
+  // Notatka admina platformy o kliencie (wewnętrzna) + archiwizacja przestrzeni.
+  adminNote              String?
+  archivedAt             DateTime?
+  // Lekki branding per klient — kolor przewodni i logo (URL).
+  brandColor             String?
+  brandLogoUrl           String?
+  // Ręczne śledzenie płatności klienta przez admina platformy (SaaS, bez Stripe).
+  billingPaidUntil       DateTime?
+  billingNote            String?
+  dashboardShortcutsJson String? // JSON: [{label, href}] skróty na pulpicie
+
+  members                 OrganizationMember[]
+  events                  Event[]
+  venues                  Venue[]
+  categories              EventCategory[]
+  blockedDates            OrgBlockedDate[]
+  templates               OrgTemplate[]
+  notifications           OrgNotification[]
+  leads                   OrgLead[]
+  agendaTemplates         AgendaTemplate[]
+  agendaDocumentTemplates AgendaDocumentTemplate[]
+  objectTypes             OrganizationObjectType[]
+  workflows               OrganizationWorkflow[]
+  menuParserConfig        MenuParserConfig?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("organizations")
+}
+
+// Konfiguracja parsera menu (na poziomie organizacji). Reguły w JSON:
+// { sections: [{match, courseType}], variantMarkers: [...], bulletChars: "*-•",
+//   ignoreContains: [...] } — definiuje, od jakich słów kluczowych powstają
+// sekcje menu przy wklejaniu tekstu.
+model MenuParserConfig {
+  id             String       @id @default(cuid())
+  organizationId String       @unique
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  rulesJson      String       @default("{}")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@map("menu_parser_configs")
+}
+
+model OrganizationMember {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role           String       @default("STAFF") // OWNER | MANAGER | STAFF | VIEWER | SERVICE
+  permissions    String? // JSON z uprawnieniami per moduł (nadpisuje role)
+  // Poziom dostępu: admin może nadawać uprawnienia i zarządzać zespołem.
+  isAdmin        Boolean      @default(false)
+  // Role operacyjne (kuchnia, kelner, bar, manager…) — użytkownik może mieć
+  // ich WIELE. JSON: string[]. Zasilają kroki procesu (kto wypełnia/akceptuje).
+  rolesJson      String       @default("[]")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([organizationId, userId])
+  @@map("organization_members")
+}
+
+// Kategorie eventów definiowane przez organizatora (np. "Chrzciny", "Bankiet firmowy")
+model EventCategory {
+  id               String       @id @default(cuid())
+  organizationId   String
+  organization     Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name             String // "Chrzciny", "Bankiet firmowy"
+  icon             String? // ikona (Lucide icon name)
+  color            String? // hex kolor kategorii
+  modulesJson      String? // JSON: ["guests_full","menu","schedule","budget"]
+  defaultsJson     String? // JSON: { guestListMode: "ALLERGENS_ONLY", ... }
+  customFieldsJson String? // JSON: [{key, label, type: "text"|"number"|"date"|"select", options?, required?}]
+  agendaTemplateId String? // ID szablonu agendy do auto-wypełnienia
+  isSystem         Boolean      @default(false) // true dla predefiniowanych (WEDDING, COMMUNION...)
+
+  events          Event[]
+  agendaTemplates AgendaTemplate[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("event_categories")
+}
+
+// Szablony agendy z wizualnym builderem (drag-and-drop)
+model AgendaTemplate {
+  id             String         @id @default(cuid())
+  organizationId String
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  categoryId     String?
+  category       EventCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  name           String
+  description    String?
+  sectionsJson   String // JSON: [{id, title, description?, fields: [{key, label, type, required?, placeholder?, llmPrompt?}]}]
+  isDefault      Boolean        @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([categoryId])
+  @@map("agenda_templates")
+}
+
+// Szablony dokumentów agendy (visual layout builder - jak Jasper Reports)
+model AgendaDocumentTemplate {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name           String
+  description    String?
+  pagesJson      String // JSON: [{blocks: [{id, type, props, slots: [{id, fieldKey?, placeholder?, llmPrompt?, style?}]}]}]
+  settingsJson   String? // JSON: {pageFormat: "A4"|"Letter", orientation: "portrait"|"landscape", margins, fonts, colors}
+  isDefault      Boolean      @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId])
+  @@map("agenda_document_templates")
+}
+
+// Połączenie z Google Calendar (OAuth) – jeden na użytkownika
+model GoogleCalendarConnection {
+  id             String    @id @default(cuid())
+  userId         String    @unique
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshToken   String
+  accessToken    String?
+  tokenExpiresAt DateTime?
+  calendarId     String? // np. "primary" lub id kalendarza
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@map("google_calendar_connections")
+}
+
+// Wedding/Event model (using Wedding as the main model)
+model Wedding {
+  id                  String   @id @default(cuid())
+  name                String
+  ceremonyDate        DateTime
+  receptionLocation   String?
+  targetBudget        Float?
+  budgetCurrency      String?  @default("PLN")
+  estimatedGuestCount Int?
+  style               String?
+  priorities          String? // JSON array stored as string
+  notes               String?
+  userId              String
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  participants        WeddingParticipant[]
+  tasks               Task[]
+  budget              BudgetItem[]
+  guests              Guest[]
+  vendors             Vendor[]
+  vendorDocuments     VendorDocument[]
+  tables              Table[]
+  seatingRules        SeatingRule[]
+  households          Household[]
+  planVersions        WeddingPlanVersion[]
+  invitationTemplates InvitationTemplate[]
+
+  @@map("weddings")
+}
+
+// Event model (for backward compatibility)
+model Event {
+  id                    String                 @id @default(cuid())
+  name                  String
+  date                  DateTime
+  userId                String
+  user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId        String?
+  organization          Organization?          @relation(fields: [organizationId], references: [id])
+  categoryId            String?
+  category              EventCategory?         @relation(fields: [categoryId], references: [id])
+  customFieldValuesJson String? // JSON: wartości pól zdefiniowanych dla typu eventu
+  workflowId            String?
+  workflow              OrganizationWorkflow?  @relation(fields: [workflowId], references: [id], onDelete: SetNull)
+  // Sala, w której odbywa się przyjęcie. Obiekt z kilkoma salami prowadzi
+  // równoległe imprezy tego samego dnia, więc kalendarz i lista muszą
+  // rozróżniać, która sala jest zajęta.
+  hallId                String?
+  hall                  VenueHall?             @relation(fields: [hallId], references: [id], onDelete: SetNull)
+  workflowStageId       String? // DEPRECATED: zachowane dla kompatybilności, użyj processState
+  workflowHistory       EventWorkflowHistory[]
+  processState          EventProcessState?
+  agendaData            EventAgendaData?
+  // Ostatnie wysłane przypomnienie o kroku czekającym na akceptację (dedup).
+  approvalReminderAt    DateTime?
+  modulesOverrideJson   String? // JSON: nadpisanie modułów per event (null = użyj kategorii)
+  brideName             String?
+  groomName             String?
+  partnerEmail          String?
+  targetBudget          Float?
+  budgetCurrency        String?                @default("PLN")
+  estimatedGuestCount   Int?
+  style                 String?
+  priorities            String? // JSON array stored as string
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  tasks               Task[]
+  budget              BudgetItem[]
+  guests              Guest[]
+  vendors             Vendor[]
+  vendorDocuments     VendorDocument[]
+  tables              Table[]
+  rules               SeatingRule[]
+  roomElements        RoomElement[]
+  dayScheduleItems    DayScheduleItem[]
+  menuCourses         MenuCourse[]
+  wishes              Wish[]
+  photos              Photo[]
+  sharedChatbotAgents SharedChatbotAgent[]
+  participants        EventParticipant[]
+  partnerInvites      EventPartnerInvite[]
+  partnerLinkAccess   EventPartnerLinkAccess[]
+  venueReservations   VenueReservation[]
+  boardLinks          EventBoardLink[]
+  menuVariants        MenuVariant[]
+  agendaApprovals     AgendaApproval[]
+  roles               Role[]
+  voiceNotes          VoiceNote[]
+  payments            EventPayment[]
+  messages            EventMessage[]
+  widgets             EventWidget[]
+
+  // RSVP configuration stored as JSON string
+  rsvpFieldsConfig String?
+
+  // Public wedding website / guest portal configuration
+  publicSlug            String? @unique
+  heroImageUrl          String?
+  guestPhotosFolderUrl  String?
+  description           String?
+  dressCode             String?
+  ceremonyLocationName  String?
+  ceremonyLocationUrl   String?
+  receptionLocationName String?
+  receptionLocationUrl  String?
+  mapLocationUrl        String?
+  guestPortalEnabled    Boolean @default(false)
+
+  // SMS task reminders (Faza 4)
+  notificationPhone         String?
+  notificationDailyEnabled  Boolean @default(false)
+  notificationWeeklyEnabled Boolean @default(false)
+
+  // Typ eventu — konfiguruje UI i dostępne sekcje
+  eventType String @default("WEDDING") // WEDDING | COMMUNION | CHRISTMAS_EVE | CORPORATE | OTHER
+
+  // Agenda imprezy (szablon docx restauracji)
+  organizerName     String? // Organizator (klient / firma)
+  responsiblePerson String? // Odpowiedzialny za event (inny niż twórca)
+  eventEndTime      DateTime? // Godzina zakończenia imprezy
+  occasionLabel     String? // Okoliczność wolnym tekstem ("bal", "studniówka")
+  scenarioNotes     String? // Scenariusz — uwagi techniczne / sprzęt / logistyka
+  isWedding         Boolean   @default(false) // Wesele → Wedding Board dla pary (link + PIN)
+
+  // WeddingBoard — token dla pary gdy isWedding=true
+  weddingBoardToken String? @unique
+
+  // Portal decyzyjny klienta (eventy nie-weselne) — link EventBoard
+  clientLinkTokenHash     String?   @unique
+  clientLinkExpiresAt     DateTime?
+  clientReviewedAt        DateTime?
+  clientFeedback          String?
+  clientWorkflowStatus    String    @default("MENU_DRAFT") // MENU_DRAFT | MENU_SENT | MENU_SUBMITTED | ORGANIZER_REVIEW | NEXT_STEP
+  clientMenuSelectionJson String? // JSON: { variantId, guests }[]
+  clientNextStepTitle     String?
+  clientNextStepMessage   String?
+  clientNextStepSentAt    DateTime?
+
+  // Status eventu
+  status String @default("DRAFT") // DRAFT | CONFIRMED | COMPLETED | ARCHIVED
+
+  // Kosztorys i deadline'y klienta
+  quoteJson           String? // JSON: { items: [{label, amount}], notes }
+  menuDeadlineAt      DateTime? // termin wyboru menu przez klienta
+  guestListDeadlineAt DateTime? // termin dostarczenia listy gości
+
+  // Tryb listy gości — pełna lista lub tylko alergeny
+  guestListMode String @default("FULL") // FULL | ALLERGENS_ONLY
+
+  // Google Calendar – id wydarzenia w Google (główne wesele)
+  googleCalendarEventId String?
+  calendarFeedToken     String? @unique // token do subskrypcji kalendarza (feed iCal)
+
+  @@index([userId, date])
+  @@index([publicSlug])
+  @@index([eventType])
+  @@map("events")
+}
+
+// Organizacja dnia wesela: co, gdzie, o której
+model DayScheduleItem {
+  id            String    @id @default(cuid())
+  eventId       String
+  event         Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  startTime     DateTime
+  endTime       DateTime?
+  title         String
+  description   String?
+  location      String?
+  sortOrder     Int       @default(0)
+  googleEventId String? // id wydarzenia w Google Calendar
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("day_schedule_items")
+}
+
+model EventBoardLink {
+  id        String   @id @default(cuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  label     String
+  url       String
+  icon      String? // map | music | camera | menu | calendar | link
+  enabled   Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("event_board_links")
+}
+
+// Menu weselne: pozycje (zupy, dania, desery itd.)
+model MenuCourse {
+  id          String  @id @default(cuid())
+  eventId     String
+  event       Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name        String
+  courseType  String // APPETIZER, SOUP, MAIN, DESSERT, CAKE, DRINKS, OTHER
+  description String?
+  sortOrder   Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("menu_courses")
+}
+
+model MenuVariant {
+  id          String              @id @default(cuid())
+  eventId     String
+  event       Event               @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  label       String // "MENU A", "MENU B", "MENU C", "MENU WIGILIJNE"
+  description String? // opis tekstowy wariantu
+  imageUrl    String? // skan menu (URL lub base64 data URL)
+  notes       String? // uwagi, alergeny itp.
+  pricePerPerson Float? // cena za osobę dla całego wariantu (np. bufet 250 zł/os.)
+  courses     MenuVariantCourse[]
+  sortOrder   Int                 @default(0)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@map("menu_variants")
+}
+
+model MenuVariantCourse {
+  id            String      @id @default(cuid())
+  menuVariantId String
+  menuVariant   MenuVariant @relation(fields: [menuVariantId], references: [id], onDelete: Cascade)
+  name          String
+  courseType    String // APPETIZER, SOUP, MAIN, DESSERT, CAKE, OTHER
+  description   String?
+  allergens     String? // JSON: { vege: bool, gluten: bool, bezgluten: bool, inne: string }
+  priceBase     Float? // cena bazowa (za osobę)
+  priceExtra    Float? // dopłata do wariantu
+  portions      Int? // liczba porcji (bufet)
+  approved      Boolean     @default(false) // pozycja zatwierdzona
+  sortOrder     Int         @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@map("menu_variant_courses")
+}
+
+// Uniwersalne typy obiektów konfigurowane przez organizację.
+model OrganizationObjectType {
+  id             String                @id @default(cuid())
+  organizationId String
+  organization   Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name           String
+  description    String?
+  icon           String?
+  fieldsJson     String // JSON: [{key,label,type,required,options}]
+  // JSON: ["EVENT","PORTAL","AGENDA","DOCUMENT","LEAD","FINANCE"] — kartoteki, w których obiekt jest widoczny
+  visibleInJson  String?
+  // Opcjonalne powiązanie z procesem — obiekt zbiera dane dla konkretnego workflow
+  workflowId     String?
+  workflow       OrganizationWorkflow? @relation(fields: [workflowId], references: [id], onDelete: SetNull)
+  isSystem       Boolean               @default(false)
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  @@index([organizationId])
+  @@index([workflowId])
+  @@map("organization_object_types")
+}
+
+// Konfigurowalne procesy obsługi eventów/transakcji.
+model OrganizationWorkflow {
+  id             String                   @id @default(cuid())
+  organizationId String
+  organization   Organization             @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name           String
+  description    String?
+  eventType      String?
+  stagesJson     String                   @default("[]") // DEPRECATED: zastąpione przez WorkflowNode
+  isDefault      Boolean                  @default(false)
+  events         Event[]
+  nodes          WorkflowNode[]
+  objectTypes    OrganizationObjectType[]
+  createdAt      DateTime                 @default(now())
+  updatedAt      DateTime                 @updatedAt
+
+  @@index([organizationId, eventType])
+  @@map("organization_workflows")
+}
+
+// Węzły procesu (drzewo decyzyjne zastępujące płaskie stagesJson)
+model WorkflowNode {
+  id                String               @id @default(cuid())
+  workflowId        String
+  workflow          OrganizationWorkflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  name              String
+  description       String?
+  nodeType          String               @default("ACTION") // ACTION | DECISION | PARALLEL | END
+  actionType        String               @default("NONE") // NONE | CLIENT_FORM | MENU_SELECTION | APPROVAL | PAYMENT | DOCUMENT | AGENDA | SEND_MESSAGE
+  assigneeRole      String               @default("MANAGER") // OWNER | MANAGER | STAFF | CLIENT | BOTH
+  sortOrder         Int                  @default(0)
+  color             String?
+  // JSON: [{sourceKey, targetAgendaKey, transform?}]
+  fieldMappingsJson String               @default("[]")
+  // JSON: [{label, conditionType, conditionValue?, nextNodeId}] — dla węzłów DECISION
+  conditionsJson    String               @default("[]")
+  // ID następnego węzła dla węzłów liniowych ACTION
+  nextNodeId        String?
+  isStart           Boolean              @default(false)
+  // Sposób wyboru menu na kroku MENU_SELECTION:
+  // WHOLE_VARIANT — klient bierze gotowy zestaw, PER_DISH — składa go z dań.
+  menuMode          String?
+  // Kto wypełnia krok, a kto go akceptuje — definiowane na etapie procesu.
+  // Gdy null, wsteczna zgodność: wypełnia = assigneeRole, brak osobnej akceptacji.
+  fillRole          String?
+  approveRole       String?
+  // Definicja pól kroku: [{key, label, type, targetAgendaKey, required?, scheduleLine?}]
+  // type: text | textarea | time | date | number | select. scheduleLine=true →
+  // wartość-czas + nazwa kroku tworzą pozycję harmonogramu w agendzie.
+  fieldsJson        String               @default("[]")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([workflowId, sortOrder])
+  @@map("workflow_nodes")
+}
+
+model EventWorkflowHistory {
+  id        String   @id @default(cuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  fromStage String?
+  toStage   String
+  note      String?
+  createdAt DateTime @default(now())
+
+  @@index([eventId, createdAt])
+  @@map("event_workflow_history")
+}
+
+model AgendaApproval {
+  id         String    @id @default(cuid())
+  eventId    String
+  event      Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  section    String // SCHEDULE, MENU, GUESTS, KITCHEN, GENERAL
+  approvedBy String? // userId — null dopóki niezaakceptowane
+  approvedAt DateTime?
+  status     String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  comment    String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@unique([eventId, section])
+  @@map("agenda_approvals")
+}
+
+// Stan instancji procesu na evencie (zastępuje workflowStageId)
+model EventProcessState {
+  id               String   @id @default(cuid())
+  eventId          String   @unique
+  event            Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  workflowId       String
+  currentNodeId    String
+  // JSON: string[] — ID ukończonych węzłów
+  completedNodeIds String   @default("[]")
+  // JSON: {nodeId: {completedAt, completedBy, role, data}} — dane zebrane przez każdy węzeł
+  nodeDataJson     String   @default("{}")
+  startedAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([workflowId])
+  @@map("event_process_states")
+}
+
+// Ujednolicony magazyn danych agendy — wynik mapowania pól z węzłów procesu
+model EventAgendaData {
+  id        String   @id @default(cuid())
+  eventId   String   @unique
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  // JSON: {fieldKey: value} — płaski obiekt zbierający dane ze wszystkich ukończonych węzłów
+  dataJson  String   @default("{}")
+  updatedAt DateTime @updatedAt
+
+  @@map("event_agenda_data")
+}
+
+model Role {
+  id          String              @id @default(cuid())
+  eventId     String
+  event       Event               @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name        String // OWNER, MANAGER, KITCHEN_CHIEF, STAFF
+  label       String // "Właściciel", "Manager", "Szef Kuchni"
+  isSystem    Boolean             @default(false) // OWNER — nieusuwalny
+  permissions SectionPermission[]
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@map("roles")
+}
+
+model SectionPermission {
+  id         String  @id @default(cuid())
+  roleId     String
+  role       Role    @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  section    String // SCHEDULE, MENU, GUESTS, KITCHEN, VENDORS, SETTINGS, ANALYTICS
+  canView    Boolean @default(false)
+  canEdit    Boolean @default(false)
+  canApprove Boolean @default(false)
+
+  @@unique([roleId, section])
+  @@map("section_permissions")
+}
+
+// Event participants (współpraca pary / planner na wydarzeniu Event)
+model EventParticipant {
+  id      String  @id @default(cuid())
+  eventId String
+  event   Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId  String
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role    String  @default("VIEWER") // COUPLE_SECONDARY, CO_ORGANIZER, WEDDING_PLANNER, VIEWER
+  roleId  String? // FK → Role (nadpisuje legacy role string)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([eventId, userId])
+  @@map("event_participants")
+}
+
+// Zaproszenie partnera zanim założy konto (e-mail).
+model EventPartnerInvite {
+  id         String    @id @default(cuid())
+  eventId    String
+  event      Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  email      String
+  role       String    @default("COUPLE_SECONDARY")
+  invitedAt  DateTime  @default(now())
+  acceptedAt DateTime?
+
+  @@unique([eventId, email])
+  @@map("event_partner_invites")
+}
+
+// Link + PIN dla partnera (bez konta Clerk), współdzielona opłata właściciela.
+model EventPartnerLinkAccess {
+  id             String    @id @default(cuid())
+  eventId        String
+  event          Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  tokenHash      String    @unique
+  pinHash        String
+  expiresAt      DateTime
+  revokedAt      DateTime?
+  failedAttempts Int       @default(0)
+  lockedUntil    DateTime?
+  lastUsedAt     DateTime?
+  createdAt      DateTime  @default(now())
+
+  @@index([eventId])
+  @@map("event_partner_link_access")
+}
+
+model StripeWebhookEvent {
+  id          String   @id
+  processedAt DateTime @default(now())
+
+  @@map("stripe_webhook_events")
+}
+
+// Wedding participants (legacy — prefer EventParticipant)
+model WeddingParticipant {
+  id        String  @id @default(cuid())
+  weddingId String
+  wedding   Wedding @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      String  @default("VIEWER") // OWNER, EDITOR, VIEWER
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([weddingId, userId])
+  @@map("wedding_participants")
+}
+
+// Task model
+model Task {
+  id            String    @id @default(cuid())
+  title         String
+  description   String?
+  status        String    @default("TODO")
+  priority      String    @default("MEDIUM")
+  dueDate       DateTime?
+  category      String?
+  assigneeRole  String? // TOGETHER | BRIDE | GROOM (Wspólnie | Pani Młoda | Pan Młody)
+  weddingId     String?
+  wedding       Wedding?  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  eventId       String?
+  event         Event?    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  assigneeId    String?
+  assignee      User?     @relation(fields: [assigneeId], references: [id])
+  googleEventId String? // id wydarzenia w Google Calendar
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([eventId, status, dueDate])
+  @@index([weddingId, status, dueDate])
+  @@map("tasks")
+}
+
+// Budget item model
+model BudgetItem {
+  id            String   @id @default(cuid())
+  name          String
+  category      String
+  plannedAmount Float
+  actualAmount  Float?
+  status        String   @default("PLANNED")
+  weddingId     String?
+  wedding       Wedding? @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  eventId       String?
+  event         Event?   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([eventId, status, category])
+  @@index([weddingId, status, category])
+  @@map("budget_items")
+}
+
+// Guest model
+model Guest {
+  id                      String     @id @default(cuid())
+  name                    String
+  firstName               String?
+  lastName                String?
+  email                   String?
+  phone                   String?
+  status                  String     @default("PENDING")
+  isAttending             Boolean?
+  tableId                 String?
+  table                   Table?     @relation(fields: [tableId], references: [id], onDelete: SetNull)
+  weddingId               String?
+  wedding                 Wedding?   @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  eventId                 String?
+  event                   Event?     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  householdId             String?
+  household               Household? @relation(fields: [householdId], references: [id], onDelete: SetNull)
+  dietaryRestrictions     String? // Rodzaj diety (wegetariańska, bezglutenowa, etc.)
+  seatingNotes            String? // Uwagi dotyczące usadzenia gościa
+  seatingPreference       String? // Preferencje usadzenia / tekst na winietkę
+  accommodationPreference String? // Preferencje noclegowe (szczegóły)
+  alcoholPreference       String? // Preferencje alkoholowe
+  invitationToken         String?    @unique // Token do zaproszenia RSVP
+  needsHotel              Boolean? // Czy gość potrzebuje hotelu
+  needsTransport          Boolean? // Czy gość potrzebuje transportu
+  transportDetails        String? // Gdzie / adres (gdy wymaga transportu)
+  foodPreference          String? // Preferencje żywieniowe (rodzaj diety)
+  allergies               String? // Alergie
+  notes                   String? // Ogólne uwagi
+
+  // Dynamic RSVP answers for configurable fields (stored as JSON string)
+  rsvpCustomAnswers String?
+
+  wishes Wish[]
+  photos Photo[]
+
+  venueClientGuestId String?           @unique
+  venueClientGuest   VenueClientGuest? @relation(fields: [venueClientGuestId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([eventId, status])
+  @@index([eventId, tableId])
+  @@index([weddingId, status])
+  @@map("guests")
+}
+
+model Wish {
+  id        String   @id @default(cuid())
+  eventId   String
+  guestId   String?
+  content   String
+  createdAt DateTime @default(now())
+
+  event Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  guest Guest? @relation(fields: [guestId], references: [id], onDelete: SetNull)
+
+  @@map("wishes")
+}
+
+model Photo {
+  id         String   @id @default(cuid())
+  eventId    String
+  guestId    String?
+  vendorId   String?
+  url        String
+  caption    String?
+  createdAt  DateTime @default(now())
+  isFavorite Boolean  @default(false)
+
+  event  Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  guest  Guest?  @relation(fields: [guestId], references: [id], onDelete: SetNull)
+  vendor Vendor? @relation(fields: [vendorId], references: [id], onDelete: SetNull)
+
+  @@map("photos")
+}
+
+// Vendor model
+model Vendor {
+  id                  String               @id @default(cuid())
+  name                String
+  category            String
+  contact             String?
+  email               String?
+  phone               String?
+  website             String?
+  notes               String?
+  vendorDaySchedule   String?
+  portalToken         String?
+  portalEnabled       Boolean              @default(true)
+  weddingId           String?
+  wedding             Wedding?             @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  eventId             String?
+  event               Event?               @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  documents           VendorDocument[]
+  photos              Photo[]
+  sharedChatbotAgents SharedChatbotAgent[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("vendors")
+}
+
+// Shareable chatbot agent link (guest / couple / vendor scoped)
+model SharedChatbotAgent {
+  id          String   @id @default(cuid())
+  eventId     String
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  scope       String // GUEST | COUPLE | VENDOR
+  vendorId    String?
+  vendor      Vendor?  @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  token       String   @unique
+  displayName String? // e.g. "Asystent Wesela Ania i Tomka"
+  createdAt   DateTime @default(now())
+
+  @@map("shared_chatbot_agents")
+}
+
+// Table model
+model Table {
+  id            String   @id @default(cuid())
+  name          String
+  capacity      Int
+  type          String?  @default("ROUND") // ROUND, RECTANGULAR, SQUARE
+  notes         String?
+  positionX     Float? // pozycja na planie sali (px lub %)
+  positionY     Float?
+  width         Float? // wymiary (px)
+  height        Float?
+  isCoupleTable Boolean? @default(false) // stół pary młodej
+  weddingId     String?
+  wedding       Wedding? @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  eventId       String?
+  event         Event?   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  guests Guest[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([eventId, name])
+  @@index([weddingId, name])
+  @@map("tables")
+}
+
+// Elementy sali: DJ, scena, bar, wejście, własne (do układu na canvasie)
+model RoomElement {
+  id        String  @id @default(cuid())
+  eventId   String
+  event     Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  type      String // DJ, STAGE, ENTRANCE, OTHER
+  label     String?
+  positionX Float   @default(0)
+  positionY Float   @default(0)
+  width     Float   @default(80)
+  height    Float   @default(60)
+  color     String? // hex np. #c9a227
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([eventId, type])
+  @@map("room_elements")
+}
+
+// Seating rule model
+model SeatingRule {
+  id        String   @id @default(cuid())
+  rule      String?
+  type      String? // MUST_SIT_TOGETHER, CANNOT_SIT_TOGETHER, SAME_TABLE, PREFER_SIT_TOGETHER
+  guestIds  String? // JSON array of guest IDs
+  weddingId String?
+  wedding   Wedding? @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  eventId   String?
+  event     Event?   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("seating_rules")
+}
+
+// Household model (for grouping guests)
+model Household {
+  id        String  @id @default(cuid())
+  name      String
+  weddingId String
+  wedding   Wedding @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+
+  // Relations
+  guests Guest[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("households")
+}
+
+// Wedding plan version (for saving different seating arrangements)
+model WeddingPlanVersion {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  planData    String? // JSON data containing the seating arrangement
+  weddingId   String
+  wedding     Wedding @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("wedding_plan_versions")
+}
+
+// Invitation template model
+model InvitationTemplate {
+  id        String  @id @default(cuid())
+  name      String
+  template  String // HTML template
+  isDefault Boolean @default(false)
+  weddingId String
+  wedding   Wedding @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("invitation_templates")
+}
+
+// Vendor document model (for storing contracts, invoices, etc.)
+model VendorDocument {
+  id        String   @id @default(cuid())
+  name      String
+  type      String // "contract" or "invoice"
+  fileName  String
+  fileUrl   String
+  fileSize  Int?
+  mimeType  String?
+  vendorId  String
+  vendor    Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  weddingId String?
+  wedding   Wedding? @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  eventId   String?
+  event     Event?   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("vendor_documents")
+}
+
+// Lead magnet: ebook „Wesele bez chaosu”
+model EbookLead {
+  id          String    @id @default(cuid())
+  name        String
+  email       String    @unique
+  weddingDate DateTime?
+  source      String?
+  createdAt   DateTime  @default(now())
+
+  @@map("ebook_leads")
+}
+
+// ── Venue Manager (B2B) ──
+
+model Venue {
+  id                     String        @id @default(cuid())
+  clerkOrgId             String        @unique
+  ownerClerkId           String?       @unique
+  organizationId         String?
+  organization           Organization? @relation(fields: [organizationId], references: [id])
+  name                   String
+  slug                   String        @unique
+  email                  String?
+  phone                  String?
+  address                String?
+  city                   String?
+  capacity               Int?
+  stripeConnectAccountId String?
+
+  // Marketplace & business profile
+  description      String?
+  website          String?
+  logoUrl          String?
+  photoUrls        String?
+  socialLinks      String?
+  tags             String?
+  features         String?
+  isPublished      Boolean @default(false)
+  priceRangeMin    Int?
+  priceRangeMax    Int?
+  guestCapacityMin Int?
+  guestCapacityMax Int?
+
+  // Tax & payment details
+  nip         String?
+  regon       String?
+  bankAccount String?
+  bankName    String?
+
+  // CRM
+  leads         VenueLead[]
+  notifications VenueNotification[]
+  staff         VenueStaff[]
+  invoices      VenueInvoice[]
+  reviews       VenueReview[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  halls               VenueHall[]
+  blockedDates        VenueBlockedDate[]
+  menuPackages        VenueMenuPackage[]
+  menuItems           VenueMenuItem[]
+  tableTemplates      VenueTableTemplate[]
+  reservations        VenueReservation[]
+  quotes              VenueQuote[]
+  roomLayoutTemplates VenueRoomLayoutTemplate[]
+  contractTemplates   ContractTemplate[]
+
+  @@map("venues")
+}
+
+model VenueHall {
+  id        String   @id @default(cuid())
+  venueId   String
+  venue     Venue    @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  name      String
+  capacity  Int
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reservations VenueReservation[]
+  blockedDates VenueBlockedDate[]
+  events       Event[]
+
+  @@index([venueId])
+  @@map("venue_halls")
+}
+
+model VenueBlockedDate {
+  id         String     @id @default(cuid())
+  venueId    String
+  venue      Venue      @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  hallId     String?
+  hall       VenueHall? @relation(fields: [hallId], references: [id], onDelete: Cascade)
+  date       DateTime
+  startTime  String?
+  endTime    String?
+  recurrence String?    @default("NONE")
+  reason     String?
+  createdAt  DateTime   @default(now())
+
+  @@unique([venueId, hallId, date, startTime])
+  @@map("venue_blocked_dates")
+}
+
+model VenueMenuPackage {
+  id             String   @id @default(cuid())
+  venueId        String
+  venue          Venue    @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  name           String
+  pricePerPerson Float
+  season         String?  @default("ALL")
+  minGuests      Int?
+  description    String?
+  isActive       Boolean  @default(true)
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  packageItems   VenueMenuPackageItem[]
+  choiceGroups   VenueMenuChoiceGroup[]
+  reservations   VenueReservation[]
+  quotes         VenueQuote[]
+  menuSelections WeddingMenuSelection[]
+
+  @@index([venueId, isActive])
+  @@map("venue_menu_packages")
+}
+
+model VenueMenuItem {
+  id             String   @id @default(cuid())
+  venueId        String
+  venue          Venue    @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  category       String
+  name           String
+  description    String?
+  pricePerPerson Float?
+  isVegetarian   Boolean  @default(false)
+  isGlutenFree   Boolean  @default(false)
+  isActive       Boolean  @default(true)
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  packageItems VenueMenuPackageItem[]
+
+  @@index([venueId, category, isActive])
+  @@map("venue_menu_items")
+}
+
+model VenueMenuPackageItem {
+  id                String                @id @default(cuid())
+  packageId         String
+  package           VenueMenuPackage      @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  menuItemId        String
+  menuItem          VenueMenuItem         @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  choiceGroupId     String?
+  choiceGroup       VenueMenuChoiceGroup? @relation(fields: [choiceGroupId], references: [id], onDelete: SetNull)
+  isRequired        Boolean               @default(false)
+  includedInPackage Boolean               @default(true)
+
+  @@unique([packageId, menuItemId])
+  @@map("venue_menu_package_items")
+}
+
+model VenueMenuChoiceGroup {
+  id            String           @id @default(cuid())
+  packageId     String
+  package       VenueMenuPackage @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  key           String
+  label         String
+  category      String?
+  minPick       Int              @default(1)
+  maxPick       Int              @default(1)
+  sortOrder     Int              @default(0)
+  defaultItemId String?
+
+  packageItems VenueMenuPackageItem[]
+
+  @@unique([packageId, key])
+  @@index([packageId])
+  @@map("venue_menu_choice_groups")
+}
+
+model VenueTableTemplate {
+  id        String   @id @default(cuid())
+  venueId   String
+  venue     Venue    @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  number    Int
+  name      String
+  capacity  Int
+  hallId    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([venueId, number])
+  @@index([venueId])
+  @@map("venue_table_templates")
+}
+
+model VenueReservation {
+  id                   String            @id @default(cuid())
+  venueId              String
+  venue                Venue             @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  eventId              String?           @unique
+  event                Event?            @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  hallId               String?
+  hall                 VenueHall?        @relation(fields: [hallId], references: [id], onDelete: SetNull)
+  basePackageId        String?
+  basePackage          VenueMenuPackage? @relation(fields: [basePackageId], references: [id], onDelete: SetNull)
+  accessTokenHash      String            @unique
+  accessTokenExpiresAt DateTime?
+  isPremiumUnlocked    Boolean           @default(false)
+  menuCompleted        Boolean           @default(false)
+  seatingCompleted     Boolean           @default(false)
+  scheduleCompleted    Boolean           @default(false)
+  guestsCompleted      Boolean           @default(false)
+  couplePortalConfig   String?
+  linkCodeHash         String?           @unique
+  linkCodeExpiresAt    DateTime?
+  linkedAt             DateTime?
+  status               String            @default("PENDING_ACTIVATION")
+  weddingDate          DateTime
+  coupleEmail          String
+  coupleName           String?
+  couplePhone          String?
+  internalNotes        String?
+  source               String?
+  guestCountEstimate   Int?
+  guestCountConfirmed  Int?
+  estimatedTotalCost   Float?
+  finalTotalCost       Float?
+  currency             String            @default("PLN")
+  seatingLockAt        DateTime?
+  seatingLockedAt      DateTime?
+  confirmedAt          DateTime?
+  cancelledAt          DateTime?
+  cancelReason         String?
+  activatedAt          DateTime?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  roomLayout String?
+
+  clientGuests        VenueClientGuest[]
+  menuSelection       WeddingMenuSelection?
+  scheduleItems       VenueClientScheduleItem[]
+  seatingExport       GuestSeatingExport?
+  paymentInstallments VenuePaymentInstallment[]
+  notes               VenueReservationNote[]
+  activities          VenueReservationActivity[]
+  quotes              VenueQuote[]
+  correctionRequests  VenueModuleCorrectionRequest[]
+  contracts           Contract[]
+  messages            VenueMessage[]
+
+  leads    VenueLead[]
+  invoices VenueInvoice[]
+  shifts   VenueStaffShift[]
+  reviews  VenueReview[]
+
+  @@index([venueId, weddingDate])
+  @@index([venueId, status])
+  @@map("venue_reservations")
+}
+
+model WeddingMenuSelection {
+  id             String            @id @default(cuid())
+  reservationId  String            @unique
+  reservation    VenueReservation  @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  basePackageId  String?
+  basePackage    VenueMenuPackage? @relation(fields: [basePackageId], references: [id], onDelete: SetNull)
+  selections     String?
+  estimatedTotal Float             @default(0)
+  submittedAt    DateTime?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  @@map("wedding_menu_selections")
+}
+
+model VenueClientGuest {
+  id               String           @id @default(cuid())
+  reservationId    String
+  reservation      VenueReservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  firstName        String
+  lastName         String
+  dietType         String?
+  allergies        String?
+  guestGroup       String?
+  attendanceStatus String?          @default("CONFIRMED")
+  tableNumber      Int?
+  sortOrder        Int              @default(0)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  plannerGuest Guest?
+
+  @@index([reservationId])
+  @@map("venue_client_guests")
+}
+
+model GuestSeatingExport {
+  id            String           @id @default(cuid())
+  reservationId String           @unique
+  reservation   VenueReservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  exportedAt    DateTime         @default(now())
+  guestCount    Int
+  snapshot      String
+  schemaVersion Int              @default(1)
+
+  @@map("guest_seating_exports")
+}
+
+model VenuePaymentInstallment {
+  id                      String           @id @default(cuid())
+  reservationId           String
+  reservation             VenueReservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  label                   String
+  type                    String
+  amount                  Float
+  dueDate                 DateTime?
+  status                  String           @default("PENDING")
+  paidAt                  DateTime?
+  paidAmount              Float?
+  paymentMethod           String?
+  notes                   String?
+  stripeCheckoutSessionId String?
+  stripeInvoiceId         String?
+  createdAt               DateTime         @default(now())
+  updatedAt               DateTime         @updatedAt
+
+  @@index([reservationId, status])
+  @@map("venue_payment_installments")
+}
+
+model VenueReservationNote {
+  id            String           @id @default(cuid())
+  reservationId String
+  reservation   VenueReservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  authorClerkId String
+  content       String
+  createdAt     DateTime         @default(now())
+
+  @@index([reservationId])
+  @@map("venue_reservation_notes")
+}
+
+model VenueReservationActivity {
+  id            String           @id @default(cuid())
+  reservationId String
+  reservation   VenueReservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  type          String
+  metadata      String?
+  createdAt     DateTime         @default(now())
+
+  @@index([reservationId, createdAt])
+  @@map("venue_reservation_activities")
+}
+
+model VenueClientScheduleItem {
+  id            String           @id @default(cuid())
+  reservationId String
+  reservation   VenueReservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  time          String
+  title         String
+  description   String?
+  location      String?
+  sortOrder     Int              @default(0)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@index([reservationId, sortOrder])
+  @@map("venue_client_schedule_items")
+}
+
+model VenueQuote {
+  id            String            @id @default(cuid())
+  venueId       String
+  venue         Venue             @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  reservationId String?
+  reservation   VenueReservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+  packageId     String?
+  package       VenueMenuPackage? @relation(fields: [packageId], references: [id], onDelete: SetNull)
+  version       Int               @default(1)
+  status        String            @default("DRAFT")
+  label         String?
+  guestCount    Int?
+  selections    String?
+  lineItems     String?
+  totalAmount   Float             @default(0)
+  currency      String            @default("PLN")
+  validUntil    DateTime?
+  sentAt        DateTime?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  contracts Contract[]
+
+  @@index([venueId, reservationId])
+  @@index([reservationId, status])
+  @@map("venue_quotes")
+}
+
+model VenueModuleCorrectionRequest {
+  id            String           @id @default(cuid())
+  reservationId String
+  reservation   VenueReservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  module        String
+  message       String?
+  status        String           @default("PENDING")
+  requestedBy   String           @default("portal")
+  resolvedAt    DateTime?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@index([reservationId, status])
+  @@map("venue_module_correction_requests")
+}
+
+model VenueRoomLayoutTemplate {
+  id        String   @id @default(cuid())
+  venueId   String
+  venue     Venue    @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  name      String
+  layout    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([venueId])
+  @@map("venue_room_layout_templates")
+}
+
+model ContractTemplate {
+  id           String   @id @default(cuid())
+  venueId      String
+  venue        Venue    @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  type         String   @default("MAIN")
+  name         String
+  docxUrl      String?
+  version      Int      @default(1)
+  placeholders String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  contracts Contract[]
+
+  @@index([venueId, type])
+  @@map("contract_templates")
+}
+
+model Contract {
+  id               String            @id @default(cuid())
+  reservationId    String
+  reservation      VenueReservation  @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  templateId       String?
+  template         ContractTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  type             String            @default("MAIN")
+  quoteId          String?
+  quote            VenueQuote?       @relation(fields: [quoteId], references: [id], onDelete: SetNull)
+  status           String            @default("DRAFT")
+  filledData       String?
+  pdfUrl           String?
+  signingTokenHash String?           @unique
+  signingTokenExp  DateTime?
+  signedCoupleAt   DateTime?
+  signedVenueAt    DateTime?
+  signedPdfUrl     String?
+  sentAt           DateTime?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  @@index([reservationId])
+  @@index([reservationId, status])
+  @@map("contracts")
+}
+
+model VenueMessage {
+  id            String           @id @default(cuid())
+  reservationId String
+  reservation   VenueReservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  senderRole    String           @default("VENUE")
+  senderName    String?
+  content       String
+  createdAt     DateTime         @default(now())
+
+  @@index([reservationId, createdAt])
+  @@map("venue_messages")
+}
+
+// CRM Lead Pipeline
+model VenueLead {
+  id             String            @id @default(cuid())
+  venueId        String
+  venue          Venue             @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  status         String            @default("NEW")
+  coupleName     String?
+  coupleEmail    String?
+  couplePhone    String?
+  weddingDate    DateTime?
+  guestCount     Int?
+  budget         Float?
+  source         String?
+  notes          String?
+  lastContactAt  DateTime?
+  nextFollowUpAt DateTime?
+  reservationId  String?
+  reservation    VenueReservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+  timeline       String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  @@index([venueId, status])
+  @@index([venueId, createdAt])
+  @@map("venue_leads")
+}
+
+model VenueNotification {
+  id        String   @id @default(cuid())
+  venueId   String
+  venue     Venue    @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  type      String   @default("NEW_LEAD")
+  title     String
+  body      String?
+  link      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([venueId, read, createdAt])
+  @@map("venue_notifications")
+}
+
+// Invoice (Faktura VAT)
+model VenueInvoice {
+  id            String            @id @default(cuid())
+  venueId       String
+  venue         Venue             @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  reservationId String?
+  reservation   VenueReservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+  invoiceNumber String            @unique
+  type          String            @default("VAT")
+  status        String            @default("DRAFT")
+  issueDate     DateTime          @default(now())
+  saleDate      DateTime?
+  dueDate       DateTime?
+  buyerName     String?
+  buyerNip      String?
+  buyerAddress  String?
+  items         String?
+  totalNet      Float             @default(0)
+  totalVat      Float             @default(0)
+  totalGross    Float             @default(0)
+  currency      String            @default("PLN")
+  paymentMethod String?
+  paidAt        DateTime?
+  paidAmount    Float?
+  pdfUrl        String?
+  notes         String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@index([venueId, issueDate])
+  @@index([reservationId])
+  @@map("venue_invoices")
+}
+
+// Staff Scheduling
+model VenueStaff {
+  id        String   @id @default(cuid())
+  venueId   String
+  venue     Venue    @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  name      String
+  email     String?
+  phone     String?
+  role      String
+  color     String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  shifts VenueStaffShift[]
+
+  @@index([venueId])
+  @@map("venue_staff")
+}
+
+model VenueStaffShift {
+  id            String            @id @default(cuid())
+  venueId       String
+  staffId       String
+  staff         VenueStaff        @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  reservationId String?
+  reservation   VenueReservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+  date          DateTime
+  startTime     String
+  endTime       String
+  role          String?
+  notes         String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@index([venueId, date])
+  @@index([staffId])
+  @@map("venue_staff_shifts")
+}
+
+// Reviews
+model VenueReview {
+  id            String            @id @default(cuid())
+  venueId       String
+  venue         Venue             @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  reservationId String?
+  reservation   VenueReservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+  reviewerName  String
+  reviewerEmail String?
+  rating        Int
+  content       String?
+  isApproved    Boolean           @default(false)
+  isPublic      Boolean           @default(true)
+  source        String            @default("direct")
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@index([venueId, isApproved])
+  @@index([venueId, createdAt])
+  @@map("venue_reviews")
+}
+
+model VoiceNote {
+  id            String   @id @default(cuid())
+  eventId       String
+  event         Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  audioUrl      String // S3 URL
+  transcription String? // tekst z Whisper
+  duration      Int? // długość w sekundach
+  section       String? // SCHEDULE, MENU, GUESTS, GENERAL
+  createdBy     String?
+  createdAt     DateTime @default(now())
+
+  @@map("voice_notes")
+}
+
+// Wiadomości czatu między organizatorem a klientem eventu.
+model EventMessage {
+  id         String   @id @default(cuid())
+  eventId    String
+  event      Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  senderRole String   @default("ORGANIZER") // ORGANIZER | CLIENT
+  senderName String?
+  content    String
+  createdAt  DateTime @default(now())
+
+  @@index([eventId, createdAt])
+  @@map("event_messages")
+}
+
+model EventWidget {
+  id         String   @id @default(cuid())
+  eventId    String
+  event      Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  widgetType String // RUNSHEET | NOTE | CHECKLIST | STAT | LINK | CUSTOM_FORM
+  title      String
+  sortOrder  Int      @default(0)
+  configJson String   @default("{}")
+  dataJson   String   @default("{}")
+  isVisible  Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("event_widgets")
+}

@@ -1,0 +1,24 @@
+{
+  "name": "Wedding Board",
+  "short_name": "WeddingBoard",
+  "description": "Aplikacja do planowania wesela - lista gości, budżet, usadzenie, harmonogram i więcej",
+  "start_url": "/pl/dashboard",
+  "display": "standalone",
+  "background_color": "#fefdfb",
+  "theme_color": "#9a8554",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "lang": "pl",
+  "categories": ["lifestyle", "productivity", "utilities"]
+}

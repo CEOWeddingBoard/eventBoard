@@ -1,0 +1,14 @@
+---
+description: Po każdej zmianie w kodzie zrób commit i push na aktualny branch
+alwaysApply: true
+---
+
+# Git: commit i push po zmianach
+
+Za każdym razem, gdy wprowadzasz zmiany w plikach projektu:
+
+1. **Dodaj zmienione/nowe pliki** do stage: `git add <pliki>` (tylko pliki związane z wykonaną pracą).
+2. **Zrób commit** z jasnym komunikatem (np. `fix: ...`, `feat: ...`, `docs: ...`).
+3. **Wypchnij na zdalny branch**: `git push origin $(git branch --show-current)`.
+
+Nie pytaj o potwierdzenie — wykonuj commit i push jako standardowy krok po zakończeniu edycji. Pomijaj tylko wtedy, gdy użytkownik wyraźnie powie, żeby nie pushować (np. „tylko lokalnie”).

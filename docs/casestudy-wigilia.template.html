@@ -1,0 +1,252 @@
+<title>Case study: proces wigilii</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  :root{--ground:#faf9f7;--surface:#fff;--surface-2:#f4f2ee;--ink:#1a1a1f;--muted:#6b6862;--faint:#93908a;--border:#e5e2dc;--border-2:#d6d2ca;--accent:#2563eb;--accent-bg:#eef4ff;--good:#10b981;--good-bg:#e8f7f1;--warn-bg:#fdf6e7;--warn-br:#e8cf94;--warn-ink:#7a5a12;--serif:"Newsreader",Georgia,serif;--sans:"Source Sans 3",system-ui,sans-serif;--mono:"JetBrains Mono",monospace}
+  @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#131317;--surface:#1b1b21;--surface-2:#22222a;--ink:#ecebe8;--muted:#a5a29b;--faint:#7e7b75;--border:#2e2e37;--border-2:#3d3d48;--accent:#7ba5f7;--accent-bg:#1c2740;--good:#4dd4a0;--good-bg:#16302a;--warn-bg:#2b2415;--warn-br:#5c4a1e;--warn-ink:#e0c485}}
+  :root[data-theme="dark"]{--ground:#131317;--surface:#1b1b21;--surface-2:#22222a;--ink:#ecebe8;--muted:#a5a29b;--faint:#7e7b75;--border:#2e2e37;--border-2:#3d3d48;--accent:#7ba5f7;--accent-bg:#1c2740;--good:#4dd4a0;--good-bg:#16302a;--warn-bg:#2b2415;--warn-br:#5c4a1e;--warn-ink:#e0c485}
+  *{box-sizing:border-box}
+  body{background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.62;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:900px;margin:0 auto;padding:0 24px 100px}
+  header.top{padding:60px 0 34px;border-bottom:1px solid var(--border);margin-bottom:40px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:0 0 14px}
+  h1{font-family:var(--serif);font-weight:500;font-size:clamp(2rem,5vw,2.9rem);line-height:1.08;letter-spacing:-.015em;margin:0 0 16px;text-wrap:balance}
+  .standfirst{font-size:1.05rem;color:var(--muted);max-width:64ch;margin:0}
+  h2{font-family:var(--serif);font-weight:500;font-size:1.55rem;line-height:1.2;margin:52px 0 6px;display:flex;align-items:baseline;gap:12px;text-wrap:balance}
+  h2 .k{font-family:var(--mono);font-size:.7rem;font-weight:500;color:var(--accent);letter-spacing:.06em}
+  h3{font-weight:600;font-size:1rem;margin:28px 0 8px}
+  p{margin:0 0 14px;max-width:68ch}
+  .lede{color:var(--muted);margin:0 0 22px;max-width:68ch}
+  code{font-family:var(--mono);font-size:.85em;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;padding:.1em .38em;white-space:nowrap}
+  figure{margin:24px 0}
+  figure img{display:block;width:100%;height:auto;border:1px solid var(--border-2);border-radius:8px;background:#fff}
+  figcaption{font-size:.82rem;color:var(--muted);margin-top:10px;line-height:1.5;max-width:72ch}
+  figcaption b{color:var(--ink);font-weight:600}
+  figcaption code{font-size:.9em}
+  .tbl-wrap{overflow-x:auto;margin:20px 0;border:1px solid var(--border);border-radius:6px}
+  table{border-collapse:collapse;width:100%;font-size:.85rem;min-width:540px;background:var(--surface)}
+  th{text-align:left;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);font-weight:500;padding:10px 12px;border-bottom:1px solid var(--border-2);background:var(--surface-2);white-space:nowrap}
+  td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:top;color:var(--muted);line-height:1.45}
+  tr:last-child td{border-bottom:none}
+  td:first-child{color:var(--ink);font-weight:500}
+  td code{background:transparent;border:none;padding:0;color:var(--ink)}
+  ol.steps{padding-left:0;list-style:none;counter-reset:s;margin:20px 0;max-width:70ch}
+  ol.steps li{counter-increment:s;position:relative;padding-left:38px;margin-bottom:13px;font-size:.92rem;color:var(--muted)}
+  ol.steps li::before{content:counter(s);position:absolute;left:0;top:0;width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;font-family:var(--mono);font-size:11px;display:flex;align-items:center;justify-content:center}
+  ol.steps li b{color:var(--ink);font-weight:600}
+  .note{border-left:3px solid var(--accent);background:var(--accent-bg);padding:13px 16px;margin:20px 0;border-radius:0 5px 5px 0;font-size:.89rem;max-width:70ch}
+  .note p{margin:0;max-width:none}.note p+p{margin-top:8px}
+  .note .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:5px}
+  .note.warn{border-left-color:var(--warn-br);background:var(--warn-bg)}.note.warn .lbl{color:var(--warn-ink)}
+  .note.ok{border-left-color:var(--good);background:var(--good-bg)}.note.ok .lbl{color:var(--good)}
+  .footer{border-top:1px solid var(--border);padding-top:22px;margin-top:50px;font-size:.82rem;color:var(--faint)}
+  a{color:var(--accent)}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <p class="eyebrow">Case study · krok po kroku</p>
+  <h1>Proces wigilii i agenda z niego zbudowana</h1>
+  <p class="standfirst">
+    Od pustego eventu do agendy złożonej z decyzji podjętych w procesie. Zrzuty pochodzą
+    z realnego konta demo, z procesu „Obsługa wigilii" zbudowanego dokładnie według
+    tych kroków.
+  </p>
+</header>
+
+<section>
+  <h2><span class="k">CEL</span>Co budujemy</h2>
+  <p class="lede">
+    Kolacja wigilijna firmowa. Klient przez portal podaje menu z liczbą osób, alergie,
+    napoje i godziny; zespół wysyła informacje o płatnościach i zatwierdza kolejno menu,
+    napoje, płatność i harmonogram. Wszystko, co po drodze ustalone, ma samo złożyć się
+    w agendę.
+  </p>
+  <p>
+    Twoja lista 11 życzeń rozkłada się na <b>13 kroków</b> — bo w tej wersji jeden krok
+    ma jedną rolę i jeden formularz. „Akceptacja przez kucharza i kelnera" to dwa kroki
+    po sobie, a „menu + liczby + alergie" to wybór menu plus osobny krok na alergie.
+  </p>
+</section>
+
+<section>
+  <h2><span class="k">A</span>Event i warianty menu</h2>
+  <ol class="steps">
+    <li><b>Eventy → Nowy event.</b> Typ: <b>Wigilia</b>, nazwa, data, sala.</li>
+    <li>Otwórz kartę eventu → <b>Warianty menu → Dodaj wariant</b>. Dodaj np. <code>Menu Wigilijne A</code> i <code>Menu Wigilijne B</code>, a w każdym dania. To z nich para wybiera w portalu.</li>
+  </ol>
+  <figure>
+    <img src="__CS:08-menu-warianty__" alt="Edytor wariantów menu na karcie eventu">
+    <figcaption>
+      Sekcja <b>Warianty menu</b> na karcie eventu. Każdy wariant ma dania z kategorią,
+      ceną, dopłatą i przełącznikami wege / gluten / bezgluten. Wiersze są zawsze
+      edytowalne — zmiana zapisuje się po wyjściu z pola.
+    </figcaption>
+  </figure>
+
+  <div class="note">
+    <span class="lbl">Dlaczego najpierw menu</span>
+    <p>Krok „Wybór menu" pokazuje parze warianty, które istnieją na evencie. Bez dodanych
+    wariantów krok nie ma z czego wybierać.</p>
+  </div>
+</section>
+
+<section>
+  <h2><span class="k">B</span>Budowa procesu</h2>
+  <p class="lede">Konfiguracja → Procesy → <b>Nowy proces</b>. Nazwa „Obsługa wigilii", typ CHRISTMAS_EVE.</p>
+
+  <figure>
+    <img src="__CS:03-mapowanie__" alt="Nagłówek procesu i łańcuch 13 kroków">
+    <figcaption>
+      Nagłówek procesu i <b>nawigator kroków</b> — kolory podpowiadają rodzaj kroku,
+      bursztynowy to węzeł decyzyjny, zielony domyka proces. Pod spodem karta pierwszego
+      kroku z otwartą zakładką <b>Mapowanie pól</b> (do tego wracamy w części C).
+    </figcaption>
+  </figure>
+
+  <p>Każdy krok dodajesz przyciskiem <b>Dodaj krok</b> i ustawiasz na jego karcie trzy rzeczy:
+  <b>Typ węzła</b>, <b>Akcja</b> i <b>Wykonuje</b>.</p>
+
+  <figure>
+    <img src="__CS:02-krok-akcja__" alt="Pojedynczy krok: Akcja Zatwierdzenie, Wykonuje Kucharz">
+    <figcaption>
+      Krok „Akceptacja menu — kuchnia": <b>Akcja</b> = Zatwierdzenie, <b>Wykonuje</b> = Kucharz.
+      Rola decyduje, kto domyka krok — role obsługi (Kucharz, Kelner, Barman) są na liście
+      obok systemowych.
+    </figcaption>
+  </figure>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Nazwa kroku</th><th>Typ węzła</th><th>Akcja</th><th>Wykonuje</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Wybór menu i liczba osób</td><td>Decyzja</td><td>Wybór menu</td><td>Klient</td></tr>
+        <tr><td>2</td><td>Alergie i diety</td><td>Akcja</td><td>Formularz klienta</td><td>Klient</td></tr>
+        <tr><td>3</td><td>Napoje</td><td>Akcja</td><td>Formularz klienta</td><td>Klient</td></tr>
+        <tr><td>4</td><td>Godzina rozpoczęcia</td><td>Akcja</td><td>Formularz klienta</td><td>Klient</td></tr>
+        <tr><td>5</td><td>Godzina zakończenia</td><td>Akcja</td><td>Formularz klienta</td><td>Klient</td></tr>
+        <tr><td>6</td><td>Informacja o zaliczce</td><td>Akcja</td><td>Wiadomość</td><td>Manager</td></tr>
+        <tr><td>7</td><td>Informacja o płatności</td><td>Akcja</td><td>Płatność</td><td>Manager</td></tr>
+        <tr><td>8</td><td>Akceptacja menu — kuchnia</td><td>Akcja</td><td>Zatwierdzenie</td><td>Kucharz</td></tr>
+        <tr><td>9</td><td>Akceptacja menu — kelner</td><td>Akcja</td><td>Zatwierdzenie</td><td>Kelner</td></tr>
+        <tr><td>10</td><td>Akceptacja napojów — kelner</td><td>Akcja</td><td>Zatwierdzenie</td><td>Kelner</td></tr>
+        <tr><td>11</td><td>Akceptacja napojów — barman</td><td>Akcja</td><td>Zatwierdzenie</td><td>Barman</td></tr>
+        <tr><td>12</td><td>Akceptacja płatności — manager</td><td>Akcja</td><td>Zatwierdzenie</td><td>Manager</td></tr>
+        <tr><td>13</td><td>Akceptacja harmonogramu</td><td>Koniec</td><td>Agenda</td><td>Klient + Manager</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>Po zapisaniu proces pojawia się na liście z pełnym łańcuchem kroków:</p>
+  <figure>
+    <img src="__CS:04-lista-procesow__" alt="Lista procesów z gotową Obsługą wigilii">
+    <figcaption>
+      <code>Konfiguracja → Procesy</code>. „Obsługa wigilii" obok domyślnej „Obsługi wesela" —
+      każdy proces pokazuje swoje kroki, kolor podpowiada rodzaj.
+    </figcaption>
+  </figure>
+</section>
+
+<section>
+  <h2><span class="k">C</span>Mapowanie do agendy</h2>
+  <p class="lede">
+    To tutaj proces buduje agendę. Na karcie kroku wchodzisz w zakładkę <b>Mapowanie pól</b>
+    i ustawiasz pary: po lewej <b>co ten krok wystawia</b>, po prawej <b>gdzie w agendzie
+    to odłożyć</b>. Obie strony to listy wyboru.
+  </p>
+
+  <div class="note">
+    <span class="lbl">Jak to działa pod spodem</span>
+    <p>Gdy krok zostaje domknięty, wskazana wartość <b>dopisuje się</b> do jednego magazynu
+    agendy tego eventu — nie nadpisując tego, co zebrały wcześniejsze kroki. Dokument w dniu
+    imprezy to suma tych wartości.</p>
+  </div>
+
+  <p>Na krokach ustaw następujące mapowania:</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Krok</th><th>Co wystawia (lewa lista)</th><th>Gdzie w agendzie (prawa lista)</th></tr></thead>
+      <tbody>
+        <tr><td>1 Wybór menu</td><td>Wybrany wariant</td><td>Menu</td></tr>
+        <tr><td>1 Wybór menu</td><td>Podsumowanie wyboru</td><td>Liczba gości</td></tr>
+        <tr><td>2 Alergie</td><td>Odpowiedź klienta</td><td>Uwagi dla kuchni</td></tr>
+        <tr><td>3 Napoje</td><td>Odpowiedź klienta</td><td>własny klucz <code>agenda.napoje</code></td></tr>
+        <tr><td>4 Godz. rozpoczęcia</td><td>Odpowiedź klienta</td><td>własny klucz <code>agenda.godzinaStart</code></td></tr>
+        <tr><td>5 Godz. zakończenia</td><td>Odpowiedź klienta</td><td>własny klucz <code>agenda.godzinaKoniec</code></td></tr>
+        <tr><td>6 Zaliczka</td><td>Treść wiadomości</td><td>Płatności</td></tr>
+        <tr><td>13 Agenda</td><td>Notatka z kroku</td><td>Uwagi końcowe</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>
+    Cele z listy (Menu, Uwagi dla kuchni, Płatności…) wybierasz z rozwijanej. Te oznaczone
+    „własny klucz" wpisujesz przez opcję <b>Własny klucz…</b> — przydają się na dane, które
+    nie mają gotowej rubryki, jak godziny czy napoje. Skrót <b>„Odkładaj notatkę z tego kroku
+    w uwagach agendy"</b> nad listą dodaje najczęstsze mapowanie jednym kliknięciem.
+  </p>
+</section>
+
+<section>
+  <h2><span class="k">D</span>Przypisanie i przejście</h2>
+  <figure>
+    <img src="__CS:05-przypisanie__" alt="Przypisanie procesu do eventów w Konfiguracji">
+    <figcaption>
+      <b>Konfiguracja → Przypisz proces do eventów.</b> Wybierasz proces i zaznaczasz eventy,
+      które mają go używać. Zaznaczenie jest pełną listą — event odznaczony traci ten proces.
+    </figcaption>
+  </figure>
+  <ol class="steps">
+    <li>Przypisz „Obsługę wigilii" do swojego eventu.</li>
+    <li>Karta eventu → sekcja <b>Proces obsługi → Rozpocznij proces</b>.</li>
+    <li><b>Eventy → Link dla klienta</b> — wyślij parze. Klient wypełnia kroki 1–5 w portalu.</li>
+    <li>Kroki 6–13 domyka zespół na karcie eventu, każdy przez swoją rolę.</li>
+  </ol>
+  <figure>
+    <img src="__CS:06-panel-procesu__" alt="Panel procesu w toku na karcie eventu">
+    <figcaption>
+      Tak wygląda proces w toku na karcie eventu: kroki ukończone przekreślone z datą i rolą,
+      bieżący rozwinięty, przyszłe wyszarzone, u góry pasek postępu. (Zrzut z demo-wesela —
+      wigilia wygląda tak samo, ma tylko swoje kroki.)
+    </figcaption>
+  </figure>
+</section>
+
+<section>
+  <h2><span class="k">E</span>Wygenerowanie agendy</h2>
+  <p class="lede">
+    Po domknięciu kroków dane siedzą już w magazynie agendy. Składasz z nich dokument.
+  </p>
+  <figure>
+    <img src="__CS:07-szablon-dokumentu__" alt="Builder szablonu dokumentu z polami danych">
+    <figcaption>
+      <b>Konfiguracja → Szablony dokumentów → Nowy.</b> Przeciągasz bloki na kartkę A4,
+      a w slotach wpisujesz klucze agendy: <code>agenda.menu</code>, <code>agenda.liczbaGosci</code>,
+      <code>agenda.napoje</code>, <code>agenda.godzinaStart</code>. Przy generowaniu z karty
+      eventu sloty wypełniają się wartościami zebranymi w procesie.
+    </figcaption>
+  </figure>
+  <p>
+    Alternatywnie <b>„Generuj agendę"</b> na karcie eventu składa harmonogram dnia z godzin
+    i menu w gotowym układzie sali.
+  </p>
+</section>
+
+<section>
+  <h2><span class="k">!</span>Gdzie to dziś zgrzyta</h2>
+  <div class="note warn">
+    <span class="lbl">Do świadomej obsługi</span>
+    <p>Kroki 3–5 (napoje, godziny) to zwykłe pola tekstowe — klient wpisuje „18:00" jako tekst.
+    Wieloosobowe akceptacje (kroki 8–11) rozbite są na osobne kroki po sobie, bo równoległe
+    zatwierdzanie nie działa jeszcze jako jeden krok.</p>
+    <p>Oba ograniczenia znikną z <b>własnymi akcjami</b>: „Napoje" dostanie pole listy z liczbami,
+    a godziny — pole typu godzina, zamiast wolnego tekstu.</p>
+  </div>
+</section>
+
+<div class="footer">
+  Ścieżki: <code>/app/events</code> · <code>/app/settings/workflows</code> ·
+  <code>/app/settings/configuration</code> · <code>/app/settings/document-templates</code><br>
+  Zrzuty z konta demo — proces „Obsługa wigilii" na develop-weddingboarddev.
+</div>
+</div>

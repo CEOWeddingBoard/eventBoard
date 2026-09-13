@@ -1,0 +1,301 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-olive/15;
+  }
+  html {
+    scrollbar-gutter: stable;
+  }
+  body {
+    @apply bg-transparent text-ink font-sans antialiased min-h-screen;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    letter-spacing: 0.01em;
+  }
+  h1 {
+    @apply font-script font-normal text-ink tracking-tight;
+  }
+  h2, h3, h4, h5, h6 {
+    @apply font-serif font-medium text-ink tracking-tight;
+  }
+}
+
+/*
+ * Panel organizatora jest narzędziem operacyjnym, otwieranym kilkadziesiąt razy
+ * dziennie. Globalny krój kaligraficzny w nagłówkach czynił tytuły stron mniej
+ * czytelnymi niż treść pod nimi i odwracał hierarchię — nazwa pojedynczego
+ * eventu na liście przyciągała wzrok mocniej niż tytuł całej sekcji.
+ * Krój ozdobny zostaje tam, gdzie pracuje na siebie: strony dla pary,
+ * zaproszenia, materiały drukowane.
+ */
+/*
+ * Landing sprzedaje ten sam produkt co panel, więc trzyma tę samą, czystą
+ * typografię (Inter). Bez tego globalne nagłówki wchodziły w krój kaligraficzny
+ * (h1) i serifowy (h2–h6), przez co strona główna wyglądała inaczej niż aplikacja.
+ */
+@layer base {
+  .landing-clean :is(h1, h2, h3, h4, h5, h6) {
+    font-family: inherit;
+  }
+}
+
+@layer base {
+  .eb-ui h1 {
+    @apply font-sans font-semibold text-[1.6rem] leading-tight tracking-tight text-neutral-900;
+  }
+  .eb-ui h2 {
+    @apply font-sans font-semibold text-[1.1rem] leading-snug tracking-tight text-neutral-900;
+  }
+  .eb-ui h3 {
+    @apply font-sans font-semibold text-[0.95rem] leading-snug tracking-normal text-neutral-800;
+  }
+  .eb-ui h4,
+  .eb-ui h5,
+  .eb-ui h6 {
+    @apply font-sans font-semibold text-[0.875rem] leading-snug tracking-normal text-neutral-800;
+  }
+
+}
+
+/*
+ * Tekst pomocniczy schodził poniżej progu czytelności na jasnym tle.
+ * Wartości wpisane wprost — @apply na klasie narzędziowej o tej samej
+ * nazwie tworzy cykl zależności.
+ */
+.eb-ui .text-neutral-400 {
+  color: #737373;
+}
+.eb-ui .text-neutral-300 {
+  color: #a3a3a3;
+}
+
+@layer components {
+  .container {
+    @apply max-w-[1140px] mx-auto px-6;
+  }
+
+  .elegant-card {
+    @apply bg-wedding-card border border-olive/25 rounded-2xl shadow-wedding hover:shadow-wedding-hover transition-all duration-300;
+  }
+
+  .glass-card {
+    @apply bg-white/90 border border-olive/20 rounded-2xl shadow-wedding backdrop-blur-xl;
+  }
+
+  .elegant-card-hover {
+    @apply hover:shadow-wedding-hover hover:-translate-y-0.5 transition-all duration-300;
+  }
+
+  .btn-primary {
+    @apply bg-white border border-olive/20 text-ink font-medium tracking-wide rounded-xl px-6 py-3.5 shadow-wedding hover:border-olive/40 hover:shadow-wedding-hover hover:-translate-y-0.5 active:shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)] transition-all duration-300;
+  }
+
+  .btn-gold {
+    @apply bg-gold-soft text-ink font-medium tracking-wide rounded-xl px-6 py-3.5 shadow-gold-soft hover:bg-gold hover:shadow-wedding-hover hover:-translate-y-0.5 active:shadow-[inset_0_1px_2px_rgba(0,0,0,0.08)] transition-all duration-300;
+  }
+
+  .btn-outline {
+    @apply bg-transparent border border-olive/40 text-olive font-medium tracking-wide rounded-xl px-6 py-3.5 hover:border-olive hover:bg-olive-muted transition-all duration-300;
+  }
+
+  .premium-button {
+    @apply btn-gold;
+  }
+
+  .elegant-input {
+    @apply bg-white border border-olive/25 rounded-xl px-4 py-3 text-ink placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-gold-subtle/30 focus:border-gold-subtle/50 transition-all duration-200;
+  }
+
+  .elegant-heading {
+    @apply font-serif text-ink tracking-tight;
+  }
+
+  .elegant-subheading {
+    @apply text-ink-muted font-light tracking-wide;
+  }
+
+  .content-readable {
+    text-shadow: 0 1px 2px rgba(255,255,255,0.9), 0 0 24px rgba(255,252,248,0.6);
+  }
+
+  .content-readable h1,
+  .content-readable h2,
+  .content-readable h3,
+  .content-readable h4,
+  .content-readable h5,
+  .content-readable h6 {
+    text-shadow: 0 1px 3px rgba(255,255,255,0.95), 0 0 28px rgba(255,252,248,0.7);
+  }
+
+  /* Magazyn — treść artykułu (spójna z kartami na liście) */
+  .prose-blog {
+    @apply text-ink-muted;
+  }
+
+  .prose-blog p {
+    @apply font-reading text-base font-light leading-[1.75] tracking-[0.01em] text-ink-muted;
+  }
+
+  .prose-blog p strong {
+    @apply font-medium text-ink;
+  }
+
+  .prose-blog h2 {
+    @apply font-serif text-xl md:text-2xl font-normal text-ink tracking-tight leading-snug;
+  }
+
+  .prose-blog h3 {
+    @apply font-serif text-lg md:text-xl font-normal text-ink tracking-tight leading-snug;
+  }
+
+}
+
+/* WCAG 2.1 AA: ink #2d3824 (ciemny oliwkowy), ink-muted #4a5c3e – kontrast na tle #fefdfb–#f5f3ee */
+@layer base {
+  :root {
+    --background: 40 20% 98%;
+    --foreground: 120 28% 12%;
+    --card: 40 25% 99%;
+    --card-foreground: 120 28% 12%;
+    --popover: 40 25% 99%;
+    --popover-foreground: 120 28% 12%;
+    --primary: 43 55% 45%;
+    --primary-foreground: 120 30% 10%;
+    --secondary: 92 15% 92%;
+    --secondary-foreground: 92 18% 35%;
+    --muted: 40 15% 94%;
+    --muted-foreground: 120 15% 35%;
+    --accent: 43 55% 45%;
+    --accent-foreground: 120 30% 10%;
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 92 12% 85%;
+    --input: 92 12% 90%;
+    --ring: 43 55% 45%;
+    --radius: 0.75rem;
+  }
+}
+
+/* Dark mode */
+.dark {
+  --background: 120 10% 8%;
+  --foreground: 40 25% 92%;
+  --card: 120 8% 11%;
+  --card-foreground: 40 25% 92%;
+  --popover: 120 8% 11%;
+  --popover-foreground: 40 25% 92%;
+  --primary: 43 45% 42%;
+  --primary-foreground: 120 30% 10%;
+  --secondary: 120 10% 16%;
+  --secondary-foreground: 92 12% 74%;
+  --muted: 120 8% 18%;
+  --muted-foreground: 92 10% 62%;
+  --accent: 43 45% 42%;
+  --accent-foreground: 120 30% 10%;
+  --destructive: 0 70% 50%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 120 12% 22%;
+  --input: 120 12% 24%;
+  --ring: 43 45% 42%;
+  --radius: 0.75rem;
+}
+.dark body {
+  background: hsl(120 10% 6%);
+}
+.dark .elegant-card {
+  @apply bg-card border-olive/10 shadow-none;
+}
+.dark .glass-card {
+  @apply bg-card/90 border-olive/10 backdrop-blur-xl;
+}
+.dark .btn-primary {
+  @apply bg-card border-olive/15 text-foreground;
+}
+.dark .btn-gold {
+  @apply bg-gold-soft/80 text-ink;
+}
+.dark .btn-outline {
+  @apply border-olive/30 text-olive/80 hover:bg-olive-muted/20;
+}
+.dark .elegant-input {
+  @apply bg-card border-olive/20 text-foreground placeholder:text-muted-foreground focus:ring-gold-subtle/20;
+}
+.dark .content-readable {
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4), 0 0 24px rgba(0,0,0,0.15);
+}
+.dark .content-readable h1,
+.dark .content-readable h2,
+.dark .content-readable h3,
+.dark .content-readable h4,
+.dark .content-readable h5,
+.dark .content-readable h6 {
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5), 0 0 28px rgba(0,0,0,0.2);
+}
+.dark .prose-blog p {
+  @apply text-muted-foreground;
+}
+.dark .prose-blog p strong {
+  @apply text-foreground;
+}
+.dark .prose-blog h2,
+.dark .prose-blog h3 {
+  @apply text-foreground;
+}
+.dark ::-webkit-scrollbar-track {
+  background: rgba(30, 34, 26, 0.8);
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(125, 141, 110, 0.3);
+}
+.dark * {
+  scrollbar-color: rgba(125, 141, 110, 0.3) rgba(30, 34, 26, 0.8);
+}
+
+/* Custom Scrollbar Styles */
+@layer base {
+  /* Webkit browsers (Chrome, Safari, Edge) */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(245, 243, 238, 0.8);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(125, 141, 110, 0.4);
+    border-radius: 4px;
+    border: 1px solid rgba(245, 243, 238, 0.6);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(125, 141, 110, 0.6);
+  }
+
+  ::-webkit-scrollbar-thumb:active {
+    background: rgba(125, 141, 110, 0.7);
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: rgba(245, 243, 238, 0.8);
+  }
+
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(125, 141, 110, 0.4) rgba(245, 243, 238, 0.8);
+  }
+
+  /* Hide scrollbar for kanban board */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari and Opera */
+  }
+}

@@ -1,0 +1,22 @@
+# Dependencies & build
+node_modules
+dist
+.cache
+scripts/.font-cache
+.next
+.next-dev
+coverage
+tsconfig.tsbuildinfo
+*.tsbuildinfo
+
+# Env (never commit secrets)
+.env
+.env.local
+.env.*.local
+
+# User uploads (guest photos, vendor documents)
+public/uploads
+
+# IDE / OS
+.aider*
+*.iml

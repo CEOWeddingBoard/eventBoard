@@ -1,0 +1,92 @@
+[env] Missing recommended production variables (features may be limited): NEXT_PUBLIC_APP_URL, RESEND_API_KEY, RESEND_FROM, CLERK_WEBHOOK_SECRET, STRIPE_PRICE_ID
+after-auth context: TypeError: Cannot read properties of undefined (reading 'findUnique')
+    at g (.next/server/app/[locale]/api/venue/calendar/route.js:1:8407)
+    at g (.next/server/app/[locale]/after-auth/page.js:2:8009)
+    at j (.next/server/app/[locale]/after-auth/page.js:3:5312)
+    at g (.next/server/app/[locale]/api/venue/calendar/route.js:1:8407)
+    at g (.next/server/app/[locale]/after-auth/page.js:2:8009)
+    at j (.next/server/app/[locale]/after-auth/page.js:3:5312)
+ ⨯ TypeError: Cannot read properties of undefined (reading 'findUnique')
+    at g (.next/server/app/[locale]/api/venue/calendar/route.js:1:8407)
+    at i (.next/server/app/[locale]/venue/onboarding/page.js:1:1308) {
+  digest: '1701816068'
+}
+after-auth context: TypeError: Cannot read properties of undefined (reading 'findUnique')
+    at aF (.next/server/chunks/3195.js:20:54743)
+    at <unknown> (.next/server/chunks/4653.js:1:877)
+    at p (.next/server/chunks/38.js:1:181201) {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'LanguageSwitcher (pl)'
+}
+Error: MISSING_MESSAGE: LanguageSwitcher (pl)
+    at <unknown> (.next/server/chunks/3195.js:20:52657)
+    at <unknown> (.next/server/chunks/3195.js:20:52695)
+    at <unknown> (.next/server/chunks/3195.js:20:54613)
+    at <unknown> (.next/server/chunks/3195.js:20:52521)
+ ⨯ The requested resource isn't a valid image for /blog/covers/blog-auto-slub-cover.png received null
+after-auth context: TypeError: Cannot read properties of undefined (reading 'findUnique')
+    at g (.next/server/app/[locale]/api/venue/calendar/route.js:1:8407)
+    at g (.next/server/app/[locale]/after-auth/page.js:2:8009)
+    at j (.next/server/app/[locale]/after-auth/page.js:3:5312)
+  digest: '1760847699'
+}
+    at g (.next/server/app/[locale]/api/venue/calendar/route.js:1:8407)
+    at g (.next/server/app/[locale]/after-auth/page.js:2:8009)
+    at o (.next/server/app/[locale]/welcome/page.js:2:548) {
+ ⨯ TypeError: Cannot read properties of undefined (reading 'findUnique')
+  originalMessage: 'LanguageSwitcher (pl)'
+}
+ ⨯ The requested resource isn't a valid image for /blog/covers/blog-auto-slub-cover.png received null
+Error: MISSING_MESSAGE: LanguageSwitcher (pl)
+    at <unknown> (.next/server/chunks/3195.js:20:52657)
+    at <unknown> (.next/server/chunks/3195.js:20:52695)
+    at <unknown> (.next/server/chunks/3195.js:20:54613)
+    at <unknown> (.next/server/chunks/3195.js:20:52521)
+    at aF (.next/server/chunks/3195.js:20:54743)
+    at <unknown> (.next/server/chunks/4653.js:1:877)
+    at p (.next/server/chunks/38.js:1:181201) {
+  code: 'MISSING_MESSAGE',
+Error: MISSING_MESSAGE: LanguageSwitcher (pl)
+    at <unknown> (.next/server/chunks/3195.js:20:52657)
+    at <unknown> (.next/server/chunks/3195.js:20:52695)
+    at <unknown> (.next/server/chunks/3195.js:20:54613)
+    at <unknown> (.next/server/chunks/3195.js:20:52521)
+    at aF (.next/server/chunks/3195.js:20:54743)
+    at <unknown> (.next/server/chunks/4653.js:1:877)
+    at p (.next/server/chunks/38.js:1:181201) {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'LanguageSwitcher (pl)'
+}
+ ⨯ The requested resource isn't a valid image for /blog/covers/blog-auto-slub-cover.png received null
+after-auth context: TypeError: Cannot read properties of undefined (reading 'findUnique')
+    at g (.next/server/app/[locale]/api/venue/calendar/route.js:1:8407)
+    at g (.next/server/app/[locale]/after-auth/page.js:2:8009)
+    at j (.next/server/app/[locale]/after-auth/page.js:3:5312)
+ ⨯ TypeError: Cannot read properties of undefined (reading 'findUnique')
+    at g (.next/server/app/[locale]/api/venue/calendar/route.js:1:8407)
+    at g (.next/server/app/[locale]/after-auth/page.js:2:8009)
+    at o (.next/server/app/[locale]/welcome/page.js:2:548) {
+  digest: '1760847699'
+}
+Error: MISSING_MESSAGE: LanguageSwitcher (pl)
+    at <unknown> (.next/server/chunks/3195.js:20:52657)
+    at <unknown> (.next/server/chunks/3195.js:20:52695)
+    at <unknown> (.next/server/chunks/3195.js:20:54613)
+    at p (.next/server/chunks/38.js:1:181201) {
+    at <unknown> (.next/server/chunks/3195.js:20:52521)
+  code: 'MISSING_MESSAGE',
+    at aF (.next/server/chunks/3195.js:20:54743)
+  originalMessage: 'LanguageSwitcher (pl)'
+    at <unknown> (.next/server/chunks/4653.js:1:877)
+}
+ ⨯ The requested resource isn't a valid image for /blog/covers/blog-auto-slub-cover.png received null
+    at g (.next/server/app/[locale]/after-auth/page.js:2:8009)
+    at j (.next/server/app/[locale]/after-auth/page.js:3:5312)
+after-auth context: TypeError: Cannot read properties of undefined (reading 'findUnique')
+    at g (.next/server/app/[locale]/api/venue/calendar/route.js:1:8407)
+ ⨯ TypeError: Cannot read properties of undefined (reading 'findUnique')
+    at g (.next/server/app/[locale]/api/venue/calendar/route.js:1:8407)
+    at g (.next/server/app/[locale]/after-auth/page.js:2:8009)
+    at o (.next/server/app/[locale]/welcome/page.js:2:548) {
+  digest: '1760847699'
+}

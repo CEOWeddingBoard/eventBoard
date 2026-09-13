@@ -1,0 +1,38 @@
+FROM node:20-bookworm-slim
+
+# Prisma requires libssl.so.3 (debian-openssl-3.0.x engine)
+RUN apt-get update -y && apt-get install -y --no-install-recommends libssl3 ca-certificates && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY package.json package-lock.json* ./
+RUN npm ci --ignore-scripts
+
+COPY . .
+
+# Ensure no stale build artifacts exist from git history or Docker cache
+RUN rm -rf .next .next-dev
+
+# Railway passes all service Variables as Docker build args when ARG is declared.
+# NEXT_PUBLIC_* are inlined by Next.js webpack at build time - must be available here.
+ARG NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+
+ARG CLERK_PUBLISHABLE_KEY
+ENV CLERK_PUBLISHABLE_KEY=$CLERK_PUBLISHABLE_KEY
+
+ARG CLERK_SECRET_KEY
+ENV CLERK_SECRET_KEY=$CLERK_SECRET_KEY
+
+ARG DATABASE_URL
+ENV DATABASE_URL=$DATABASE_URL
+
+RUN npx prisma generate
+RUN npm run build
+
+ENV PRISMA_QUERY_ENGINE_LIBRARY=/app/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+ENV NODE_ENV=production
+ENV PORT=3000
+EXPOSE 3000
+
+CMD ["npm", "start"]

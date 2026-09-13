@@ -1,0 +1,1817 @@
+<title>Podręcznik EventBoard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+
+<style>
+  :root {
+    --ground:#faf9f7; --surface:#fff; --surface-2:#f4f2ee;
+    --ink:#1a1a1f; --muted:#6b6862; --faint:#93908a;
+    --border:#e5e2dc; --border-2:#d6d2ca;
+    --accent:#2563eb; --accent-bg:#eef4ff;
+    --good:#10b981; --good-bg:#e8f7f1;
+    --warn-bg:#fdf6e7; --warn-br:#e8cf94; --warn-ink:#7a5a12;
+    --t1:#3b82f6; --t2:#f97316; --t3:#22c55e; --t4:#8b5cf6;
+    --t5:#0ea5e9; --t6:#f59e0b; --t7:#6366f1; --t8:#059669;
+    --serif:"Newsreader",ui-serif,Georgia,serif;
+    --sans:"Source Sans 3",ui-sans-serif,system-ui,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:#131317; --surface:#1b1b21; --surface-2:#22222a;
+      --ink:#ecebe8; --muted:#a5a29b; --faint:#7e7b75;
+      --border:#2e2e37; --border-2:#3d3d48;
+      --accent:#7ba5f7; --accent-bg:#1c2740;
+      --good:#4dd4a0; --good-bg:#16302a;
+      --warn-bg:#2b2415; --warn-br:#5c4a1e; --warn-ink:#e0c485;
+      --t1:#7aa7f5; --t2:#f7a35f; --t3:#63d38b; --t4:#b295f7;
+      --t5:#5cbdf0; --t6:#f0bb5c; --t7:#9095f5; --t8:#4bc48f;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:#131317; --surface:#1b1b21; --surface-2:#22222a;
+    --ink:#ecebe8; --muted:#a5a29b; --faint:#7e7b75;
+    --border:#2e2e37; --border-2:#3d3d48;
+    --accent:#7ba5f7; --accent-bg:#1c2740;
+    --good:#4dd4a0; --good-bg:#16302a;
+    --warn-bg:#2b2415; --warn-br:#5c4a1e; --warn-ink:#e0c485;
+    --t1:#7aa7f5; --t2:#f7a35f; --t3:#63d38b; --t4:#b295f7;
+    --t5:#5cbdf0; --t6:#f0bb5c; --t7:#9095f5; --t8:#4bc48f;
+  }
+
+  *{box-sizing:border-box}
+  body{background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased}
+
+  .wrap{display:grid;grid-template-columns:1fr;max-width:1200px;margin:0 auto;padding:0 24px 100px}
+  @media (min-width:1080px){.wrap{grid-template-columns:222px minmax(0,1fr);gap:60px;padding-right:40px}}
+
+  .masthead{grid-column:1/-1;padding:66px 0 40px;border-bottom:1px solid var(--border);margin-bottom:50px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:0 0 14px}
+  h1{font-family:var(--serif);font-weight:500;font-size:clamp(2.2rem,5vw,3.2rem);line-height:1.08;letter-spacing:-.015em;margin:0 0 16px;text-wrap:balance}
+  .standfirst{font-size:1.07rem;color:var(--muted);max-width:62ch;margin:0}
+  .meta-row{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:26px;font-family:var(--mono);font-size:11.5px;color:var(--faint)}
+  .meta-row b{color:var(--muted);font-weight:500}
+
+  .toc{display:none}
+  @media (min-width:1080px){
+    .toc{display:block;position:sticky;top:30px;align-self:start;max-height:calc(100vh - 60px);overflow-y:auto;font-size:13px;line-height:1.4}
+    .toc p{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin:0 0 11px}
+    .toc p+p{margin-top:20px}
+    .toc a{display:block;padding:5px 0 5px 12px;border-left:2px solid var(--border);color:var(--muted);text-decoration:none;transition:color .15s,border-color .15s}
+    .toc a:hover{color:var(--accent);border-left-color:var(--accent)}
+    .toc a b{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-right:7px;font-weight:500}
+  }
+
+  main{min-width:0}
+  section{margin-bottom:72px;scroll-margin-top:28px}
+
+  h2{font-family:var(--serif);font-weight:500;font-size:1.75rem;line-height:1.18;letter-spacing:-.01em;margin:0 0 6px;text-wrap:balance;display:flex;align-items:baseline;gap:14px}
+  h2 .num{font-family:var(--mono);font-size:.72rem;font-weight:500;color:var(--accent);letter-spacing:.06em;flex-shrink:0}
+  h3{font-family:var(--sans);font-weight:600;font-size:1.03rem;margin:34px 0 10px;display:flex;align-items:center;gap:9px}
+  h4{font-family:var(--sans);font-weight:600;font-size:.92rem;margin:24px 0 8px;color:var(--ink)}
+  .lede{color:var(--muted);margin:0 0 26px;max-width:68ch}
+  p{margin:0 0 16px;max-width:68ch}
+
+  code{font-family:var(--mono);font-size:.855em;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;padding:.1em .38em;white-space:nowrap}
+
+  figure{margin:28px 0}
+  figure img{display:block;width:100%;height:auto;border:1px solid var(--border-2);border-radius:8px;background:#fff}
+  figcaption{font-size:.82rem;color:var(--muted);margin-top:11px;line-height:1.55;max-width:76ch}
+  figcaption b{color:var(--ink);font-weight:600}
+  figcaption code{font-size:.9em}
+
+  .dot{width:9px;height:9px;border-radius:2px;display:inline-block;flex-shrink:0}
+  .sw{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:7px}
+
+  /* przepływ end-to-end */
+  .flow{display:grid;gap:2px;margin:30px 0;grid-template-columns:1fr}
+  @media (min-width:820px){.flow{grid-template-columns:repeat(6,1fr)}}
+  .fstep{background:var(--surface);border:1px solid var(--border);padding:15px 14px}
+  .fstep .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--accent);display:block;margin-bottom:7px}
+  .fstep .t{font-weight:600;font-size:.9rem;line-height:1.28;margin-bottom:5px}
+  .fstep .d{font-size:.79rem;color:var(--muted);line-height:1.45}
+  .fstep .w{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);margin-top:9px;padding-top:8px;border-top:1px dashed var(--border-2)}
+
+  /* karty zakładek */
+  .tabcard{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--c,var(--accent));border-radius:0 8px 8px 0;padding:16px 20px;margin:20px 0;max-width:76ch}
+  .tabcard h4{margin:0 0 8px}
+  .tabcard p{margin:0 0 8px;font-size:.9rem;color:var(--muted)}
+  .tabcard p:last-child{margin-bottom:0}
+
+  .tbl-wrap{overflow-x:auto;margin:22px 0;border:1px solid var(--border);border-radius:6px}
+  table{border-collapse:collapse;width:100%;font-size:.855rem;min-width:520px;background:var(--surface)}
+  th{text-align:left;font-family:var(--mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);font-weight:500;padding:11px 14px;border-bottom:1px solid var(--border-2);background:var(--surface-2);white-space:nowrap}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:top;color:var(--muted);line-height:1.5}
+  tr:last-child td{border-bottom:none}
+  td:first-child{color:var(--ink)}
+  td code{background:transparent;border:none;padding:0;color:var(--ink);font-weight:500}
+
+  .note{border-left:3px solid var(--accent);background:var(--accent-bg);padding:14px 18px;margin:22px 0;border-radius:0 5px 5px 0;font-size:.89rem;max-width:72ch}
+  .note p{margin:0;max-width:none}
+  .note p+p{margin-top:9px}
+  .note .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:6px}
+  .note.warn{border-left-color:var(--warn-br);background:var(--warn-bg)}
+  .note.warn .lbl{color:var(--warn-ink)}
+  .note.ok{border-left-color:var(--good);background:var(--good-bg)}
+  .note.ok .lbl{color:var(--good)}
+
+  .story{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 6px 6px 0;padding:14px 18px;margin:16px 0;max-width:74ch}
+  .story .s{margin:0 0 10px;font-size:.95rem;color:var(--ink);max-width:none;font-style:italic}
+  .story .s b{font-style:normal}
+  .story .c{margin:0;padding-top:10px;border-top:1px dashed var(--border-2);font-size:.84rem;color:var(--muted);line-height:1.65;max-width:none}
+  .story .c b{color:var(--ink);font-weight:600}
+
+  ol.steps{padding-left:0;list-style:none;counter-reset:s;margin:22px 0;max-width:70ch}
+  ol.steps li{counter-increment:s;position:relative;padding-left:40px;margin-bottom:14px;font-size:.91rem;color:var(--muted)}
+  ol.steps li::before{content:counter(s);position:absolute;left:0;top:1px;width:24px;height:24px;border-radius:50%;background:var(--surface-2);border:1px solid var(--border-2);color:var(--ink);font-family:var(--mono);font-size:11px;display:flex;align-items:center;justify-content:center}
+  ol.steps li b{color:var(--ink);font-weight:600}
+
+  ul.plain{padding-left:20px;margin:14px 0;max-width:70ch}
+  ul.plain li{margin-bottom:8px;color:var(--muted);font-size:.91rem}
+  ul.plain li b{color:var(--ink);font-weight:600}
+
+  .footer{grid-column:1/-1;border-top:1px solid var(--border);padding-top:26px;margin-top:20px;font-size:.82rem;color:var(--faint)}
+  a{color:var(--accent)}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+  /* ——— komponenty z dokumentacji silnika procesów ——— */
+/* ---------- pipeline ---------- */
+  .pipeline {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: 1fr;
+    margin: 30px 0;
+  }
+  @media (min-width: 720px) { .pipeline { grid-template-columns: repeat(5, 1fr); gap: 0; } }
+
+  .stage {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 16px 15px 15px;
+  }
+  @media (min-width: 720px) {
+    .stage { border-right: none; }
+    .stage:last-child { border-right: 1px solid var(--border); }
+  }
+  .stage .k {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .1em;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 8px;
+  }
+  .stage .t { font-weight: 600; font-size: .93rem; margin-bottom: 5px; line-height: 1.3; }
+  .stage .d { font-size: .8rem; color: var(--muted); line-height: 1.45; }
+  .stage .who {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--faint);
+    margin-top: 10px;
+    padding-top: 9px;
+    border-top: 1px dashed var(--border-2);
+  }
+
+  /* ---------- data model chain ---------- */
+  .chain { display: flex; flex-direction: column; gap: 0; margin: 28px 0; }
+  .chain-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-bottom: none;
+    padding: 14px 16px;
+  }
+  .chain-row:last-child { border-bottom: 1px solid var(--border); }
+  @media (min-width: 640px) {
+    .chain-row { grid-template-columns: 210px 1fr; gap: 20px; align-items: baseline; }
+  }
+  .chain-row .m { font-family: var(--mono); font-size: .8rem; font-weight: 700; color: var(--ink); }
+  .chain-row .m span { display: block; font-weight: 400; font-size: .72rem; color: var(--faint); margin-top: 2px; }
+  .chain-row .x { font-size: .87rem; color: var(--muted); line-height: 1.5; }
+
+  /* ---------- screen schematic ---------- */
+  figure { margin: 30px 0; }
+  .screen {
+    background: var(--surface);
+    border: 1px solid var(--border-2);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(0,0,0,.04);
+  }
+  .screen-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+  }
+  .screen-bar .dots { display: flex; gap: 5px; }
+  .screen-bar .dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--border-2); display: block; }
+  .screen-bar .path {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .screen-body { padding: 18px; }
+
+  figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--border-2);
+    border-radius: 8px;
+    background: #fff;
+  }
+
+  figcaption {
+    font-size: .82rem;
+    color: var(--muted);
+    margin-top: 11px;
+    line-height: 1.55;
+    max-width: 74ch;
+  }
+  figcaption code { font-size: .9em; }
+  figcaption b { color: var(--ink); font-weight: 600; }
+
+  .ui-h { font-weight: 600; font-size: .95rem; margin-bottom: 3px; }
+  .ui-sub { font-size: .8rem; color: var(--faint); margin-bottom: 16px; }
+
+  .node-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--dot, var(--n-none));
+    border-radius: 6px;
+    padding: 11px 13px;
+    margin-bottom: 8px;
+    background: var(--surface);
+  }
+  .node-card .idx {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--faint);
+    padding-top: 3px;
+    flex-shrink: 0;
+    min-width: 14px;
+  }
+  .node-card .body { flex: 1; min-width: 0; }
+  .node-card .nm { font-weight: 600; font-size: .87rem; margin-bottom: 3px; }
+  .node-card .tags { display: flex; flex-wrap: wrap; gap: 5px; }
+
+  .tag {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: .04em;
+    padding: 2px 6px;
+    border-radius: 3px;
+    background: var(--surface-2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .tag.role { background: var(--accent-bg); color: var(--accent); border-color: transparent; }
+  .tag.dec  { background: var(--warn-bg); color: var(--warn-ink); border-color: transparent; }
+  .tag.done { background: color-mix(in srgb, var(--n-done) 14%, transparent); color: var(--n-done); border-color: transparent; }
+
+  .status-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
+
+  /* ---------- branch diagram ---------- */
+  .branch {
+    display: grid;
+    gap: 12px;
+    margin: 26px 0;
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+  @media (min-width: 700px) { .branch { grid-template-columns: 1fr auto 1fr 1fr; align-items: center; } }
+  .bnode {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 14px;
+    font-size: .86rem;
+  }
+  .bnode .bn { font-weight: 600; margin-bottom: 4px; }
+  .bnode .bc { font-family: var(--mono); font-size: 10.5px; color: var(--muted); line-height: 1.6; }
+  .barrow { text-align: center; color: var(--faint); font-family: var(--mono); font-size: 15px; }
+  .bstack { display: flex; flex-direction: column; gap: 10px; }
+
+  /* ---------- tables ---------- */
+  .tbl-wrap { overflow-x: auto; margin: 22px 0; border: 1px solid var(--border); border-radius: 6px; }
+  table { border-collapse: collapse; width: 100%; font-size: .855rem; min-width: 520px; background: var(--surface); }
+  th {
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--faint);
+    font-weight: 500;
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--border-2);
+    background: var(--surface-2);
+    white-space: nowrap;
+  }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--muted); line-height: 1.5; }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { color: var(--ink); }
+  td code { background: transparent; border: none; padding: 0; color: var(--ink); font-weight: 500; }
+
+  .sw { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 7px; vertical-align: baseline; }
+
+  /* ---------- callouts ---------- */
+  .note {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-bg);
+    padding: 14px 18px;
+    margin: 24px 0;
+    border-radius: 0 5px 5px 0;
+    font-size: .89rem;
+    max-width: 68ch;
+  }
+  .note p { margin: 0; max-width: none; }
+  .note p + p { margin-top: 9px; }
+  .note .lbl {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 6px;
+  }
+  .note.warn { border-left-color: var(--warn-br); background: var(--warn-bg); }
+  .note.warn .lbl { color: var(--warn-ink); }
+
+  /* ---------- user story ---------- */
+  .story {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    padding: 14px 18px;
+    margin: 16px 0;
+    max-width: 74ch;
+  }
+  .story .s {
+    margin: 0 0 10px;
+    font-size: .95rem;
+    color: var(--ink);
+    max-width: none;
+    font-style: italic;
+  }
+  .story .s b { font-style: normal; }
+  .story .c {
+    margin: 0;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border-2);
+    font-size: .84rem;
+    color: var(--muted);
+    line-height: 1.65;
+    max-width: none;
+  }
+  .story .c b { color: var(--ink); font-weight: 600; }
+
+  ol.steps { padding-left: 0; list-style: none; counter-reset: s; margin: 22px 0; max-width: 68ch; }
+  ol.steps li {
+    counter-increment: s;
+    position: relative;
+    padding-left: 40px;
+    margin-bottom: 14px;
+    font-size: .91rem;
+    color: var(--muted);
+  }
+  ol.steps li::before {
+    content: counter(s);
+    position: absolute;
+    left: 0; top: 1px;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    border: 1px solid var(--border-2);
+    color: var(--ink);
+    font-family: var(--mono);
+    font-size: 11px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  ol.steps li b { color: var(--ink); font-weight: 600; }
+
+  ul.plain { padding-left: 20px; margin: 14px 0; max-width: 68ch; }
+  ul.plain li { margin-bottom: 8px; color: var(--muted); font-size: .91rem; }
+  ul.plain li b { color: var(--ink); font-weight: 600; }
+
+  .footer {
+    grid-column: 1 / -1;
+    border-top: 1px solid var(--border);
+    padding-top: 26px;
+    margin-top: 20px;
+    font-size: .82rem;
+    color: var(--faint);
+  }
+  .footer code { font-size: .95em; }
+
+  a { color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">Podręcznik użytkownika · panel organizatora</p>
+    <h1>Podręcznik EventBoard</h1>
+    <p class="standfirst">
+      Przejście przez każdą zakładkę panelu, pełną ścieżkę obsługi od zapytania po rozliczenie oraz silnik procesów, który tę ścieżkę prowadzi. Wszystkie zrzuty pochodzą z działającego środowiska demo.
+    </p>
+    <div class="meta-row">
+      <span><b>Rola</b> organizator / sala</span>
+      <span><b>Panel</b> /pl/app</span>
+      <span><b>Demo</b> scripts/seed-demo-org.mjs</span>
+    </div>
+  </header>
+
+  <nav class="toc">
+    <p>Spis treści</p>
+    <p>Panel organizatora</p>
+    <a href="#sciezka"><b>01</b>Ścieżka obsługi</a>
+    <a href="#start"><b>02</b>Pierwsze kroki</a>
+    <a href="#dashboard"><b>03</b>Dashboard</a>
+    <a href="#kalendarz"><b>04</b>Kalendarz</a>
+    <a href="#eventy"><b>05</b>Eventy</a>
+    <a href="#karta"><b>06</b>Karta eventu</a>
+    <a href="#agenda"><b>07</b>Agenda i dokumenty</a>
+    <a href="#zapytania"><b>08</b>Zapytania</a>
+    <a href="#finanse"><b>09</b>Finanse</a>
+    <a href="#zespol"><b>10</b>Zespół</a>
+    <a href="#konfiguracja"><b>11</b>Konfiguracja</a>
+    <a href="#ustawienia"><b>12</b>Ustawienia</a>
+    <a href="#klient"><b>13</b>Widok klienta</a>
+    <p>Silnik procesów</p>
+    <a href="#przeglad"><b>14</b>Jak działa proces</a>
+    <a href="#model"><b>15</b>Model danych</a>
+    <a href="#edytor"><b>16</b>Edytor procesów</a>
+    <a href="#przypisanie"><b>17</b>Przypisanie do eventu</a>
+    <a href="#organizator"><b>18</b>Panel organizatora</a>
+    <a href="#proces-portal"><b>19</b>Portal klienta w procesie</a>
+    <a href="#rozgalezienia"><b>20</b>Rozgałęzienia</a>
+    <a href="#mapowanie"><b>21</b>Mapowanie pól</a>
+    <a href="#typy-wezlow"><b>22</b>Typy węzłów w praktyce</a>
+    <a href="#slowniki"><b>23</b>Słowniki</a>
+    <p>Praktyka</p>
+    <a href="#luki"><b>24</b>Czego brakuje</a>
+    <a href="#przyklad"><b>25</b>Przykład i generator demo</a>
+  </nav>
+
+  <main>
+
+    <!-- 01 -->
+<section id="sciezka">
+      <h2><span class="num">01</span>Ścieżka obsługi</h2>
+      <p class="lede">
+        Cała aplikacja układa się w jeden ciąg. Zakładki nie są osobnymi narzędziami —
+        każda obsługuje inny odcinek tej samej drogi.
+      </p>
+
+      <div class="flow">
+        <div class="fstep"><span class="k">01</span><div class="t">Zapytanie</div><div class="d">Klient wysyła formularz z publicznego profilu sali.</div><div class="w">Zapytania</div></div>
+        <div class="fstep"><span class="k">02</span><div class="t">Event</div><div class="d">Zapytanie staje się eventem z datą, typem i liczbą gości.</div><div class="w">Eventy</div></div>
+        <div class="fstep"><span class="k">03</span><div class="t">Proces</div><div class="d">Event dostaje ścieżkę obsługi z krokami i rolami.</div><div class="w">Karta eventu</div></div>
+        <div class="fstep"><span class="k">04</span><div class="t">Ustalenia</div><div class="d">Menu, harmonogram dnia, zadania produkcyjne.</div><div class="w">Karta eventu</div></div>
+        <div class="fstep"><span class="k">05</span><div class="t">Agenda</div><div class="d">Dokument z danych zebranych w procesie.</div><div class="w">Karta eventu</div></div>
+        <div class="fstep"><span class="k">06</span><div class="t">Rozliczenie</div><div class="d">Zadatek, raty, dopłata końcowa.</div><div class="w">Finanse</div></div>
+      </div>
+
+      <p>
+        Pod spodem trzy rzeczy ustawia się <b>raz</b>, a potem działają dla każdego eventu:
+        kategorie eventów i moduły (Ustawienia), własne typy obiektów i procesy
+        (Konfiguracja) oraz blokady terminów (Kalendarz).
+      </p>
+
+      <div class="note">
+        <span class="lbl">Zasada, która porządkuje resztę</span>
+        <p>
+          Zakładki górnego poziomu są <b>przeglądem wielu eventów</b> — kalendarz, lista,
+          pieniądze, zapytania. Cała praca nad pojedynczym przyjęciem dzieje się na
+          <b>karcie eventu</b>. Jeśli szukasz konkretnego pola i nie ma go w zakładce,
+          prawie na pewno jest na karcie.
+        </p>
+      </div>
+    </section>
+
+    <!-- 02 -->
+<section id="start">
+      <h2><span class="num">02</span>Pierwsze kroki</h2>
+      <p class="lede">
+        Świeża organizacja jest pusta. Trzy ustawienia sprawiają, że reszta panelu
+        zaczyna mieć sens.
+      </p>
+
+      <ol class="steps">
+        <li><b>Wejdź w Ustawienia.</b> Pierwsze otwarcie zakłada pięć kategorii systemowych — Wesele, Komunia, Wigilia, Firmowe, Inne. Bez nich formularz nowego eventu ma pustą listę typów i nie da się nic utworzyć.</li>
+        <li><b>Sprawdź link profilu publicznego.</b> W Ustawieniach jest adres <code>/org/&lt;slug&gt;</code> — to on trafia do klientów i to z niego wpadają zapytania.</li>
+        <li><b>Zbuduj proces w Konfiguracji.</b> Choćby prosty, liniowy. Event bez procesu działa, ale nie prowadzi zespołu za rękę.</li>
+        <li><b>Zablokuj terminy niedostępne</b> w Kalendarzu, żeby nie przyjąć rezerwacji na remont albo imprezę zamkniętą.</li>
+      </ol>
+
+      <div class="note warn">
+        <span class="lbl">Kolejność ma znaczenie</span>
+        <p>
+          Kategorie seedują się dopiero przy <b>pierwszym wejściu w Ustawienia</b>, nie przy
+          zakładaniu organizacji. Jeśli od razu pójdziesz w Eventy, lista „Typ eventu”
+          będzie pusta i wyjdzie na to, że formularz jest zepsuty.
+        </p>
+      </div>
+    </section>
+
+    <!-- 03 -->
+<section id="dashboard">
+      <h2><span class="num">03</span><span class="dot" style="background:var(--t1)"></span>Dashboard</h2>
+      <p class="lede">
+        Ekran otwarcia dnia: cztery liczby, rozkład pracy w czasie i skróty, które
+        układasz sam.
+      </p>
+
+      <figure>
+        <img src="__IMG_10__" alt="Dashboard z licznikami, pipeline etapów i obciążeniem miesięcznym">
+        <figcaption><code>/pl/app/dashboard</code> — pulpit organizacji.</figcaption>
+      </figure>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Element</th><th>Co pokazuje</th><th>Do czego służy</th></tr></thead>
+          <tbody>
+            <tr><td>Eventy</td><td>Liczba wszystkich eventów organizacji.</td><td>Skala obłożenia.</td></tr>
+            <tr><td>Zespół</td><td>Liczba członków organizacji.</td><td>Kontrola dostępów.</td></tr>
+            <tr><td>Czeka na decyzję</td><td>Eventy zatrzymane na kroku wymagającym działania.</td><td>To jest kolejka na dziś.</td></tr>
+            <tr><td>Przychody (opłacone)</td><td>Suma płatności oznaczonych jako opłacone.</td><td>Realny wpływ, nie wartość kontraktów.</td></tr>
+            <tr><td>Pipeline etapów</td><td>Rozkład eventów po krokach procesu.</td><td>Gdzie się korkuje obsługa.</td></tr>
+            <tr><td>Obciążenie miesięczne</td><td>Liczba osób w kolejnych miesiącach.</td><td>Planowanie obsady i zakupów.</td></tr>
+            <tr><td>Nadchodzące eventy</td><td>Najbliższe terminy.</td><td>Co jest tuż za rogiem.</td></tr>
+            <tr><td>Skróty</td><td>Własne linki, edytowalne przyciskiem „Edytuj”.</td><td>Wejście w miejsca używane codziennie.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note">
+        <span class="lbl">Jak to czytać</span>
+        <p>
+          <b>Czeka na decyzję</b> i <b>Pipeline etapów</b> mają sens dopiero, gdy eventy mają
+          przypisany proces. Bez procesu pipeline pokazuje „Brak procesu”, a licznik decyzji
+          stoi na zerze, choć pracy jest dużo.
+        </p>
+      </div>
+
+      <h3>Powiadomienia</h3>
+      <p>
+        Dzwonek w górnym pasku zbiera zdarzenia wymagające reakcji organizacji.
+        Wpadają tam trzy rodzaje sygnałów, wszystkie wywołane działaniem z zewnątrz:
+      </p>
+      <ul class="plain">
+        <li><b>Klient ukończył krok procesu</b> — np. para wybrała menu w portalu. Powiadomienie niesie nazwę kroku i link do karty eventu.</li>
+        <li><b>Odpowiedź klienta w portalu</b> — wypełniony formularz albo akceptacja.</li>
+        <li><b>Nowe zapytanie ofertowe</b> z publicznego profilu.</li>
+      </ul>
+      <p>
+        Kroki wykonane przez zespół powiadomień nie generują — dzwonek pokazuje wyłącznie
+        to, co przyszło z zewnątrz i czeka na Waszą odpowiedź.
+      </p>
+    </section>
+
+    <!-- 04 -->
+<section id="kalendarz">
+      <h2><span class="num">04</span><span class="dot" style="background:var(--t2)"></span>Kalendarz</h2>
+      <p class="lede">
+        Siatka miesiąca z eventami i blokadami. Podstawowe narzędzie przy odpowiadaniu
+        na pytanie „czy macie wolny termin”.
+      </p>
+
+      <figure>
+        <img src="__IMG_11__" alt="Kalendarz miesięczny z eventami i zablokowanymi terminami">
+        <figcaption><code>/pl/app/calendar</code> — kalendarz z blokadami terminów.</figcaption>
+      </figure>
+
+      <ul class="plain">
+        <li><b>Klik w dzień</b> otwiera tworzenie eventu z podstawioną datą.</li>
+        <li><b>Klik w event</b> przenosi do jego agendy.</li>
+        <li><b>Blokada</b> oznacza dzień jako niedostępny — z powodem, np. „Remont sali głównej”.</li>
+        <li><b>Nowy event</b> tworzy event bez wychodzenia z kalendarza.</li>
+      </ul>
+
+      <div class="story">
+        <p class="s">Jako <b>manager</b> chcę zablokować sylwestra na imprezę zamkniętą, żeby
+        nikt z zespołu nie obiecał tego terminu parze pytającej o wesele.</p>
+        <p class="c">Blokada → data <code>31.12</code> → powód „Impreza zamknięta — sylwester”.
+        Dzień zostaje oznaczony w siatce dla całego zespołu.</p>
+      </div>
+    </section>
+
+    <!-- 05 -->
+<section id="eventy">
+      <h2><span class="num">05</span><span class="dot" style="background:var(--t3)"></span>Eventy</h2>
+      <p class="lede">
+        Lista wszystkich przyjęć z filtrami statusu. Stąd wchodzi się w konkretną kartę.
+      </p>
+
+      <figure>
+        <img src="__IMG_12__" alt="Lista eventów z filtrami statusów">
+        <figcaption><code>/pl/app/events</code> — cztery eventy różnych kategorii.</figcaption>
+      </figure>
+
+      <h4>Statusy</h4>
+      <p>
+        <b>Szkic</b> → <b>Potwierdzony</b> → <b>Zakończony</b> → <b>Archiwalny</b>.
+        Status zmienia się przyciskiem na karcie i filtruje listę u góry. Jest niezależny
+        od kroku procesu: proces mówi <i>co się teraz dzieje</i>, status mówi
+        <i>czy to jeszcze sprzedaż, czy już historia</i>.
+      </p>
+
+      <h4>Tworzenie eventu</h4>
+      <p>
+        Formularz pyta o typ, nazwę, datę, liczbę gości i jedną rzecz, która ma dalsze
+        konsekwencje — <b>„To jest wesele”</b>. Zaznaczenie odblokowuje portal dla pary
+        (link i PIN), czyli osobny widok dla klienta.
+      </p>
+
+      <h4>Akcje na karcie listy</h4>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Akcja</th><th>Efekt</th></tr></thead>
+          <tbody>
+            <tr><td>Otwórz</td><td>Przejście do pełnej karty eventu.</td></tr>
+            <tr><td>Edytuj</td><td>Zmiana nazwy, daty, liczby gości, typu.</td></tr>
+            <tr><td>Duplikuj</td><td>Kopia eventu — przydatne przy cyklicznych imprezach firmowych.</td></tr>
+            <tr><td>Link dla klienta</td><td>Adres portalu dla pary wraz z PIN-em.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 06 -->
+<section id="karta">
+      <h2><span class="num">06</span><span class="dot" style="background:var(--t4)"></span>Karta eventu</h2>
+      <p class="lede">
+        Najważniejszy ekran w aplikacji. Wszystko, co dotyczy jednego przyjęcia, jest tutaj —
+        od procesu, przez menu i harmonogram, po pieniądze i widgety.
+      </p>
+
+      <h3><span class="dot" style="background:var(--t7)"></span>Proces obsługi</h3>
+      <figure>
+        <img src="__IMG_20__" alt="Panel procesu na karcie eventu">
+        <figcaption>
+          Oś kroków: ukończone przekreślone z datą i rolą, bieżący rozwinięty z panelem
+          działania, przyszłe wyszarzone. Pasek u góry pokazuje postęp.
+        </figcaption>
+      </figure>
+      <p>
+        Event bez procesu pokazuje w tym miejscu wybór ścieżki i przycisk
+        <b>Rozpocznij proces</b>. Szczegóły działania silnika opisuje osobna
+        <a href="#przeglad">dokumentacja procesów</a>.
+      </p>
+
+      <h3><span class="dot" style="background:var(--t2)"></span>Warianty menu</h3>
+      <figure>
+        <img src="__IMG_21__" alt="Warianty menu z daniami">
+        <figcaption>
+          Każdy wariant ma opis, uwagi o alergenach i listę dań z kategorią, ceną,
+          dopłatą i znacznikami wege / gluten / bezgluten.
+        </figcaption>
+      </figure>
+      <p>
+        Warianty są tym, z czego para wybiera w portalu. Etykieta wariantu wraca potem
+        do procesu jako wartość warunku <code>client_choice</code>, więc <b>nazwa wariantu
+        musi zgadzać się dokładnie</b> z wartością wpisaną w rozgałęzieniu.
+      </p>
+
+      <h3><span class="dot" style="background:var(--t5)"></span>Harmonogram dnia</h3>
+      <figure>
+        <img src="__IMG_22__" alt="Harmonogram dnia z godzinami i opisami">
+        <figcaption>Godzina, tytuł i opis — od ceremonii po poczęstunek nocny.</figcaption>
+      </figure>
+      <p>
+        Harmonogram zasila agendę i eksport PDF. To ten sam materiał, z którego prowadzący
+        korzysta na sali, więc opisy warto pisać operacyjnie: gdzie, ile osób, co ma być
+        gotowe.
+      </p>
+
+      <h3><span class="dot" style="background:var(--t3)"></span>Checklista produkcyjna</h3>
+      <figure>
+        <img src="__IMG_25__" alt="Checklista produkcyjna z przypisaniem">
+        <figcaption>Zadania z przypisaniem do osoby z zespołu.</figcaption>
+      </figure>
+
+      <h3><span class="dot" style="background:var(--t8)"></span>Płatności klienta</h3>
+      <figure>
+        <img src="__IMG_23__" alt="Płatności klienta z podsumowaniem opłacone i do zapłaty">
+        <figcaption>
+          Ręczne śledzenie wpłat: nazwa, kwota, termin. Podsumowanie rozbija sumę na
+          <b>opłacone</b> i <b>do zapłaty</b>, a wartości te agregują się w zakładce Finanse.
+        </figcaption>
+      </figure>
+      <div class="note">
+        <span class="lbl">To nie jest bramka płatnicza</span>
+        <p>
+          Płatności odnotowuje się ręcznie — aplikacja nie pobiera pieniędzy ani nie łączy
+          się z bankiem. Oznaczenie „opłacone” to decyzja człowieka, który zobaczył przelew.
+        </p>
+      </div>
+
+      <h3><span class="dot" style="background:var(--t6)"></span>Pulpit eventu (widgety)</h3>
+      <figure>
+        <img src="__IMG_24__" alt="Pulpit eventu z widgetami">
+        <figcaption>
+          Widgety dokładane per event. Dodawanie prowadzi przez dwa kroki: wybór typu,
+          potem nazwa i widoczność.
+        </figcaption>
+      </figure>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Typ</th><th>Do czego</th></tr></thead>
+          <tbody>
+            <tr><td><span class="sw" style="background:var(--t7)"></span>Scenariusz</td><td>Minutowy plan prowadzącego z trybem live — pokazuje bieżący i następny punkt.</td></tr>
+            <tr><td><span class="sw" style="background:var(--t6)"></span>Notatka</td><td>Wolny tekst: uwagi, instrukcje, ustalenia telefoniczne.</td></tr>
+            <tr><td><span class="sw" style="background:var(--t3)"></span>Checklista</td><td>Lista do odhaczenia z licznikiem ukończenia.</td></tr>
+            <tr><td><span class="sw" style="background:var(--t4)"></span>Statystyka</td><td>Liczba z jednostką i trendem.</td></tr>
+            <tr><td><span class="sw" style="background:var(--t5)"></span>Link</td><td>Szybki dostęp do adresów — playlisty, dysku ze zdjęciami, umowy.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Każdy widget ma przełącznik widoczności: <b>Prywatny</b> (tylko zespół) albo
+        <b>Portal klienta</b>. Klik w plakietkę przełącza to bez wchodzenia w ustawienia.
+      </p>
+
+      <h3>Pozostałe sekcje karty</h3>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Sekcja</th><th>Zastosowanie</th></tr></thead>
+          <tbody>
+            <tr><td>Generuj agendę</td><td>Składa dokument z danych eventu i kroków procesu.</td></tr>
+            <tr><td>Dokumenty eventu</td><td>Generowanie z szablonów zdefiniowanych w Konfiguracji.</td></tr>
+            <tr><td>Konwersacja z klientem</td><td>Wątek wiadomości powiązany z eventem.</td></tr>
+            <tr><td>Akceptacje agendy</td><td>Pięć sekcji do zatwierdzenia: Ogólne, Goście, Kuchnia, Menu, Harmonogram.</td></tr>
+            <tr><td>Kosztorys / wycena</td><td>Wyliczenie z cen menu razy liczba gości plus pozycje dodatkowe.</td></tr>
+            <tr><td>Terminy</td><td>Deadline wyboru menu i listy gości przez klienta.</td></tr>
+            <tr><td>Szablony</td><td>Zapisanie eventu jako szablon do ponownego użycia.</td></tr>
+            <tr><td>Generuj umowę (DOCX)</td><td>Eksport umowy do edycji w edytorze tekstu.</td></tr>
+            <tr><td>Eksport PDF</td><td>Harmonogram dnia i menu jako osobne pliki.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 07 -->
+<section id="agenda">
+      <h2><span class="num">07</span><span class="dot" style="background:var(--t7)"></span>Agenda i dokumenty</h2>
+      <p class="lede">
+        Agenda jest tym, po co istnieje reszta systemu. Wszystko, co wpisujesz przez
+        tygodnie obsługi — menu, godziny, ustalenia z pary, decyzje kuchni — zbiega się
+        w jednym dokumencie, który w dniu imprezy trzyma w ręku obsługa.
+      </p>
+
+      <div class="note">
+        <span class="lbl">Dlaczego to zmienia sposób pracy</span>
+        <p>
+          W typowej sali agenda powstaje ręcznie: ktoś przepisuje ustalenia z maili,
+          notatek i rozmów do pliku Word, dzień przed imprezą. Tutaj agenda jest
+          <b>składana z danych, które już są w systemie</b> — a kroki procesu dosyłają
+          do niej kolejne informacje w miarę, jak zapadają decyzje. Nie ma etapu
+          przepisywania, więc nie ma też miejsca, w którym coś wypada.
+        </p>
+      </div>
+
+      <h3>Skąd agenda bierze dane</h3>
+      <p>
+        Renderowanie dokumentu buduje jedną płaską mapę wartości z trzech warstw.
+        Późniejsza warstwa nadpisuje wcześniejszą, więc dane z procesu wygrywają
+        z wartościami domyślnymi.
+      </p>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Warstwa</th><th>Skąd</th><th>Przykładowe klucze</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>1 · Pola eventu</td>
+              <td>Karta eventu, menu, harmonogram dnia.</td>
+              <td><code>event.name</code>, <code>event.date</code>, <code>event.estimatedGuestCount</code>, <code>event.menuVariants</code>, <code>event.dayScheduleItems</code></td>
+            </tr>
+            <tr>
+              <td>2 · Pola kategorii</td>
+              <td>Własne pola zdefiniowane przy typie eventu.</td>
+              <td><code>custom.motyw_przewodni</code>, <code>custom.kolor_dekoracji</code></td>
+            </tr>
+            <tr>
+              <td>3 · Dane z procesu</td>
+              <td>Mapowania pól na ukończonych krokach procesu.</td>
+              <td><code>agenda.menu</code>, <code>agenda.uwagiFinalne</code> — nazwy nadajesz sam</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Trzy drogi do agendy</h3>
+
+      <h4>1 · Kreator harmonogramu — „Generuj agendę”</h4>
+      <figure>
+        <img src="__IMG_29__" alt="Kreator agendy — krok wyboru źródła">
+        <figcaption>
+          Kreator prowadzi przez trzy kroki: <b>Źródło → Podgląd → Zapis</b>.
+        </figcaption>
+      </figure>
+      <p>
+        W kroku <b>Źródło</b> możesz dopisać instrukcje zwykłym zdaniem — na przykład
+        „ceremonia w plenerze o 15, tort po 20, poczęstunek nocny”. W kroku
+        <b>Podgląd</b> dostajesz gotowe punkty z godzinami i opisami, każdy do edycji.
+        W kroku <b>Zapis</b> decydujesz, czy punkty mają trafić do harmonogramu dnia,
+        czy od razu wyjść jako plik.
+      </p>
+
+      <h4>2 · Agenda tekstowa w formacie sali</h4>
+      <p>
+        Osobna ścieżka składa agendę w ustalonym układzie: data, liczba osób, miejsce,
+        organizator, osoba odpowiedzialna, okoliczność, dzień tygodnia, potem godziny
+        z punktami, sekcje menu i scenariusz. Wynik pobiera się jako <code>.docx</code>.
+      </p>
+      <div class="note">
+        <span class="lbl">Działa bez konfiguracji AI</span>
+        <p>
+          Jeśli model językowy jest podpięty, układa treść sam. Jeśli nie —
+          a domyślnie <code>AI_PROVIDER</code> stoi na <code>mock</code> — wchodzi
+          <b>deterministyczny generator</b>, który składa agendę z tych samych danych
+          według stałego wzorca. Funkcja nigdy nie zostawia użytkownika z pustym plikiem.
+        </p>
+      </div>
+
+      <h4>3 · Dokument z szablonu A4</h4>
+      <figure>
+        <img src="__IMG_31__" alt="Builder szablonu dokumentu — paleta bloków i kartka A4">
+        <figcaption>
+          <code>/pl/app/settings/document-templates/new</code> — pusta kartka A4, na którą
+          przeciągasz bloki z palety po lewej, a potem wiążesz ich sloty z polami danych.
+        </figcaption>
+      </figure>
+      <p>
+        To najbardziej elastyczna droga: projektujesz własny układ dokumentu raz,
+        a potem generujesz go dla dowolnego eventu z podstawionymi danymi.
+      </p>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Element buildera</th><th>Zawartość</th></tr></thead>
+          <tbody>
+            <tr><td>Bloki</td><td>Nagłówek, Sekcja, Tekst, Kolumny, Tabela, Obraz, Odstęp, Nowa strona.</td></tr>
+            <tr><td>Pola danych</td><td>Pogrupowane: Event, Notatki, Menu, Agenda, Goście.</td></tr>
+            <tr><td>Ustawienia strony</td><td>Format A4 lub Letter, orientacja, marginesy, czcionki nagłówka i tekstu, kolory.</td></tr>
+            <tr><td>Właściwości slotu</td><td>Klucz pola, placeholder oraz prompt dla modelu językowego.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <figure>
+        <img src="__IMG_30__" alt="Lista szablonów dokumentów">
+        <figcaption><code>/pl/app/settings/document-templates</code> — zapisane szablony.</figcaption>
+      </figure>
+
+      <div class="note warn">
+        <span class="lbl">Paleta nie pokazuje wszystkich pól</span>
+        <p>
+          Lista pól do przeciągnięcia zawiera jedenaście kluczy eventu. Pola własne
+          kategorii (<code>custom.*</code>) i klucze przysyłane przez proces
+          (np. <code>agenda.menu</code>) <b>działają przy renderowaniu, ale nie są
+          w palecie</b> — trzeba je wpisać ręcznie w polu „Klucz pola”. Warto więc
+          trzymać spis kluczy, których używacie w mapowaniach.
+        </p>
+      </div>
+
+      <h3>Od kroku procesu do gotowego dokumentu</h3>
+      <p>
+        To jest połączenie, dla którego cała reszta ma sens. Krok procesu zbiera dane,
+        mapowanie przenosi je pod nazwany klucz, a dokument ten klucz drukuje.
+      </p>
+
+      <ol class="steps">
+        <li><b>Para wybiera menu</b> w portalu — krok <code>MENU_SELECTION</code> zapisuje etykietę wariantu.</li>
+        <li><b>Mapowanie pola</b> na tym kroku przenosi <code>selectedVariantLabel</code> pod klucz <code>agenda.menu</code>.</li>
+        <li><b>Wartość ląduje</b> w magazynie danych agendy tego eventu.</li>
+        <li><b>Szablon dokumentu</b> ma slot z kluczem <code>agenda.menu</code> — przy generowaniu wchodzi tam wybór pary, bez przepisywania.</li>
+      </ol>
+
+      <div class="story">
+        <p class="s">Jako <b>szef sali</b> chcę, żeby wybór menu i uwagi z ostatniej rozmowy
+        z parą same znalazły się w agendzie, żeby dzień przed imprezą nie przeklejać
+        niczego z maili.</p>
+        <p class="c">
+          Na kroku „Agenda zatwierdzona” dwa mapowania:
+          <code>selectedVariantLabel → agenda.menu</code> oraz
+          <code>note → agenda.uwagiFinalne</code> z transformacją <code>join_newline</code>.
+          Oba klucze wstawione jako sloty w szablonie A4.
+        </p>
+      </div>
+
+      <h3>Akceptacje agendy</h3>
+      <figure>
+        <img src="__IMG_27__" alt="Panel akceptacji agendy z pięcioma sekcjami">
+        <figcaption>
+          Pięć sekcji do zatwierdzenia: Ogólne, Goście, Kuchnia, Menu, Harmonogram.
+          Licznik u góry pokazuje postęp.
+        </figcaption>
+      </figure>
+      <p>
+        Każdą sekcję można zaakceptować albo odrzucić osobno. Dopiero komplet akceptacji
+        oznacza agendę jako uzgodnioną — to bramka przed drukiem i przed wysłaniem
+        dokumentu parze.
+      </p>
+
+      <h3>Generowanie dokumentu na evencie</h3>
+      <figure>
+        <img src="__IMG_28__" alt="Panel dokumentów eventu">
+        <figcaption>
+          Sekcja <b>Dokumenty eventu</b> na karcie: wybierasz szablon, dostajesz dokument
+          wypełniony danymi tego konkretnego przyjęcia.
+        </figcaption>
+      </figure>
+
+      <h4>Co jeszcze wychodzi z karty</h4>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Eksport</th><th>Zawartość</th></tr></thead>
+          <tbody>
+            <tr><td>Agenda <code>.docx</code></td><td>Pełna agenda w formacie sali, do dalszej edycji.</td></tr>
+            <tr><td>PDF — harmonogram dnia</td><td>Same godziny z punktami, do wywieszenia na zapleczu.</td></tr>
+            <tr><td>PDF — menu</td><td>Karta menu z wariantami i alergenami.</td></tr>
+            <tr><td>Umowa <code>.docx</code></td><td>Umowa z danymi eventu i kwotami.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 08 -->
+<section id="zapytania">
+      <h2><span class="num">08</span><span class="dot" style="background:var(--t5)"></span>Zapytania</h2>
+      <p class="lede">
+        Wejście lejka. Zapytania trafiają tu z publicznego profilu sali — nie da się
+        ich dodać ręcznie z panelu.
+      </p>
+
+      <figure>
+        <img src="__IMG_13__" alt="Lista zapytań ofertowych">
+        <figcaption><code>/pl/app/leads</code> — zapytania wysłane przez formularz publiczny.</figcaption>
+      </figure>
+
+      <p>
+        Zapytanie niesie imię i nazwisko, kontakt, preferowaną datę, liczbę gości i treść
+        wiadomości. Ma status <b>NEW → CONTACTED → WON / LOST</b>, a wygrane zapytanie
+        można przekuć w event.
+      </p>
+
+      <div class="story">
+        <p class="s">Jako <b>manager</b> chcę zobaczyć zapytanie z datą i liczbą gości, żeby
+        w kalendarzu od razu sprawdzić, czy w ogóle mamy ten termin wolny.</p>
+        <p class="c">Zapytania → wybierz pozycję → sprawdź datę w Kalendarzu → jeśli wolne,
+        konwertuj na event i przypisz proces.</p>
+      </div>
+
+      <div class="note warn">
+        <span class="lbl">Zapytania biorą się z jednego miejsca</span>
+        <p>
+          Jeśli lista jest pusta mimo rozmów z klientami, to znaczy, że nikt nie użył
+          formularza z <code>/org/&lt;slug&gt;</code>. Ten link trzeba świadomie rozesłać —
+          znajdziesz go w Ustawieniach.
+        </p>
+      </div>
+    </section>
+
+    <!-- 09 -->
+<section id="finanse">
+      <h2><span class="num">09</span><span class="dot" style="background:var(--t8)"></span>Finanse</h2>
+      <p class="lede">
+        Zbiorczy widok pieniędzy ze wszystkich eventów. Sam nic nie wprowadza — agreguje
+        płatności wpisane na kartach.
+      </p>
+
+      <figure>
+        <img src="__IMG_14__" alt="Finanse z podsumowaniem przychodów">
+        <figcaption><code>/pl/app/finances</code> — opłacone, do zapłaty i wartość kontraktów.</figcaption>
+      </figure>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Miara</th><th>Znaczenie</th></tr></thead>
+          <tbody>
+            <tr><td>Opłacone</td><td>Suma płatności oznaczonych jako zapłacone — realny wpływ.</td></tr>
+            <tr><td>Do zapłaty</td><td>Wystawione, jeszcze nieopłacone raty i dopłaty.</td></tr>
+            <tr><td>Wartość kontraktów</td><td>Łączna wartość ustaleń, niezależnie od tego, co wpłynęło.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        Rozdzielenie tych trzech liczb jest celowe: <b>wartość kontraktów</b> mówi, ile
+        sprzedano, <b>opłacone</b> — ile faktycznie jest na koncie, a <b>do zapłaty</b>
+        wskazuje, po co trzeba zadzwonić.
+      </p>
+    </section>
+
+    <!-- 10 -->
+<section id="zespol">
+      <h2><span class="num">10</span><span class="dot" style="background:var(--t1)"></span>Zespół</h2>
+      <p class="lede">Lista osób w organizacji wraz z rolami.</p>
+
+      <figure>
+        <img src="__IMG_15__" alt="Lista członków zespołu z rolami">
+        <figcaption><code>/pl/app/team</code> — użytkownik, e-mail, rola.</figcaption>
+      </figure>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Rola</th><th>Zakres</th></tr></thead>
+          <tbody>
+            <tr><td>OWNER — Właściciel</td><td>Pełny dostęp, w tym edytor procesów.</td></tr>
+            <tr><td>MANAGER</td><td>Prowadzenie eventów i edycja procesów.</td></tr>
+            <tr><td>STAFF — Pracownik</td><td>Praca na eventach; <b>bez</b> dostępu do edytora procesów.</td></tr>
+            <tr><td>VIEWER</td><td>Podgląd; <b>bez</b> edycji procesów.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note">
+        <span class="lbl">Role zespołu a role w procesie to dwie różne rzeczy</span>
+        <p>
+          Rola w zespole decyduje o <b>uprawnieniach w aplikacji</b>. Rola na kroku procesu
+          (Kucharz, Kelner, Barman, Koordynator albo dowolna własna) opisuje jedynie,
+          <b>kto ma wykonać ten krok</b> — jest etykietą organizacyjną, nie kontrolą dostępu.
+        </p>
+      </div>
+    </section>
+
+    <!-- 11 -->
+<section id="konfiguracja">
+      <h2><span class="num">11</span><span class="dot" style="background:var(--t4)"></span>Konfiguracja</h2>
+      <p class="lede">
+        Ustawiasz raz, działa przy każdym evencie. Cztery kafle na górze prowadzą do
+        obszarów konfiguracji, niżej definiujesz własne obiekty i przypisujesz procesy.
+      </p>
+
+      <figure>
+        <img src="__IMG_16__" alt="Konfiguracja organizacji z kreatorem typów obiektów">
+        <figcaption><code>/pl/app/settings/configuration</code> — kreator typu obiektu i przypisanie procesu.</figcaption>
+      </figure>
+
+      <h4>Własne typy obiektów</h4>
+      <p>Kreator prowadzi przez cztery kroki:</p>
+      <ol class="steps">
+        <li><b>Podstawowe dane</b> — nazwa i opis obiektu.</li>
+        <li><b>Gdzie ma być widoczny</b> — wybór kartotek: Karta eventu, Portal klienta, Agenda, Dokumenty, Zapytania, Finanse.</li>
+        <li><b>Powiązanie z procesem</b> — opcjonalne; pola powiązanego obiektu stają się kandydatami przy mapowaniu do agendy.</li>
+        <li><b>Pola obiektu</b> — Tekst, Liczba, Data, Kwota, Lista; kolejność zmieniasz przeciąganiem.</li>
+      </ol>
+
+      <div class="story">
+        <p class="s">Jako <b>manager</b> chcę mieć obiekt „Kontakt do pary” widoczny na karcie
+        eventu i w dokumentach, żeby dane do umowy były w jednym miejscu, a nie w mailach.</p>
+        <p class="c">Kartoteki: Karta eventu + Dokumenty. Pola: imiona pary (tekst),
+        telefon (tekst), termin degustacji (data).</p>
+      </div>
+
+      <h4>Przypisanie procesu do eventów</h4>
+      <p>
+        Wybierasz proces i zaznaczasz eventy, które mają go używać.
+        <b>Zaznaczenie jest pełną listą, nie dopiskiem</b> — eventy odznaczone tracą ten proces.
+      </p>
+    </section>
+
+    <!-- 12 -->
+<section id="ustawienia">
+      <h2><span class="num">12</span><span class="dot" style="background:var(--t6)"></span>Ustawienia</h2>
+      <p class="lede">Dane organizacji, link publiczny i kategorie eventów z modułami.</p>
+
+      <figure>
+        <img src="__IMG_17__" alt="Ustawienia z kategoriami eventów">
+        <figcaption><code>/pl/app/settings</code> — organizacja, profil publiczny, kategorie.</figcaption>
+      </figure>
+
+      <p>
+        <b>Kategorie eventów</b> decydują, jaki typ wybierasz przy zakładaniu przyjęcia,
+        i mogą nieść własne pola, które trafiają potem do agendy jako klucze
+        <code>custom.*</code>. Pięć kategorii systemowych — Wesele, Komunia, Wigilia,
+        Firmowe, Inne — zakłada się przy pierwszym wejściu w Ustawienia; własne dodajesz
+        przyciskiem na dole.
+      </p>
+
+      <div class="note warn">
+        <span class="lbl">Moduły przy kategorii na razie nic nie zmieniają</span>
+        <p>
+          Każda kategoria pokazuje listę modułów (menu, harmonogram, budżet, stoliki,
+          dostawcy…), ale <b>karta eventu ich nie czyta</b> — wyświetla ten sam komplet
+          sekcji niezależnie od typu. Zaznaczanie modułów zapisuje się, lecz dziś nie
+          wpływa na to, co widzisz na evencie.
+        </p>
+      </div>
+    </section>
+
+    <!-- 13 -->
+<section id="klient">
+      <h2><span class="num">13</span><span class="dot" style="background:var(--t2)"></span>Widok klienta</h2>
+      <p class="lede">
+        Dwie powierzchnie, które widzi ktoś z zewnątrz: profil publiczny przed
+        podpisaniem i portal po.
+      </p>
+
+      <h3>Profil publiczny</h3>
+      <figure>
+        <img src="__IMG_26__" alt="Publiczny profil organizatora z formularzem zapytania">
+        <figcaption>
+          <code>/org/&lt;slug&gt;</code> — wizytówka sali z formularzem „Zapytanie o dostępność”.
+          To jedyna droga, którą zapytania trafiają do panelu.
+        </figcaption>
+      </figure>
+      <p>
+        Profil pokazuje dane kontaktowe, adres, pojemność i przedział cenowy — o ile są
+        uzupełnione. Puste pola po prostu się nie renderują.
+      </p>
+
+      <h3>Portal pary</h3>
+      <p>
+        Dostępny dla eventów oznaczonych jako wesele. Link z tokenem i PIN znajdziesz na
+        liście eventów pod <b>„Link dla klienta”</b>. Para widzi wyłącznie kroki procesu
+        przypisane do roli <b>Klient</b> lub <b>Klient + Manager</b> oraz widgety oznaczone
+        jako widoczne w portalu — wewnętrzne ustalenia zostają po Waszej stronie.
+      </p>
+    </section>
+
+    <!-- 14 -->
+<section id="przeglad">
+      <h2><span class="num">14</span>Jak działa proces</h2>
+      <p class="lede">
+        Proces to drzewo decyzyjne złożone z węzłów. Każdy węzeł ma typ akcji, przypisaną rolę
+        i opcjonalne mapowanie pól. Ukończenie węzła zapisuje dane, aplikuje mapowania i wyznacza
+        następny węzeł — liniowo albo warunkowo.
+      </p>
+
+      <div class="pipeline">
+        <div class="stage">
+          <span class="k">01</span>
+          <div class="t">Definicja</div>
+          <div class="d">Budujesz węzły procesu w edytorze — typ, akcja, rola, warunki.</div>
+          <div class="who">Manager / Właściciel</div>
+        </div>
+        <div class="stage">
+          <span class="k">02</span>
+          <div class="t">Przypisanie</div>
+          <div class="d">Wskazujesz eventy, które mają używać procesu. Powstaje stan procesu.</div>
+          <div class="who">Manager / Właściciel</div>
+        </div>
+        <div class="stage">
+          <span class="k">03</span>
+          <div class="t">Wykonanie</div>
+          <div class="d">Bieżący węzeł czeka na akcję — w panelu organizatora albo w portalu klienta.</div>
+          <div class="who">Organizator / Klient</div>
+        </div>
+        <div class="stage">
+          <span class="k">04</span>
+          <div class="t">Mapowanie</div>
+          <div class="d">Dane z ukończonego kroku trafiają do wspólnego magazynu agendy.</div>
+          <div class="who">Automatycznie</div>
+        </div>
+        <div class="stage">
+          <span class="k">05</span>
+          <div class="t">Dokument</div>
+          <div class="d">Agenda i dokumenty czytają zebrane klucze i renderują treść.</div>
+          <div class="who">Automatycznie</div>
+        </div>
+      </div>
+
+      <div class="note">
+        <span class="lbl">Kluczowa zasada</span>
+        <p>
+          Węzeł można ukończyć tylko wtedy, gdy jest bieżący. <code>completeProcessNode</code>
+          odrzuca wywołanie, jeśli przekazany <code>nodeId</code> nie równa się
+          <code>currentNodeId</code> w stanie procesu. Nie da się przeskoczyć kroku ani
+          cofnąć procesu przez API.
+        </p>
+      </div>
+    </section>
+
+    <!-- 15 -->
+<section id="model">
+      <h2><span class="num">15</span>Model danych</h2>
+      <p class="lede">
+        Cztery modele niosą cały proces. Definicja jest wspólna dla organizacji,
+        stan jest per event.
+      </p>
+
+      <div class="chain">
+        <div class="chain-row">
+          <div class="m">OrganizationWorkflow<span>organization_workflows</span></div>
+          <div class="x">
+            Nagłówek procesu: nazwa, opis, typ eventu, flaga domyślności. Pole
+            <code>stagesJson</code> jest przestarzałe — zostało dla zgodności wstecznej i nowy
+            builder zapisuje do niego <code>[]</code>.
+          </div>
+        </div>
+        <div class="chain-row">
+          <div class="m">WorkflowNode<span>workflow_nodes</span></div>
+          <div class="x">
+            Pojedynczy węzeł. Niesie <code>nodeType</code>, <code>actionType</code>,
+            <code>assigneeRole</code>, <code>sortOrder</code>, a także dwa bloby JSON:
+            <code>fieldMappingsJson</code> i <code>conditionsJson</code>. Wskaźnik
+            <code>nextNodeId</code> obsługuje przejście liniowe, <code>isStart</code> oznacza wejście.
+          </div>
+        </div>
+        <div class="chain-row">
+          <div class="m">EventProcessState<span>event_process_states</span></div>
+          <div class="x">
+            Stan instancji, jeden rekord na event. Trzyma <code>currentNodeId</code>,
+            listę <code>completedNodeIds</code> oraz <code>nodeDataJson</code> — mapę
+            <code>{nodeId → {completedAt, completedBy, role, data}}</code> z pełną historią wypełnień.
+          </div>
+        </div>
+        <div class="chain-row">
+          <div class="m">EventAgendaData<span>event_agenda_data</span></div>
+          <div class="x">
+            Płaski magazyn <code>{fieldKey → value}</code>. Zasilany wyłącznie przez mapowania pól
+            przy ukończeniu węzła. To z niego generator agendy i dokumentów czyta wartości.
+          </div>
+        </div>
+      </div>
+
+      <h3>Synchronizacja ze starym modelem</h3>
+      <p>
+        Runtime utrzymuje zgodność z poprzednim, liniowym systemem etapów. Przy każdym przejściu
+        aktualizowane jest <code>Event.workflowStageId</code> i dopisywany wpis do
+        <code>EventWorkflowHistory</code> — dzięki temu listy eventów i widoki historii działają
+        bez zmian.
+      </p>
+    </section>
+
+    <!-- 16 -->
+<section id="edytor">
+      <h2><span class="num">16</span>Edytor procesów</h2>
+      <p class="lede">
+        Tu powstaje definicja. Lista procesów pozwala tworzyć, duplikować i usuwać;
+        edytor węzłów definiuje przepływ.
+      </p>
+
+      <figure>
+        <img src="__IMG_18__" alt="Lista procesów obsługi z łańcuchem sześciu węzłów">
+        <figcaption>
+          <code>/pl/app/settings/workflows</code> — lista procesów. Każdy proces pokazuje
+          swój łańcuch węzłów; kolor podpowiada rodzaj kroku, bursztynowy to węzeł decyzyjny,
+          zielony domyka proces.
+        </figcaption>
+      </figure>
+
+      <figure>
+        <img src="__IMG_19__" alt="Edytor procesu z rozwiniętymi kartami węzłów">
+        <figcaption>
+          <code>/pl/app/settings/workflows/[id]</code> — edytor przykładowego procesu
+          „Obsługa wesela”. Widoczny nagłówek procesu, nawigator węzłów i rozwinięte karty
+          kroków. Na trzecim kroku licznik pokazuje <b>Warunki (2)</b> — to węzeł
+          rozgałęziający.
+        </figcaption>
+      </figure>
+
+      <h3>Co ustawiasz na węźle</h3>
+      <ul class="plain">
+        <li><b>Typ węzła</b> — czy krok jest liniowy, rozgałęzia proces, biegnie równolegle, czy kończy przepływ.</li>
+        <li><b>Typ akcji</b> — determinuje, jaki panel zobaczy osoba wykonująca krok.</li>
+        <li><b>Rola</b> — kto zatwierdza. Oprócz ról systemowych dostępne są role obsługi (Kucharz, Kelner, Barman, Koordynator) oraz dowolna rola własna wpisywana tekstem.</li>
+        <li><b>Warunki</b> — tylko dla rozgałęzień; każdy warunek wskazuje węzeł docelowy.</li>
+        <li><b>Mapowanie pól</b> — pary <code>sourceKey → targetAgendaKey</code> z opcjonalną transformacją.</li>
+      </ul>
+
+      <div class="note warn">
+        <span class="lbl">Uwaga przy zapisie</span>
+        <p>
+          Zapis procesu podmienia komplet węzłów: <code>updateWorkflowWithNodes</code> wykonuje
+          <code>deleteMany</code> a następnie <code>createMany</code>. Wszystkie identyfikatory
+          węzłów są więc generowane od nowa. Konsekwencje opisuje sekcja
+          <a href="#luki">Ograniczenia</a>.
+        </p>
+      </div>
+    </section>
+
+    <!-- 17 -->
+<section id="przypisanie">
+      <h2><span class="num">17</span>Przypisanie do eventu</h2>
+      <p class="lede">
+        Proces sam z siebie nic nie robi. Dopiero przypisanie do eventu tworzy
+        <code>EventProcessState</code> i ustawia węzeł startowy.
+      </p>
+
+      <ol class="steps">
+        <li><b>Wybór węzła startowego.</b> Runtime szuka węzła z <code>isStart = true</code>; jeśli go nie ma, bierze pierwszy według <code>sortOrder</code>.</li>
+        <li><b>Utworzenie stanu.</b> <code>EventProcessState</code> powstaje przez <code>upsert</code> — ponowne przypisanie resetuje proces do początku i czyści zebrane dane.</li>
+        <li><b>Synchronizacja.</b> Ustawiane są <code>Event.workflowId</code> i <code>Event.workflowStageId</code>.</li>
+        <li><b>Wpis historii.</b> Do <code>EventWorkflowHistory</code> trafia rekord z notatką „Proces zainicjowany”.</li>
+      </ol>
+
+      <p>
+        Przypisanie zbiorcze znajdziesz w <code>/app/settings/configuration</code> — wybierasz proces
+        i zaznaczasz eventy. Ta operacja zdejmuje proces z eventów wcześniej do niego przypisanych,
+        więc zaznaczenie jest pełną listą, nie dopiskiem.
+      </p>
+    </section>
+
+    <!-- 18 -->
+<section id="organizator">
+      <h2><span class="num">18</span>Panel organizatora</h2>
+      <p class="lede">
+        Na karcie eventu <code>ProcessCenterPanel</code> pokazuje oś węzłów i pełny panel akcji
+        dla kroku bieżącego.
+       Zrzut tego panelu znajdziesz w części o <a href="#karta">karcie eventu</a>.</p>
+
+      
+
+      <h3>Panel zależny od typu akcji</h3>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>Typ akcji</th><th>Co widzi organizator</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><span class="sw" style="background:var(--n-menu)"></span><code>MENU_SELECTION</code></td><td>Podgląd wariantów wybranych przez klienta wraz z liczbą osób, plus pole notatki.</td></tr>
+            <tr><td><span class="sw" style="background:var(--n-appr)"></span><code>APPROVAL</code></td><td>Pole komentarza i przycisk zatwierdzenia kroku.</td></tr>
+            <tr><td><span class="sw" style="background:var(--n-msg)"></span><code>SEND_MESSAGE</code></td><td>Pole treści wiadomości kierowanej do klienta.</td></tr>
+            <tr><td><span class="sw" style="background:var(--n-pay)"></span><code>PAYMENT</code></td><td>Notatka o płatności, np. potwierdzenie wpływu zadatku.</td></tr>
+            <tr><td><span class="sw" style="background:var(--n-dec)"></span>węzeł z warunkami</td><td>Lista gałęzi do wyboru oraz alternatywne przejście ręczne z notatką.</td></tr>
+            <tr><td><span class="sw" style="background:var(--n-none)"></span>pozostałe</td><td>Pole notatki i przycisk ukończenia kroku.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 19 -->
+<section id="proces-portal">
+      <h2><span class="num">19</span>Portal klienta w procesie</h2>
+      <p class="lede">
+        Klient wchodzi przez link z tokenem i widzi wyłącznie kroki przypisane do roli
+        <code>CLIENT</code> lub <code>BOTH</code>.
+      </p>
+
+      <figure>
+        <div class="screen">
+          <div class="screen-bar">
+            <span class="dots"><i></i><i></i><i></i></span>
+            <span class="path">/pl/portal/[token]</span>
+          </div>
+          <div class="screen-body">
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:18px; font-size:.8rem">
+              <span style="color:var(--n-done); font-weight:600">✓ Dane pary</span>
+              <span style="color:var(--faint)">→</span>
+              <span style="color:var(--accent); font-weight:600">◉ Wybór menu</span>
+              <span style="color:var(--faint)">→</span>
+              <span style="color:var(--faint)">○ Akceptacja agendy</span>
+              <span style="color:var(--faint); font-family:var(--mono); font-size:11px">(1/3)</span>
+            </div>
+
+            <div class="node-card" style="--dot: var(--n-menu); background: var(--accent-bg); border-color: var(--accent)">
+              <div class="body">
+                <div class="nm">Wybór menu</div>
+                <div style="font-size:.82rem; color:var(--muted); margin:6px 0 12px">
+                  Prosimy o wybór wariantu menu dla przyjęcia.
+                </div>
+                <div class="node-card" style="--dot: var(--n-menu); padding:9px 12px; margin-bottom:6px">
+                  <div class="body"><div class="nm" style="font-size:.84rem">Menu A — klasyczne</div></div>
+                </div>
+                <div class="node-card" style="--dot: var(--n-menu); padding:9px 12px; margin-bottom:0; opacity:.6">
+                  <div class="body"><div class="nm" style="font-size:.84rem">Menu B — wegetariańskie</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <figcaption>
+          <b>Rysunek poglądowy, nie zrzut ekranu</b> — portal wymaga linku z tokenem
+          wysłanego parze, więc nie powstał przy generowaniu pozostałych zdjęć. Układ
+          odwzorowuje <code>ClientProcessStep.tsx</code>. Pasek postępu liczy wyłącznie
+          kroki klienckie; kroki wewnętrzne organizacji pozostają niewidoczne.
+        </figcaption>
+      </figure>
+
+      <p>
+        Token rozpoznawany jest dwutorowo: <code>getEventProcessStateForPortal</code> dopasowuje go
+        do <code>clientLinkTokenHash</code> (portal EventBoard) albo <code>weddingBoardToken</code>
+        (portal WeddingBoard), więc oba typy linków korzystają z tego samego silnika.
+      </p>
+
+      <div class="note">
+        <span class="lbl">Powiadomienie zwrotne</span>
+        <p>
+          Gdy krok ukończy klient, do organizacji trafia powiadomienie
+          <code>OrgNotification</code> typu <code>CLIENT_REPLY</code> z nazwą kroku i linkiem
+          do karty eventu. Kroki wykonane przez organizatora powiadomienia nie generują.
+        </p>
+      </div>
+    </section>
+
+    <!-- 20 -->
+<section id="rozgalezienia">
+      <h2><span class="num">20</span>Rozgałęzienia</h2>
+      <p class="lede">
+        Po ukończeniu węzła <code>resolveNextNode</code> wyznacza następny krok. Kolejność
+        rozstrzygania jest ściśle określona.
+      </p>
+
+      <ol class="steps">
+        <li><b>Warunki, jeśli istnieją.</b> Lista <code>conditions</code> przechodzona jest po kolei; wygrywa pierwszy pasujący warunek. Gdy żaden nie pasuje, wybierany jest pierwszy warunek z listy jako zabezpieczenie.</li>
+        <li><b>Jawny <code>nextNodeId</code>.</b> Używany, gdy węzeł nie ma warunków.</li>
+        <li><b>Następny wg <code>sortOrder</code>.</b> Domyślne przejście liniowe.</li>
+        <li><b>Koniec procesu.</b> Brak następnika oznacza <code>done = true</code>; <code>currentNodeId</code> pozostaje na ostatnim węźle.</li>
+      </ol>
+
+      <div class="branch">
+        <div class="bnode" style="border-left:3px solid var(--n-dec)">
+          <div class="bn">Wybór menu przez parę</div>
+          <div class="bc">nodeType: DECISION<br>actionType: MENU_SELECTION</div>
+        </div>
+        <div class="barrow">→</div>
+        <div class="bstack">
+          <div class="bnode" style="border-left:3px solid var(--n-appr)">
+            <div class="bn">Akceptacja kuchni</div>
+            <div class="bc">client_choice = „Menu A”</div>
+          </div>
+          <div class="bnode" style="border-left:3px solid var(--n-msg)">
+            <div class="bn">Konsultacja dietetyczna</div>
+            <div class="bc">client_choice = „Menu B”</div>
+          </div>
+        </div>
+        <div class="bnode" style="border-left:3px solid var(--n-pay)">
+          <div class="bn">Zadatek</div>
+          <div class="bc">obie gałęzie zbiegają się<br>w tym węźle</div>
+        </div>
+      </div>
+
+      <h3>Typy warunków</h3>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>Typ</th><th>Kiedy pasuje</th><th>Format wartości</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>always</code></td><td>Zawsze — pierwszy taki warunek kończy szukanie.</td><td>—</td></tr>
+            <tr><td><code>manual</code></td><td>Zawsze; gałąź wybiera organizator w panelu.</td><td>—</td></tr>
+            <tr><td><code>client_choice</code></td><td>Gdy <code>selectedVariantLabel</code> z danych kroku równa się wartości warunku.</td><td>etykieta wariantu</td></tr>
+            <tr><td><code>field_equals</code></td><td>Gdy wskazane pole danych kroku równa się wartości.</td><td><code>pole=wartość</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 21 -->
+<section id="mapowanie">
+      <h2><span class="num">21</span>Mapowanie pól</h2>
+      <p class="lede">
+        To pomost między procesem a agendą. Bez mapowań dane kroku zostają tylko w historii
+        i nie trafiają do dokumentów.
+      </p>
+
+      <p>
+        Mapowanie to trójka <code>sourceKey</code> → <code>targetAgendaKey</code> z opcjonalną
+        transformacją. Przy ukończeniu węzła runtime czyta dane kroku, przepuszcza je przez
+        transformację i scala z istniejącą zawartością <code>EventAgendaData.dataJson</code>.
+        Klucze o wartości <code>undefined</code> są pomijane, więc mapowanie nigdy nie kasuje
+        wcześniej zebranej wartości.
+      </p>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>Transformacja</th><th>Działanie</th><th>Warunek</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>none</code></td><td>Wartość przepisywana bez zmian.</td><td>domyślna</td></tr>
+            <tr><td><code>join_comma</code></td><td>Łączy elementy przecinkiem i spacją.</td><td>tylko dla tablic</td></tr>
+            <tr><td><code>join_newline</code></td><td>Łączy elementy znakiem nowej linii.</td><td>tylko dla tablic</td></tr>
+            <tr><td><code>date_pl</code></td><td>Formatuje datę po polsku, np. <code>14 marca 2026</code>.</td><td>tylko dla tekstu</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Powiązanie z typami obiektów</h3>
+      <p>Kreator typu obiektu pokazuje część o <a href="#konfiguracja">Konfiguracji</a>.</p>
+      <p>
+        Własny typ obiektu deklaruje, w których kartotekach ma być widoczny, i może zostać
+        powiązany z procesem. Pola takiego obiektu stają się wtedy naturalnymi kandydatami
+        na <code>sourceKey</code> w mapowaniu.
+      </p>
+
+      
+    </section>
+
+    <!-- 22 -->
+<section id="typy-wezlow">
+      <h2><span class="num">22</span>Typy węzłów w praktyce</h2>
+      <p class="lede">
+        Typ węzła odpowiada na jedno pytanie: <b>ile wyjść ma ten krok i kto decyduje,
+        którym proces pójdzie dalej</b>. To jedyna rzecz, którą typ ustala — czynność
+        opisuje osobne pole „Akcja”, a wykonawcę pole „Wykonuje”.
+      </p>
+
+      <div class="note">
+        <span class="lbl">Jak wybrać w trzy sekundy</span>
+        <p>
+          Krok ma jedno naturalne „co dalej”? → <code>ACTION</code>.<br>
+          Dalsza ścieżka zależy od czyjejś odpowiedzi? → <code>DECISION</code>.<br>
+          Kilka osób musi się wypowiedzieć, zanim ruszysz? → <code>PARALLEL</code>.<br>
+          Tu proces się kończy? → <code>END</code>.
+        </p>
+      </div>
+
+      <h3><span class="sw" style="background:var(--n-form)"></span>ACTION — krok liniowy</h3>
+      <p>
+        Domyślny wybór i zdecydowana większość kroków. Ktoś ma coś zrobić, a kiedy to zrobi,
+        proces idzie do następnego kroku — zawsze tego samego. Nie ma tu żadnego wyboru
+        ścieżki, więc nie musisz nic konfigurować poza akcją i rolą.
+      </p>
+      <div class="story">
+        <p class="s">Jako <b>manager sali</b> chcę odnotować wysłanie oferty, żeby zespół
+        widział, że para czeka teraz na naszą odpowiedź, a nie odwrotnie.</p>
+        <p class="c">
+          Typ <code>ACTION</code> · Akcja <code>DOCUMENT</code> · Wykonuje Manager.
+          Po oznaczeniu kroku proces przechodzi do wyboru menu — bez pytania o cokolwiek.
+        </p>
+      </div>
+      <div class="story">
+        <p class="s">Jako <b>szef kuchni</b> chcę potwierdzić, że wybrane menu da się wykonać
+        dla 120 osób, żeby sprzedaż nie obiecała czegoś, czego kuchnia nie dowiezie.</p>
+        <p class="c">
+          Typ <code>ACTION</code> · Akcja <code>APPROVAL</code> · Wykonuje Kucharz.
+          Krok blokuje proces do czasu zatwierdzenia — to naturalna bramka jakościowa.
+        </p>
+      </div>
+
+      <h3><span class="sw" style="background:var(--n-dec)"></span>DECISION — rozgałęzienie</h3>
+      <p>
+        Sięgasz po nie wtedy, gdy <b>dalsza ścieżka zależy od treści odpowiedzi</b>, a nie
+        tylko od faktu jej udzielenia. Węzeł dostaje listę warunków; każdy ma etykietę,
+        typ dopasowania i wskazany krok docelowy. Wygrywa pierwszy pasujący warunek.
+      </p>
+      <div class="story">
+        <p class="s">Jako <b>para młoda</b> chcę wybrać wariant menu w portalu, żeby dalsze
+        ustalenia dotyczyły już tylko tego, co naprawdę wybraliśmy.</p>
+        <p class="c">
+          Typ <code>DECISION</code> · Akcja <code>MENU_SELECTION</code> · Wykonuje Klient.<br>
+          Warunek <code>client_choice = „Menu A — klasyczne”</code> → <b>Akceptacja kuchni</b><br>
+          Warunek <code>client_choice = „Menu B — wegetariańskie”</code> → <b>Zadatek</b><br>
+          Menu B omija kuchnię, bo wariant wegetariański jest z góry zatwierdzony — para
+          dostaje krótszą ścieżkę, a szef kuchni nie jest zawracany bez powodu.
+        </p>
+      </div>
+      <div class="story">
+        <p class="s">Jako <b>właściciel</b> chcę, żeby przyjęcia powyżej 150 osób szły przez
+        dodatkowe uzgodnienie obsługi kelnerskiej, a mniejsze omijały ten krok.</p>
+        <p class="c">
+          Warunek <code>field_equals</code> z wartością <code>rozmiar=duze</code> → krok
+          uzgodnienia z kelnerami; drugi warunek <code>always</code> → zwykła ścieżka.
+          Kolejność ma znaczenie: warunek <code>always</code> zawsze wygrywa, więc trzymaj
+          go na końcu listy.
+        </p>
+      </div>
+
+      <h3><span class="sw" style="background:var(--n-doc)"></span>PARALLEL — kroki równoległe</h3>
+      <p>
+        Przeznaczony na sytuacje, w których <b>kilka osób musi się wypowiedzieć niezależnie</b>,
+        a proces rusza dopiero po komplecie zgód.
+      </p>
+      <div class="story">
+        <p class="s">Jako <b>koordynator</b> chcę, żeby kuchnia, bar i obsługa kelnerska
+        zatwierdziły harmonogram równolegle, żeby nie czekać, aż jedna osoba odblokuje
+        pozostałe.</p>
+        <p class="c">
+          Typ <code>PARALLEL</code> · Akcja <code>APPROVAL</code>.
+        </p>
+      </div>
+      <div class="note warn">
+        <span class="lbl">Czego ten typ jeszcze nie robi</span>
+        <p>
+          Runtime nie ma osobnej logiki dla <code>PARALLEL</code> — węzeł zachowuje się
+          jak zwykły <code>ACTION</code> i przechodzi dalej po <b>pierwszym</b> zatwierdzeniu,
+          nie po komplecie. Dopóki to się nie zmieni, równoległe zgody modeluj jako
+          osobne kroki <code>ACTION</code> jeden po drugim.
+        </p>
+      </div>
+
+      <h3><span class="sw" style="background:var(--n-done)"></span>END — koniec procesu</h3>
+      <p>
+        Domyka przepływ. Po ukończeniu takiego kroku nie ma następnika, więc proces
+        raportuje zakończenie. To dobre miejsce na mapowanie pól — zbierasz w nim to,
+        co ma trafić do agendy.
+      </p>
+      <div class="story">
+        <p class="s">Jako <b>para</b> i <b>manager</b> chcemy wspólnie zatwierdzić finalną
+        agendę, żeby nikt później nie zmieniał ustaleń bez wiedzy drugiej strony.</p>
+        <p class="c">
+          Typ <code>END</code> · Akcja <code>AGENDA</code> · Wykonuje Klient + Manager.
+          Mapowanie przenosi <code>selectedVariantLabel → agenda.menu</code>, więc wybór
+          menu z kroku trzeciego ląduje w dokumencie bez przepisywania.
+        </p>
+      </div>
+
+      <div class="note">
+        <span class="lbl">Częsty błąd</span>
+        <p>
+          Nie używaj <code>DECISION</code> tam, gdzie chodzi wyłącznie o zatwierdzenie
+          albo odrzucenie czegoś przez jedną osobę. Jeśli obie odpowiedzi prowadzą do tego
+          samego następnego kroku, to jest <code>ACTION</code> z akcją <code>APPROVAL</code> —
+          rozgałęzienie dokładasz dopiero wtedy, gdy odpowiedzi prowadzą gdzie indziej.
+        </p>
+      </div>
+    </section>
+
+    <!-- 23 -->
+<section id="slowniki">
+      <h2><span class="num">23</span>Słowniki</h2>
+      <p class="lede">Pełne listy wartości przyjmowanych przez węzeł.</p>
+
+      <h3>Typy węzłów — skrót</h3>
+      <p>
+        Rozwinięte omówienie z przykładami znajdziesz w sekcji
+        <a href="#typy-wezlow">Typy węzłów w praktyce</a>.
+      </p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Wartość</th><th>Znaczenie</th><th>Ile wyjść</th></tr></thead>
+          <tbody>
+            <tr><td><code>ACTION</code></td><td>Krok liniowy — coś się dzieje, proces idzie dalej.</td><td>jedno</td></tr>
+            <tr><td><code>DECISION</code></td><td>Rozgałęzienie — następnik zależy od warunków.</td><td>wiele</td></tr>
+            <tr><td><code>PARALLEL</code></td><td>Kroki równoległe wymagające wielu zatwierdzeń.</td><td>jedno (patrz uwaga)</td></tr>
+            <tr><td><code>END</code></td><td>Zakończenie przepływu.</td><td>brak</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Typy akcji</h3>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Wartość</th><th>Etykieta</th><th>Zastosowanie</th></tr></thead>
+          <tbody>
+            <tr><td><span class="sw" style="background:var(--n-none)"></span><code>NONE</code></td><td>Brak akcji</td><td>Krok informacyjny lub kontrolny.</td></tr>
+            <tr><td><span class="sw" style="background:var(--n-form)"></span><code>CLIENT_FORM</code></td><td>Formularz klienta</td><td>Zbiera dane wypełniane przez parę.</td></tr>
+            <tr><td><span class="sw" style="background:var(--n-menu)"></span><code>MENU_SELECTION</code></td><td>Wybór menu</td><td>Wybór wariantu — zasila <code>client_choice</code>.</td></tr>
+            <tr><td><span class="sw" style="background:var(--n-appr)"></span><code>APPROVAL</code></td><td>Zatwierdzenie</td><td>Akceptacja z komentarzem.</td></tr>
+            <tr><td><span class="sw" style="background:var(--n-pay)"></span><code>PAYMENT</code></td><td>Płatność</td><td>Odnotowanie wpłaty.</td></tr>
+            <tr><td><span class="sw" style="background:var(--n-doc)"></span><code>DOCUMENT</code></td><td>Dokument</td><td>Wystawienie lub podpis dokumentu.</td></tr>
+            <tr><td><span class="sw" style="background:var(--n-agenda)"></span><code>AGENDA</code></td><td>Agenda</td><td>Domknięcie harmonogramu.</td></tr>
+            <tr><td><span class="sw" style="background:var(--n-msg)"></span><code>SEND_MESSAGE</code></td><td>Wiadomość</td><td>Wysyłka komunikatu do klienta.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Role zatwierdzające</h3>
+      <p>
+        Pole <code>assigneeRole</code> jest tekstem, nie wyliczeniem — obok wartości gotowych
+        przyjmuje dowolną rolę własną wpisaną w edytorze.
+      </p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Wartość</th><th>Etykieta</th><th>Charakter</th></tr></thead>
+          <tbody>
+            <tr><td><code>MANAGER</code></td><td>Manager</td><td>systemowa</td></tr>
+            <tr><td><code>OWNER</code></td><td>Właściciel</td><td>systemowa</td></tr>
+            <tr><td><code>STAFF</code></td><td>Pracownik</td><td>systemowa</td></tr>
+            <tr><td><code>CLIENT</code></td><td>Klient (para/gość)</td><td>widoczna w portalu</td></tr>
+            <tr><td><code>BOTH</code></td><td>Klient + Manager</td><td>widoczna w portalu</td></tr>
+            <tr><td><code>CHEF</code></td><td>Kucharz</td><td>obsługa</td></tr>
+            <tr><td><code>WAITER</code></td><td>Kelner</td><td>obsługa</td></tr>
+            <tr><td><code>BARTENDER</code></td><td>Barman</td><td>obsługa</td></tr>
+            <tr><td><code>COORDINATOR</code></td><td>Koordynator</td><td>obsługa</td></tr>
+            <tr><td>dowolny tekst</td><td>rola własna</td><td>definiowana w edytorze</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 24 -->
+<section id="luki">
+      <h2><span class="num">24</span>Czego brakuje</h2>
+      <p class="lede">
+        Rzeczy, które warto znać przed wdrożeniem u klienta — żeby nie odkryć ich
+        przy pierwszym prawdziwym weselu.
+      </p>
+
+      <h4>W panelu</h4>
+      <ul class="plain">
+        <li><b>Zapraszanie do zespołu nie ma interfejsu.</b> Zakładka Zespół wyświetla listę i role, ale nie ma z niej jak dodać kolejnej osoby.</li>
+        <li><b>Płatności są ręczne.</b> Brak integracji z bankiem czy bramką — „opłacone” oznacza człowiek, który zobaczył przelew.</li>
+        <li><b>Zapytania wpływają tylko z profilu publicznego.</b> Nie da się dopisać ręcznie telefonicznego zapytania, więc część lejka bywa niewidoczna w statystykach.</li>
+      </ul>
+
+      <div class="note ok">
+        <span class="lbl">Naprawione w tej wersji</span>
+        <p>
+          Publiczny profil organizatora zwracał 404, a po odblokowaniu trasy — 500, więc
+          zapytania ofertowe nie mogły w ogóle dotrzeć. Zapis procesu nadawał krokom nowe
+          identyfikatory, przez co rozgałęzienia przestawały działać po pierwszej edycji.
+          Cele gałęzi trzeba było wpisywać jako surowe identyfikatory. Role obsługi
+          wyświetlały się jako wartości techniczne. Wszystko to działa już poprawnie.
+        </p>
+      </div>
+          <h3>Ograniczenia silnika procesów</h3>
+<h3>Pozostałe uwagi</h3>
+      <ul class="plain">
+        <li><b>Ponowne przypisanie resetuje postęp.</b> <code>initEventProcess</code> nadpisuje stan przez <code>upsert</code>, czyszcząc listę ukończonych węzłów i zebrane dane.</li>
+        <li><b>Węzeł <code>PARALLEL</code> nie ma jeszcze osobnej logiki runtime</b> — zachowuje się jak krok liniowy.</li>
+        <li><b>Warunek bez dopasowania nie zatrzymuje procesu</b> — wybierana jest pierwsza gałąź, co może ukryć błąd w konfiguracji warunków.</li>
+      </ul>
+    
+<div class="note warn">
+        <span class="lbl">Otwarte — zakres autoryzacji runtime</span>
+        <p>
+          Edytor procesów jest chroniony: <code>assertCanManage</code> odrzuca role
+          <code>STAFF</code> i <code>VIEWER</code>. Natomiast <code>initEventProcess</code>
+          i <code>completeProcessNode</code> sprawdzają jedynie, czy użytkownik jest zalogowany,
+          bez weryfikacji przynależności do organizacji będącej właścicielem eventu.
+        </p>
+      </div>
+
+      
+    </section>
+
+    <!-- 25 -->
+<section id="przyklad">
+      <h2><span class="num">25</span>Przykład i generator demo</h2>
+      <p class="lede">
+        Wszystkie zrzuty w tej dokumentacji pochodzą z jednego procesu odtwarzanego skryptem,
+        więc środowisko demo można postawić od zera w każdej chwili.
+      </p>
+
+      <h3>Proces „Obsługa wesela”</h3>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>#</th><th>Krok</th><th>Typ</th><th>Akcja</th><th>Rola</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>Zapytanie przyjęte</td><td><code>ACTION</code></td><td><code>NONE</code></td><td>Manager</td></tr>
+            <tr><td>2</td><td>Oferta wysłana</td><td><code>ACTION</code></td><td><code>DOCUMENT</code></td><td>Manager</td></tr>
+            <tr><td>3</td><td>Wybór menu przez parę</td><td><code>DECISION</code></td><td><code>MENU_SELECTION</code></td><td>Klient</td></tr>
+            <tr><td>4</td><td>Akceptacja kuchni</td><td><code>ACTION</code></td><td><code>APPROVAL</code></td><td>Kucharz</td></tr>
+            <tr><td>5</td><td>Zadatek</td><td><code>ACTION</code></td><td><code>PAYMENT</code></td><td>Klient</td></tr>
+            <tr><td>6</td><td>Agenda zatwierdzona</td><td><code>END</code></td><td><code>AGENDA</code></td><td>Klient + Manager</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        Krok 3 rozgałęzia proces na wyborze pary. <b>Menu A</b> prowadzi do akceptacji kuchni,
+        <b>Menu B</b> omija ten krok i przechodzi wprost do zadatku — wariant wegetariański jest
+        z góry zatwierdzony, więc szef kuchni nie musi go opiniować. Krok 6 mapuje
+        <code>selectedVariantLabel → agenda.menu</code> oraz
+        <code>note → agenda.uwagiFinalne</code> z transformacją <code>join_newline</code>.
+      </p>
+
+      <h3>Odtworzenie środowiska</h3>
+      <p>
+        Skrypt loguje się przyciskiem „Wejdź kontem testowym” (akcja zakłada świeżą organizację,
+        więc nie podaje się żadnych danych logowania), buduje proces, event, warianty menu,
+        uruchamia proces, przesuwa go o dwa kroki i zapisuje zrzuty do <code>docs/screens</code>.
+      </p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Polecenie</th><th>Efekt</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><code>node scripts/demo-workflow-screenshots.mjs</code></td>
+              <td>Pełne środowisko demo na domyślnym adresie dev oraz komplet zrzutów.</td>
+            </tr>
+            <tr>
+              <td><code>node scripts/demo-workflow-screenshots.mjs &lt;url&gt; &lt;katalog&gt;</code></td>
+              <td>To samo na wskazanym środowisku, z zapisem zrzutów do wybranego katalogu.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note">
+        <span class="lbl">Uwaga o koncie testowym</span>
+        <p>
+          <code>createTestAccount</code> zakłada <b>nową</b> organizację przy każdym uruchomieniu
+          (e-mail <code>test-&lt;znacznik&gt;@eventboard.local</code>). Kolejne uruchomienia
+          skryptu nie nadpisują poprzedniego demo, tylko tworzą następne — na środowisku dev
+          zbiera się z tego trochę organizacji do posprzątania.
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="footer">
+    Panel: <code>/pl/app</code> · Profil publiczny: <code>/org/&lt;slug&gt;</code> · Portal pary: <code>/pl/portal/&lt;token&gt;</code><br>
+    Środowisko demo odtwarza <code>node scripts/seed-demo-org.mjs &lt;url&gt; &lt;katalog-zrzutów&gt;</code>
+  </div>
+
+</div>

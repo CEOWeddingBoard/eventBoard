@@ -1,0 +1,5 @@
+ALTER TABLE "events" ADD COLUMN IF NOT EXISTS "clientWorkflowStatus" TEXT NOT NULL DEFAULT 'MENU_DRAFT';
+ALTER TABLE "events" ADD COLUMN IF NOT EXISTS "clientMenuSelectionJson" TEXT;
+ALTER TABLE "events" ADD COLUMN IF NOT EXISTS "clientNextStepTitle" TEXT;
+ALTER TABLE "events" ADD COLUMN IF NOT EXISTS "clientNextStepMessage" TEXT;
+ALTER TABLE "events" ADD COLUMN IF NOT EXISTS "clientNextStepSentAt" TIMESTAMP(3);

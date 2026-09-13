@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>WeddingBoard - Case Study Venue Manager</title>
+<style>
+@page { size: A4; margin: 2cm; }
+body { font-family: system-ui, sans-serif; font-size: 11pt; line-height: 1.6; color: #1a1a1a; max-width: 900px; margin: 0 auto; padding: 20px; }
+h1 { font-size: 22pt; text-align: center; border-bottom: 3px solid #6b7c3b; padding-bottom: 10px; margin-bottom: 5px; }
+h2 { font-size: 14pt; color: #6b7c3b; border-bottom: 1px solid #ddd; padding-bottom: 4px; margin-top: 30px; }
+h3 { font-size: 12pt; margin-top: 20px; }
+p { margin: 6px 0; }
+table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; font-size: 10pt; }
+th { background: #f0f0f0; }
+pre { background: #f5f5f5; padding: 10px; border-radius: 4px; font-size: 9pt; overflow-x: auto; }
+.badge { display: inline-block; background: #6b7c3b; color: white; padding: 2px 8px; border-radius: 10px; font-size: 9pt; }
+.phase { border-left: 4px solid #6b7c3b; padding-left: 15px; margin: 20px 0; }
+hr { border: none; border-top: 1px solid #ddd; margin: 25px 0; }
+code { background: #f0f0f0; padding: 1px 4px; border-radius: 3px; font-size: 9pt; }
+em { color: #6b7c3b; }
+</style></head>
+<body>
+
+<h1>WeddingBoard<br>System zarządzania salą weselną<br>Case Study</h1>
+
+<p style="text-align:center; color: #666; margin-top: 10px;">Sala "Pałac pod Dębami" × Kasia i Tomek<br><em>Pełny scenariusz: od rejestracji sali po rozliczenie wesela</em></p>
+
+<hr>
+
+<h2>Bohaterowie</h2>
+<p><strong>Ania</strong> — managerka sali weselnej "Pałac pod Dębami" (120–200 gości, 3 sale, 3 pakiety menu)</p>
+<p><strong>Kasia i Tomek</strong> — para młoda (ślub 15 sierpnia 2026, 95 gości)</p>
+
+<h2>FAZA 1 — Onboarding sali (Dzień 1)</h2>
+<div class="phase">
+<p>Ania wchodzi na WeddingBoard → klika <em>"Jestem Organizatorem"</em> → rejestruje się przez email + Google → wypełnia onboarding:</p>
+<ul>
+<li>Nazwa: <em>"Pałac pod Dębami"</em></li>
+<li>Adres, email, telefon, maksymalna pojemność: 200 gości</li>
+<li>System tworzy profil sali z unikalnym slugiem</li>
+<li>Przekierowanie na dashboard managera</li>
+</ul>
+</div>
+
+<h2>FAZA 2 — Konfiguracja oferty (Tydzień 1)</h2>
+<div class="phase">
+
+<h3>Ustawienia → Sale</h3>
+<table><tr><th>Sala</th><th>Pojemność</th></tr>
+<tr><td>Sala Balowa</td><td>200 os.</td></tr>
+<tr><td>Sala Kominkowa</td><td>80 os.</td></tr>
+<tr><td>Oranżeria</td><td>120 os.</td></tr></table>
+
+<h3>Ustawienia → Pakiety</h3>
+<table><tr><th>Pakiet</th><th>Cena/os.</th><th>Sezon</th></tr>
+<tr><td>Basic</td><td>180 zł</td><td>ALL</td></tr>
+<tr><td>Premium</td><td>240 zł</td><td>ALL</td></tr>
+<tr><td>Basic Zimowy</td><td>160 zł</td><td>WINTER</td></tr></table>
+
+<h3>Skład pakietu Premium (grupy wyboru)</h3>
+<table><tr><th>Grupa</th><th>Wybór</th><th>Dania</th></tr>
+<tr><td>Zupa</td><td>1 z 3</td><td>Rosół, Krem z pomidorów, Żurek</td></tr>
+<tr><td>Danie główne</td><td>1 z 4</td><td>Schabowy, De volaille, Łosoś, Stek</td></tr>
+<tr><td>Deser</td><td>1 z 3</td><td>Szarlotka, Tiramisu, Sernik</td></tr></table>
+
+<h3>Ustawienia → Stoły</h3>
+<p>20 stołów okrągłych (10 os.) + 5 prostokątnych (12 os.)</p>
+
+<h3>Ustawienia → Umowy</h3>
+<p>Wgrywa wzór <code>umowa-glowna.docx</code> z placeholderami:</p>
+<pre>{{coupleName}} | {{weddingDate}} | {{hallName}} | {{packageName}} | {{guestCount}} | {{totalPrice}}</pre>
+</div>
+
+<h2>FAZA 3 — Pierwsza rezerwacja (Tydzień 2)</h2>
+<div class="phase">
+<p>Dashboard → <em>"+ Nowa rezerwacja"</em>:</p>
+<ul>
+<li>Imiona: Kasia i Tomek | Email: kasia@example.com</li>
+<li>Data: 15.08.2026 | Sala: Oranżeria | Pakiet: Premium</li>
+<li>Goście (szac.): 100 → system: 100 × 240 zł = <strong>24 000 zł</strong></li>
+<li>Send invite: wysyła link z tokenem do pary</li>
+</ul>
+</div>
+
+<h2>FAZA 4 — Portal pary młodej</h2>
+<div class="phase">
+
+<p><strong>Aktywacja:</strong> Kasia klika link → widzi powitanie → "Potwierdzam" → status ACTIVE</p>
+
+<h3>Zakładka ① — Lista gości</h3>
+<ul>
+<li>Ręcznie: imię, nazwisko, dieta (wege/vegan/dziecko), alergie, grupa</li>
+<li>CSV import: plik 40-gości-od-rodzicow.csv → system parsuje i dodaje</li>
+<li>Łącznie: 95 gości (3 wege, 2 vegan, 4 dzieci)</li>
+<li>"Przekaż listę sali" → <code>guestsCompleted = true</code></li>
+</ul>
+
+<h3>Zakładka ② — Menu</h3>
+<ul>
+<li>Wybiera: rosół, łosoś, tiramisu z pakietu Premium</li>
+<li>System: 95 × 240 zł = 22 800 zł szacunkowo</li>
+<li>"Zatwierdź menu" → <code>menuCompleted = true</code></li>
+</ul>
+
+<h3>Zakładka ③ — Usadzenie</h3>
+<ul>
+<li>Widzi 20 stołów × 10 os. z kontrolą pojemności</li>
+<li>Przypisuje gości → stół nr 5: 11 osób → <strong style="color:red">⚠ czerwone ostrzeżenie</strong></li>
+<li>Koryguje → "Przekaż usadzenie sali" → <code>seatingCompleted = true</code></li>
+</ul>
+
+<h3>Zakładka ④ — Harmonogram</h3>
+<ul>
+<li>"Szablon wesela" → ładuje 9-punktowy timeline</li>
+<li>Dostosowuje godziny → "Przekaż harmonogram" → <code>scheduleCompleted = true</code></li>
+</ul>
+
+<h3>Zakładka ⑤ — Wiadomości (czat)</h3>
+<ul>
+<li>Kasia: <em>"Czy możemy dostać dodatkowy stół dla dzieci?"</em></li>
+<li>Ania (sala): <em>"Tak, przygotujemy obok stołu nr 3"</em></li>
+</ul>
+</div>
+
+<h2>FAZA 5 — Panel sali: zarządzanie (Tydzień 3–4)</h2>
+<div class="phase">
+
+<table><tr><th>Zakładka</th><th>Co robi Ania</th></tr>
+<tr><td>Przegląd</td><td>Progress card: 4/4 zielone ✓ — edytuje dane pary, zmienia liczbę gości → auto-koszt 22 800 zł</td></tr>
+<tr><td>Goście</td><td>Edytuje inline każdego gościa (dieta, alergie, stół), dodaje/usuwa gości, CSV import, PDF export</td></tr>
+<tr><td>Menu</td><td>Widzi wybory Kasi, może zmieniać, zapisuje zmiany</td></tr>
+<tr><td>Usadzenie</td><td>Karty stołów + nieprzypisani goście (czerwona sekcja), przypisywanie przez select</td></tr>
+<tr><td>Plan sali</td><td>Canvas: drag & drop stołów, goście z diet markers (kolorowe kropki), elementy sali (scena/DJ/bar), zoom, szablony</td></tr>
+<tr><td>Harmonogram</td><td>Timeline, drag reorder (↕), inline edit, szablon, dodawanie punktów</td></tr>
+<tr><td>Oferty</td><td>Tworzy ofertę z pakietu → wysyła do pary → akceptacja</td></tr>
+<tr><td>Umowy</td><td>Szablon DOCX → podmienia placeholdery → PDF → <strong>podpis uproszczony SMS</strong> (para podpisuje → sala kontrasygnuje → SIGNED_BOTH)</td></tr>
+<tr><td>Płatności</td><td>30% zadatek (6 840 zł) + rata 40% (9 120 zł) + końcowe 30% (6 840 zł) + kaucja zwrotna 2 000 zł</td></tr>
+<tr><td>Wiadomości</td><td>Czat z parą, auto-odświeżanie co 8s</td></tr>
+</table>
+</div>
+
+<h2>FAZA 6 — Kalendarz i planowanie</h2>
+<div class="phase">
+<ul>
+<li>Sierpień 2026: 4 rezerwacje (olive), 14.08 zablokowane 8:00–22:00 (czerwone)</li>
+<li>Blokada cykliczna: każdy poniedziałek = "Dzień techniczny"</li>
+<li>iCal export → subskrypcja w Google Calendar</li>
+</ul>
+</div>
+
+<h2>FAZA 7 — Finanse i raporty</h2>
+<div class="phase">
+
+<h3>Dashboard finansowy</h3>
+<table><tr><th>Metryka</th><th>Wartość</th></tr>
+<tr><td>Opłacone</td><td>45 600 zł</td></tr>
+<tr><td>Oczekujące</td><td>22 800 zł</td></tr>
+<tr><td>Pipeline</td><td>96 000 zł</td></tr></table>
+
+<h3>Raporty</h3>
+<table><tr><th>Metryka</th><th>Wartość</th></tr>
+<tr><td>Aktywne rezerwacje</td><td>4</td></tr>
+<tr><td>Śr. przychód</td><td>24 000 zł</td></tr>
+</table>
+<p>Wykresy: popularne pakiety, sale wg przychodu. CSV Export → Excel.</p>
+</div>
+
+<h2>FAZA 8 — Dzień wesela</h2>
+<div class="phase">
+<p>Checklisty dla załogi:</p>
+<ul>
+<li><strong>Kuchnia:</strong> rosół 95 porcji ✓, łosoś 93 porcje ✓, tiramisu ✓, tort ✓</li>
+<li><strong>Serwis:</strong> lista stołów z gośćmi i alergiami (⚠ Anna K. — orzechy, stół 5)</li>
+<li><strong>Manager:</strong> harmonogram 15:00–01:00 godzinowy</li>
+</ul>
+<p>PDF export: lista gości, plan stołów, harmonogram, plan sali.</p>
+</div>
+
+<h2>FAZA 9 — Po weselu</h2>
+<div class="phase">
+<ul>
+<li>Ostatnia rata oznaczona jako opłacona</li>
+<li>Kaucja zwrócona → status zmieniony</li>
+<li>Rezerwacja → COMPLETED</li>
+<li>Raporty: Premium = 70% rezerwacji → Ania podnosi cenę do 260 zł</li>
+</ul>
+</div>
+
+<hr>
+
+<h2 style="text-align:center">Flow — diagram</h2>
+<pre style="font-size: 7pt; line-height: 1.3;">
+SALA ─────────────────────────────────────────────────────────────────────────
+│
+├── 1. Onboarding (rejestracja + profil sali)
+├── 2. Konfiguracja: sale, pakiety, dania, stoły, szablony umów
+├── 3. Dashboard + Kalendarz
+├── 4. Nowa rezerwacja ──→ wysyła link do PARY ──────────────────────────────┐
+│                                                                              │
+│                          PARA ────────────────────────────────────────────── │
+│                          │                                                    │
+│                          ├── 5. Aktywacja portalu                            │
+│                          ├── 6. Goście (ręcznie + CSV)                       │
+│                          ├── 7. Menu (wybory z pakietu)                      │
+│                          ├── 8. Usadzenie (stoły + kontrola pojemności)       │
+│                          ├── 9. Harmonogram (szablon)                        │
+│                          └── 10. Czat z salą                                 │
+│                                                                              │
+│ SALA ─────────────────────────────────────────────────────────────────────── │
+│ │                                                                            │
+│ ├── 11. Edytuje dane pary (goście, menu, usadzenie, harmonogram)            │
+│ ├── 12. Plan sali (canvas + szablony)                                       │
+│ ├── 13. Oferta → akceptacja                                                 │
+│ ├── 14. Umowa DOCX → PDF → podpis SMS                                       │
+│ ├── 15. Harmonogram płatności                                               │
+│ └── 16. Dashboard finansowy                                                 │
+│                                                                              │
+│ DZIEŃ WESELA ─────────────────────────────────────────────────────────────── │
+│ │                                                                            │
+│ ├── 17. Checklisty: kuchnia, serwis, manager                                │
+│ └── 18. PDF export dla obsługi                                              │
+│                                                                              │
+│ PO WESELU ────────────────────────────────────────────────────────────────── │
+│ │                                                                            │
+│ ├── 19. Rozliczenie finansowe                                               │
+│ ├── 20. Zamknięcie rezerwacji                                               │
+│ └── 21. Raporty i statystyki                                                │
+</pre>
+
+<hr>
+
+<h2 style="text-align:center">Kluczowe funkcjonalności</h2>
+
+<table>
+<tr><th>Panel sali (venue)</th><th>Portal pary (wedding-client)</th></tr>
+<tr>
+<td>✓ Dashboard z KPI, finansami, raportami<br>✓ Edycja gości, menu, usadzenia, harmonogramu<br>✓ Wizualny plan sali (canvas drag & drop)<br>✓ System umów (DOCX → PDF → podpis SMS)<br>✓ Harmonogram płatności (zadatki, raty, kaucje)<br>✓ Kalendarz (blokady godzinowe, cykliczne, iCal)<br>✓ Czat z parą</td>
+<td>✓ Goście (ręcznie + CSV import)<br>✓ Menu (grupy wyboru z pakietu)<br>✓ Usadzenie (kontrola pojemności)<br>✓ Harmonogram (szablon dnia wesela)<br>✓ Czat z salą<br>✓ Akceptacja ofert<br>✓ Podpis umowy (SMS)</td>
+</tr>
+</table>
+
+<p style="text-align:center; margin-top: 30px; color: #6b7c3b;"><strong>WeddingBoard — sala + para = jeden system</strong></p>
+
+</body>
+</html>

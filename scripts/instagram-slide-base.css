@@ -1,0 +1,911 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap");
+
+@font-face {
+  font-family: "Great Vibes";
+  src: url("../public/fonts/GreatVibes-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  width: 1080px;
+  height: 1350px;
+  overflow: hidden;
+  font-family: "Montserrat", system-ui, sans-serif;
+  font-weight: 400;
+  color: #2d3824;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Canvas ── */
+.canvas {
+  width: 1080px;
+  height: 1350px;
+  position: relative;
+  background-color: #f8f7f5;
+  background-image: 
+    radial-gradient(ellipse at 20% 10%, rgba(194, 149, 100, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 90%, rgba(194, 149, 100, 0.05) 0%, transparent 50%);
+}
+
+/* ── Text slide (planner deck) ── */
+.text-slide .canvas {
+  padding: 56px 56px 88px;
+  display: flex;
+  flex-direction: column;
+}
+
+.text-slide .deck-card {
+  flex: 1;
+  position: relative;
+  background: #ffffff;
+  border: 1px solid rgba(194, 149, 100, 0.15);
+  border-radius: 12px;
+  padding: 48px 52px 44px 52px;
+  box-shadow: 0 8px 32px rgba(45, 56, 36, 0.06);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.text-slide .deck-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #c29564;
+  border-radius: 12px 0 0 12px;
+}
+
+.text-slide .phase-watermark {
+  position: absolute;
+  top: 32px;
+  right: 44px;
+  font-family: "Montserrat", sans-serif;
+  font-size: 96px;
+  font-weight: 300;
+  line-height: 1;
+  color: rgba(194, 149, 100, 0.08);
+  pointer-events: none;
+  user-select: none;
+}
+
+.text-slide .meta-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.text-slide .phase-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #ffffff;
+  background: #c29564;
+  padding: 8px 16px;
+  border-radius: 6px;
+}
+
+.text-slide .timing {
+  font-family: "Montserrat", sans-serif;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  color: #8b6f47;
+}
+
+.text-slide h1 {
+  font-family: "Montserrat", sans-serif;
+  font-size: 34px;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #2d2d2d;
+  max-width: 820px;
+  margin-bottom: 16px;
+}
+
+.text-slide .intro {
+  font-size: 21px;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #4a5c3e;
+  max-width: 780px;
+  margin-bottom: 28px;
+}
+
+.text-slide .action-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 800px;
+}
+
+.text-slide .action-list li {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  font-size: 21px;
+  line-height: 1.5;
+  color: #2d3824;
+}
+
+.text-slide .action-list li::before {
+  content: "";
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  margin-top: 11px;
+  border-radius: 50%;
+  background: #c29564;
+}
+
+.text-slide .action-list strong {
+  font-weight: 600;
+  color: #2d3824;
+}
+
+.text-slide .planner-note {
+  margin-top: auto;
+  padding-top: 24px;
+  border-top: 1px solid rgba(194, 149, 100, 0.18);
+}
+
+.text-slide .note-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #c29564;
+  margin-bottom: 8px;
+}
+
+.text-slide .planner-note p {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 19px;
+  font-style: italic;
+  line-height: 1.45;
+  color: #4a5c3e;
+  max-width: 760px;
+}
+
+/* Legacy: plain lines without new schema */
+.text-slide .body-lines p {
+  font-size: 21px;
+  line-height: 1.55;
+  color: #2d3824;
+  margin-bottom: 18px;
+  max-width: 780px;
+}
+
+.text-slide .body-lines p:last-child {
+  margin-bottom: 0;
+}
+
+/* Timeline blocks (planner phases) */
+.text-slide .timeline-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  flex: 1;
+}
+
+.text-slide .timeline-block {
+  padding: 22px 0;
+  border-bottom: 1px solid rgba(194, 149, 100, 0.14);
+}
+
+.text-slide .timeline-block:first-child {
+  padding-top: 4px;
+}
+
+.text-slide .timeline-block:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.text-slide .block-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.text-slide .block-timing {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #ffffff;
+  background: #c29564;
+  padding: 7px 14px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.text-slide .block-label {
+  font-size: 17px;
+  font-weight: 600;
+  color: #2d2d2d;
+}
+
+.text-slide .block-items {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-left: 2px;
+}
+
+.text-slide .block-items li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  font-size: 18px;
+  line-height: 1.45;
+  color: #3d3d3d;
+}
+
+.text-slide .block-items li::before {
+  content: "";
+  flex-shrink: 0;
+  width: 5px;
+  height: 5px;
+  margin-top: 10px;
+  border-radius: 50%;
+  background: #c29564;
+}
+
+.text-slide .pull-quote {
+  margin-top: 28px;
+  padding: 20px 24px;
+  background: rgba(125, 141, 110, 0.08);
+  border-left: 3px solid #9a8554;
+  font-family: "Playfair Display", Georgia, serif;
+  font-style: italic;
+  font-size: 20px;
+  line-height: 1.48;
+  color: #4a5c3e;
+}
+
+/* ── Footer (logo marki — bez numeracji) ── */
+.footer-bar,
+.ig-footer {
+  position: absolute;
+  left: 56px;
+  right: 56px;
+  bottom: 36px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  z-index: 2;
+}
+
+.footer-bar .brand-mini,
+.ig-footer .ig-brand {
+  font-family: "Great Vibes", cursive;
+  font-size: 26px;
+  font-weight: 400;
+  letter-spacing: normal;
+  color: #2d2d2d;
+}
+
+.cover-slide .footer-bar .brand-mini {
+  text-shadow: 0 1px 12px rgba(255, 255, 255, 0.9), 0 0 4px rgba(255, 255, 255, 0.6);
+}
+
+/* ── Cover ── */
+.cover-slide .canvas {
+  padding: 0;
+  background-size: cover;
+  background-position: center;
+}
+
+.cover-slide .overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(248, 247, 245, 0.05) 0%,
+    rgba(248, 247, 245, 0.25) 35%,
+    rgba(248, 247, 245, 0.75) 65%,
+    rgba(248, 247, 245, 0.96) 100%
+  );
+  padding: 56px 56px 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.cover-slide .cover-card {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid rgba(194, 149, 100, 0.18);
+  border-radius: 16px;
+  padding: 40px 44px 36px 52px;
+  box-shadow: 0 16px 48px rgba(45, 56, 36, 0.08);
+  max-width: 100%;
+}
+
+.cover-slide .cover-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #c29564;
+  border-radius: 16px 0 0 16px;
+}
+
+.cover-slide .cover-tag {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #ffffff;
+  background: #c29564;
+  display: inline-block;
+  padding: 8px 16px;
+  margin-bottom: 20px;
+  align-self: flex-start;
+  border-radius: 6px;
+}
+
+.cover-slide h1 {
+  font-family: "Montserrat", sans-serif;
+  font-size: 52px;
+  line-height: 1.12;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #2d2d2d;
+  max-width: 820px;
+}
+
+.cover-slide .subtitle {
+  font-family: "Montserrat", sans-serif;
+  font-size: 22px;
+  font-style: normal;
+  font-weight: 400;
+  color: #5a5a5a;
+  margin-top: 10px;
+  max-width: 640px;
+}
+
+.cover-slide .subtitle.script {
+  font-family: "Great Vibes", cursive;
+  font-size: 44px;
+  font-style: normal;
+  font-weight: 400;
+  color: #c29564;
+  margin-top: 4px;
+  line-height: 1.15;
+}
+
+.cover-slide .cover-lead {
+  margin-top: 18px;
+  font-size: 17px;
+  line-height: 1.45;
+  color: #6a6a6a;
+  max-width: 600px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(194, 149, 100, 0.2);
+}
+
+.cover-slide .overlay.center {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: linear-gradient(180deg, rgba(45, 56, 36, 0.15) 0%, rgba(45, 56, 36, 0.55) 100%);
+}
+
+/* IG grid safe zone — treść w środku kadru 4:5 (przetrwa crop 1:1 na profilu) */
+.cover-slide .overlay.center-card {
+  justify-content: center;
+  align-items: stretch;
+  padding: 140px 56px 120px;
+  background: linear-gradient(
+    180deg,
+    rgba(248, 247, 245, 0.35) 0%,
+    rgba(248, 247, 245, 0.2) 28%,
+    rgba(248, 247, 245, 0.15) 52%,
+    rgba(248, 247, 245, 0.55) 78%,
+    rgba(248, 247, 245, 0.92) 100%
+  );
+}
+
+.cover-slide .overlay.center-card .cover-card {
+  padding: 32px 40px 28px 48px;
+}
+
+.cover-slide .overlay.center-card h1 {
+  font-size: 46px;
+  line-height: 1.1;
+}
+
+.cover-slide .overlay.center-card .subtitle.script {
+  font-size: 38px;
+}
+
+.cover-slide .overlay.top {
+  justify-content: flex-start;
+  padding: 64px 56px 100px;
+  background: linear-gradient(
+    180deg,
+    rgba(250, 248, 244, 0.97) 0%,
+    rgba(250, 248, 244, 0.82) 18%,
+    rgba(250, 248, 244, 0.35) 38%,
+    rgba(250, 248, 244, 0.08) 55%,
+    transparent 72%
+  );
+}
+
+.cover-slide .overlay.top .cover-card {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+.cover-slide .overlay.top .cover-card::before {
+  display: none;
+}
+
+.cover-slide .overlay.top .cover-divider {
+  width: 80px;
+  height: 2px;
+  background: #c29564;
+  opacity: 0.55;
+  margin-top: 22px;
+  align-self: flex-start;
+}
+
+.cover-slide h1.big {
+  font-size: 52px;
+  font-weight: 600;
+  color: #fefdfb;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.25);
+  max-width: 860px;
+  line-height: 1.18;
+}
+
+/* ── CTA ── */
+.cta-slide .canvas {
+  padding: 56px 56px 88px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.cta-slide .cta-card {
+  background: #ffffff;
+  border: 1px solid rgba(194, 149, 100, 0.15);
+  border-radius: 16px;
+  padding: 64px 56px;
+  max-width: 880px;
+  width: 100%;
+  box-shadow: 0 16px 48px rgba(45, 56, 36, 0.06);
+}
+
+.cta-slide .brand {
+  font-family: "Great Vibes", cursive;
+  font-size: 52px;
+  line-height: 1;
+  margin-bottom: 24px;
+  color: #2d2d2d;
+}
+
+.cta-slide .lead {
+  font-family: "Montserrat", sans-serif;
+  font-size: 32px;
+  line-height: 1.4;
+  font-weight: 500;
+  margin-bottom: 32px;
+  color: #2d2d2d;
+}
+
+.cta-slide .cta-link {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #c29564;
+}
+
+.cta-slide .cta-link span {
+  border-bottom: 2px solid rgba(194, 149, 100, 0.6);
+  padding-bottom: 3px;
+}
+
+.cta-slide .save {
+  margin-top: 20px;
+  font-family: "Montserrat", sans-serif;
+  font-style: normal;
+  font-size: 18px;
+  color: #8b6f47;
+}
+
+/* ── Image slide ── */
+.image-slide .canvas {
+  padding: 44px 52px 88px;
+  display: flex;
+  flex-direction: column;
+}
+
+.image-slide img {
+  width: 100%;
+  border-radius: 2px;
+  border: 1px solid rgba(125, 141, 110, 0.18);
+  box-shadow: 0 16px 48px rgba(45, 56, 36, 0.08);
+  object-fit: contain;
+  object-position: top;
+  background: #fefdfb;
+}
+
+.image-slide .caption-bar {
+  margin-top: 24px;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 28px;
+  font-weight: 500;
+  font-style: italic;
+  color: #3d4a32;
+}
+
+/* ── Infographic (simple timeline) ── */
+.ig-slide {
+  width: 1080px;
+  height: 1350px;
+  overflow: hidden;
+  font-family: "Montserrat", system-ui, sans-serif;
+  color: #2d3824;
+  -webkit-font-smoothing: antialiased;
+}
+
+.ig-canvas {
+  width: 1080px;
+  height: 1350px;
+  position: relative;
+  background: #f5f3ee;
+  padding: 96px 88px 100px;
+}
+
+.ig-canvas-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Cover */
+.ig-cover .ig-canvas {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding-left: 72px;
+  padding-right: 72px;
+}
+
+.ig-cover .ig-cover-main {
+  width: 100%;
+  max-width: 880px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.ig-cover-illustrated .ig-canvas {
+  padding-top: 72px;
+  padding-bottom: 80px;
+}
+
+.ig-cover-art {
+  width: 920px;
+  height: 560px;
+  margin-bottom: 28px;
+  flex-shrink: 0;
+}
+
+.ig-cover-art svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ig-cover-illustrated h1 {
+  font-size: 54px;
+}
+
+.ig-cover-illustrated .ig-sub {
+  margin-top: 14px;
+  font-size: 21px;
+}
+
+.ig-cover h1 {
+  font-size: 64px;
+  line-height: 1.1;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-align: center;
+  max-width: 880px;
+}
+
+.ig-sub {
+  margin-top: 20px;
+  font-size: 22px;
+  font-weight: 400;
+  color: #4a5c3e;
+  text-align: center;
+}
+
+/* Timeline */
+.ig-timeline .ig-canvas {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.ig-timeline-title {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 64px;
+  color: #2d3824;
+}
+
+.ig-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.ig-step {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  column-gap: 40px;
+  align-items: stretch;
+  padding: 36px 0;
+}
+
+.ig-step-rail {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.ig-step-node {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #9a8554;
+  margin-top: 8px;
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+}
+
+.ig-step-line {
+  position: absolute;
+  top: 20px;
+  bottom: -36px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  background: #9a8554;
+  opacity: 0.35;
+  z-index: 1;
+}
+
+.ig-step-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 12px;
+}
+
+.ig-phase {
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #2d3824;
+}
+
+.ig-range {
+  font-size: 18px;
+  font-weight: 500;
+  color: #7d8d6e;
+  white-space: nowrap;
+}
+
+.ig-summary {
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1.45;
+  color: #4a5c3e;
+}
+
+.ig-step-highlight {
+  margin: 0 -32px;
+  padding: 36px 32px;
+  background: linear-gradient(
+    90deg,
+    rgba(154, 133, 84, 0.1) 0%,
+    rgba(154, 133, 84, 0.04) 55%,
+    transparent 100%
+  );
+  border-left: 3px solid #9a8554;
+  border-radius: 0 12px 12px 0;
+}
+
+.ig-step-highlight .ig-step-node {
+  width: 14px;
+  height: 14px;
+  box-shadow: 0 0 0 4px rgba(154, 133, 84, 0.2);
+}
+
+.ig-range-highlight {
+  font-size: 26px;
+  font-weight: 700;
+  color: #9a8554;
+  letter-spacing: -0.01em;
+}
+
+/* CTA */
+.ig-cta-lead {
+  font-size: 36px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #2d3824;
+  margin-bottom: 32px;
+  max-width: 640px;
+}
+
+.ig-cta-link {
+  font-size: 16px;
+  font-weight: 500;
+  color: #7d8d6e;
+}
+
+/* ── Stories (9:16) ── */
+.ig-story {
+  width: 1080px;
+  height: 1920px;
+  overflow: hidden;
+  font-family: "Montserrat", system-ui, sans-serif;
+  color: #2d3824;
+  -webkit-font-smoothing: antialiased;
+}
+
+.ig-story .ig-canvas {
+  width: 1080px;
+  height: 1920px;
+  padding: 140px 88px 120px;
+}
+
+.ig-story .ig-eyebrow {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #9a8554;
+  margin-bottom: 48px;
+}
+
+.ig-story .ig-script {
+  font-family: "Great Vibes", cursive;
+  font-size: 72px;
+  line-height: 1;
+  color: #9a8554;
+  margin-bottom: 32px;
+}
+
+.ig-story .ig-price {
+  font-size: 120px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: #9a8554;
+  margin-bottom: 16px;
+}
+
+.ig-story .ig-period {
+  font-size: 36px;
+  font-weight: 600;
+  color: #2d3824;
+  margin-bottom: 40px;
+}
+
+.ig-story .ig-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 760px;
+}
+
+.ig-story .ig-lines p {
+  font-size: 26px;
+  line-height: 1.45;
+  color: #4a5c3e;
+}
+
+.ig-story .ig-feature-card {
+  margin-top: 48px;
+  width: 100%;
+  max-width: 820px;
+  background: #fefdfb;
+  border: 1px solid rgba(154, 133, 84, 0.25);
+  border-radius: 20px;
+  padding: 40px 48px;
+}
+
+.ig-story .ig-feature-card h3 {
+  font-size: 34px;
+  font-weight: 600;
+  margin-bottom: 28px;
+  color: #2d3824;
+}
+
+.ig-story .ig-feature-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ig-story .ig-feature-list li {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 28px;
+  color: #2d3824;
+}
+
+.ig-story .ig-feature-list li::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #9a8554;
+  flex-shrink: 0;
+}
+
+.ig-story .ig-pill {
+  margin-top: 56px;
+  display: inline-block;
+  padding: 22px 48px;
+  border-radius: 999px;
+  background: #9a8554;
+  color: #fefdfb;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.ig-story .ig-cta-lead {
+  font-size: 48px;
+  max-width: 720px;
+}
+
+.ig-story .ig-note {
+  margin-top: 32px;
+  font-size: 24px;
+  color: #7d8d6e;
+}

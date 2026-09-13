@@ -1,0 +1,307 @@
+/* Clerk auth – responsywność i spójność z Wedding Board */
+
+.auth-flow {
+  background: transparent !important;
+}
+
+.auth-signin-page,
+.auth-signin-page * {
+  box-sizing: border-box;
+}
+
+.auth-signin-page .clerk-form-host {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Pola – pełna szerokość, brak overflow */
+.auth-flow input[type="text"],
+.auth-flow input[type="email"],
+.auth-flow input[type="password"],
+.auth-flow input[type="tel"],
+.auth-flow [data-clerk-card] input {
+  font-feature-settings: normal !important;
+  letter-spacing: normal !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+.auth-flow [data-clerk-root],
+.auth-flow [data-clerk-card],
+.auth-flow [data-clerk-card] > div,
+.auth-flow [data-clerk-card] form,
+.auth-flow [class*="cardBox"],
+.auth-flow [class*="rootBox"],
+.auth-flow .cl-rootBox,
+.auth-flow .cl-cardBox,
+.auth-flow .cl-card,
+.auth-flow .cl-main,
+.auth-flow .cl-form,
+.auth-flow .cl-formFieldRow,
+.auth-flow .cl-formField,
+.auth-flow .cl-formButtonPrimary {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+.auth-flow [data-clerk-card],
+.auth-flow [data-clerk-card] > div {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  overflow-x: hidden !important;
+}
+
+.auth-flow [data-clerk-card] form,
+.auth-flow [data-clerk-card] [class*="formContainer"],
+.auth-flow [data-clerk-card] [class*="form"] {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.auth-flow [data-clerk-card] [data-clerk-social-buttons] {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.5rem !important;
+  overflow: visible !important;
+}
+
+.auth-flow [data-clerk-card] [data-clerk-social-buttons] button,
+.auth-flow [data-clerk-card] a[href*="oauth"],
+.auth-flow button[data-clerk-social-button],
+.auth-flow [class*="socialButton"],
+.auth-flow .cl-socialButtonsBlockButton {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 44px !important;
+  overflow: visible !important;
+}
+
+.auth-flow .cl-socialButtonsBlockButtonText,
+.auth-flow [class*="socialButton"] [class*="Text"] {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: unset !important;
+  text-align: center !important;
+  line-height: 1.25 !important;
+}
+
+.auth-flow [data-clerk-card] [class*="divider"],
+.auth-flow [data-clerk-card] [class*="formField"],
+.auth-flow [data-clerk-card] [class*="formButton"],
+.auth-flow [data-clerk-card] button[type="submit"] {
+  width: 100% !important;
+}
+
+.auth-flow [data-clerk-card] footer {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+  flex-wrap: wrap !important;
+  gap: 0.25rem !important;
+}
+
+.auth-flow [data-clerk-card],
+.auth-flow [data-clerk-card] *,
+.auth-flow .clerk-box,
+.auth-flow .clerk-box * {
+  font-family: var(--font-sans), "Montserrat", sans-serif !important;
+}
+
+.auth-flow header[data-clerk-header],
+.auth-flow [class*="clerkHeader"],
+.auth-flow [class*="cardHeader"] {
+  display: none !important;
+}
+
+.auth-flow [data-clerk-card] input[type="text"],
+.auth-flow [data-clerk-card] input[type="email"],
+.auth-flow [data-clerk-card] input[type="password"],
+.auth-flow [data-clerk-card] input,
+.auth-flow .clerk-input {
+  box-shadow: none !important;
+  border: 1px solid rgba(125, 141, 110, 0.25) !important;
+  border-radius: 10px !important;
+  padding: 10px 14px !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+}
+
+.auth-flow [data-clerk-card] input:focus,
+.auth-flow .clerk-input:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(154, 133, 84, 0.2) !important;
+}
+
+/* Własne formularze logowania – padding z miejscem na ikonę (nie nadpisuj pl-10 z Tailwind) */
+.auth-flow .auth-field-input {
+  box-shadow: none !important;
+  border: 1px solid rgba(125, 141, 110, 0.25) !important;
+  border-radius: 0.75rem !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.auth-flow .auth-field-input--leading-icon {
+  padding: 0.75rem 1rem 0.75rem 2.75rem !important;
+}
+
+.auth-flow .auth-field-input--both-icons {
+  padding: 0.75rem 2.75rem 0.75rem 2.75rem !important;
+}
+
+.auth-flow .auth-field-input--centered {
+  padding: 0.75rem 1rem !important;
+}
+
+.auth-flow .auth-field-input:focus {
+  outline: none !important;
+  border-color: rgba(154, 133, 84, 0.5) !important;
+  box-shadow: 0 0 0 2px rgba(154, 133, 84, 0.2) !important;
+}
+
+.auth-flow .auth-field-input::placeholder {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.auth-flow [data-clerk-social-buttons] button,
+.auth-flow [data-clerk-card] a[href*="oauth"],
+.auth-flow button[data-clerk-social-button],
+.auth-flow [class*="socialButton"],
+.auth-flow .cl-socialButtonsBlockButton {
+  background: transparent !important;
+  border: 1px solid rgba(125, 141, 110, 0.25) !important;
+  box-shadow: none !important;
+  border-radius: 10px !important;
+}
+
+.auth-flow [data-clerk-card],
+.auth-flow [data-clerk-card] > div,
+.auth-flow .glass-card [data-clerk-card] {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* OTP – mieści się na wąskich ekranach */
+.auth-flow [class*="otpCodeFieldInputs"],
+.auth-flow [class*="otpCodeFieldInputContainer"] {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  gap: 0.35rem 0.5rem !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.auth-flow [class*="otpCodeFieldInput"],
+.auth-flow .cl-otpCodeFieldInput {
+  width: 2.5rem !important;
+  min-width: 2.25rem !important;
+  max-width: 2.75rem !important;
+  flex: 0 1 auto !important;
+  padding: 8px 4px !important;
+  font-size: 1.1rem !important;
+}
+
+/* Kroki weryfikacji – tekst łamie się */
+.auth-flow [class*="identityPreview"],
+.auth-flow [class*="alternativeMethods"],
+.auth-flow [class*="navbar"] {
+  width: 100% !important;
+  max-width: 100% !important;
+  word-break: break-word !important;
+}
+
+.auth-flow [data-clerk-card] form a:not([href*="clerk.com"]):not([href*="oauth"]),
+.auth-flow [data-clerk-card] [role="navigation"] a {
+  font-weight: 500 !important;
+  color: #2d3824 !important;
+}
+
+.auth-flow [data-clerk-card] footer > div:last-child,
+.auth-flow [data-clerk-card] [class*="footerPages"],
+.auth-flow footer a[href*="clerk.com"] {
+  opacity: 0.2 !important;
+  color: #8f9e82 !important;
+  font-size: 0.65rem !important;
+  pointer-events: none !important;
+}
+
+.auth-flow footer a:not([href*="clerk.com"]) {
+  color: #737373 !important;
+}
+
+/* Mobile */
+@media (max-width: 639px) {
+  .auth-flow input[type="text"],
+  .auth-flow input[type="email"],
+  .auth-flow input[type="password"],
+  .auth-flow [data-clerk-card] input,
+  .auth-flow .auth-field-input {
+    font-size: 16px !important;
+  }
+
+  .auth-flow .auth-field-input--leading-icon {
+    padding: 0.75rem 0.875rem 0.75rem 2.875rem !important;
+  }
+
+  .auth-flow .auth-field-input--both-icons {
+    padding: 0.75rem 2.875rem 0.75rem 2.875rem !important;
+  }
+
+  .auth-flow [class*="otpCodeFieldInput"],
+  .auth-flow .cl-otpCodeFieldInput {
+    width: 2.15rem !important;
+    min-width: 2rem !important;
+    max-width: 2.35rem !important;
+    font-size: 1rem !important;
+  }
+
+  .auth-flow [data-clerk-card] [data-clerk-social-buttons] [class*="badge"],
+  .auth-flow [data-clerk-card] [data-clerk-social-buttons] [class*="Badge"],
+  .auth-flow [data-clerk-card] [data-clerk-social-buttons] [class*="lastUsed"] {
+    max-width: calc(100% - 8px) !important;
+    right: 4px !important;
+    font-size: 0.65rem !important;
+  }
+
+  .auth-flow .cl-socialButtonsBlockButtonText {
+    font-size: 0.85rem !important;
+  }
+
+  .auth-flow [data-clerk-card] footer,
+  .auth-flow [data-clerk-card] [class*="footerAction"] {
+    font-size: 0.8rem !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
+
+/* Bardzo wąskie telefony */
+@media (max-width: 360px) {
+  .auth-flow [class*="otpCodeFieldInput"],
+  .auth-flow .cl-otpCodeFieldInput {
+    width: 1.85rem !important;
+    min-width: 1.75rem !important;
+    max-width: 2rem !important;
+    font-size: 0.95rem !important;
+  }
+}
+
+/* Safe area (notch) */
+@supports (padding: max(0px)) {
+  .auth-signin-page {
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+    padding-right: max(0.75rem, env(safe-area-inset-right));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+}

@@ -1,0 +1,923 @@
+<title>Podręcznik EventBoard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+
+<style>
+  :root {
+    --ground:#faf9f7; --surface:#fff; --surface-2:#f4f2ee;
+    --ink:#1a1a1f; --muted:#6b6862; --faint:#93908a;
+    --border:#e5e2dc; --border-2:#d6d2ca;
+    --accent:#2563eb; --accent-bg:#eef4ff;
+    --good:#10b981; --good-bg:#e8f7f1;
+    --warn-bg:#fdf6e7; --warn-br:#e8cf94; --warn-ink:#7a5a12;
+    --t1:#3b82f6; --t2:#f97316; --t3:#22c55e; --t4:#8b5cf6;
+    --t5:#0ea5e9; --t6:#f59e0b; --t7:#6366f1; --t8:#059669;
+    --serif:"Newsreader",ui-serif,Georgia,serif;
+    --sans:"Source Sans 3",ui-sans-serif,system-ui,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:#131317; --surface:#1b1b21; --surface-2:#22222a;
+      --ink:#ecebe8; --muted:#a5a29b; --faint:#7e7b75;
+      --border:#2e2e37; --border-2:#3d3d48;
+      --accent:#7ba5f7; --accent-bg:#1c2740;
+      --good:#4dd4a0; --good-bg:#16302a;
+      --warn-bg:#2b2415; --warn-br:#5c4a1e; --warn-ink:#e0c485;
+      --t1:#7aa7f5; --t2:#f7a35f; --t3:#63d38b; --t4:#b295f7;
+      --t5:#5cbdf0; --t6:#f0bb5c; --t7:#9095f5; --t8:#4bc48f;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:#131317; --surface:#1b1b21; --surface-2:#22222a;
+    --ink:#ecebe8; --muted:#a5a29b; --faint:#7e7b75;
+    --border:#2e2e37; --border-2:#3d3d48;
+    --accent:#7ba5f7; --accent-bg:#1c2740;
+    --good:#4dd4a0; --good-bg:#16302a;
+    --warn-bg:#2b2415; --warn-br:#5c4a1e; --warn-ink:#e0c485;
+    --t1:#7aa7f5; --t2:#f7a35f; --t3:#63d38b; --t4:#b295f7;
+    --t5:#5cbdf0; --t6:#f0bb5c; --t7:#9095f5; --t8:#4bc48f;
+  }
+
+  *{box-sizing:border-box}
+  body{background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased}
+
+  .wrap{display:grid;grid-template-columns:1fr;max-width:1200px;margin:0 auto;padding:0 24px 100px}
+  @media (min-width:1080px){.wrap{grid-template-columns:222px minmax(0,1fr);gap:60px;padding-right:40px}}
+
+  .masthead{grid-column:1/-1;padding:66px 0 40px;border-bottom:1px solid var(--border);margin-bottom:50px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:0 0 14px}
+  h1{font-family:var(--serif);font-weight:500;font-size:clamp(2.2rem,5vw,3.2rem);line-height:1.08;letter-spacing:-.015em;margin:0 0 16px;text-wrap:balance}
+  .standfirst{font-size:1.07rem;color:var(--muted);max-width:62ch;margin:0}
+  .meta-row{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:26px;font-family:var(--mono);font-size:11.5px;color:var(--faint)}
+  .meta-row b{color:var(--muted);font-weight:500}
+
+  .toc{display:none}
+  @media (min-width:1080px){
+    .toc{display:block;position:sticky;top:30px;align-self:start;max-height:calc(100vh - 60px);overflow-y:auto;font-size:13px;line-height:1.4}
+    .toc p{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin:0 0 11px}
+    .toc p+p{margin-top:20px}
+    .toc a{display:block;padding:5px 0 5px 12px;border-left:2px solid var(--border);color:var(--muted);text-decoration:none;transition:color .15s,border-color .15s}
+    .toc a:hover{color:var(--accent);border-left-color:var(--accent)}
+    .toc a b{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-right:7px;font-weight:500}
+  }
+
+  main{min-width:0}
+  section{margin-bottom:72px;scroll-margin-top:28px}
+
+  h2{font-family:var(--serif);font-weight:500;font-size:1.75rem;line-height:1.18;letter-spacing:-.01em;margin:0 0 6px;text-wrap:balance;display:flex;align-items:baseline;gap:14px}
+  h2 .num{font-family:var(--mono);font-size:.72rem;font-weight:500;color:var(--accent);letter-spacing:.06em;flex-shrink:0}
+  h3{font-family:var(--sans);font-weight:600;font-size:1.03rem;margin:34px 0 10px;display:flex;align-items:center;gap:9px}
+  h4{font-family:var(--sans);font-weight:600;font-size:.92rem;margin:24px 0 8px;color:var(--ink)}
+  .lede{color:var(--muted);margin:0 0 26px;max-width:68ch}
+  p{margin:0 0 16px;max-width:68ch}
+
+  code{font-family:var(--mono);font-size:.855em;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;padding:.1em .38em;white-space:nowrap}
+
+  figure{margin:28px 0}
+  figure img{display:block;width:100%;height:auto;border:1px solid var(--border-2);border-radius:8px;background:#fff}
+  figcaption{font-size:.82rem;color:var(--muted);margin-top:11px;line-height:1.55;max-width:76ch}
+  figcaption b{color:var(--ink);font-weight:600}
+  figcaption code{font-size:.9em}
+
+  .dot{width:9px;height:9px;border-radius:2px;display:inline-block;flex-shrink:0}
+  .sw{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:7px}
+
+  /* przepływ end-to-end */
+  .flow{display:grid;gap:2px;margin:30px 0;grid-template-columns:1fr}
+  @media (min-width:820px){.flow{grid-template-columns:repeat(6,1fr)}}
+  .fstep{background:var(--surface);border:1px solid var(--border);padding:15px 14px}
+  .fstep .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--accent);display:block;margin-bottom:7px}
+  .fstep .t{font-weight:600;font-size:.9rem;line-height:1.28;margin-bottom:5px}
+  .fstep .d{font-size:.79rem;color:var(--muted);line-height:1.45}
+  .fstep .w{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);margin-top:9px;padding-top:8px;border-top:1px dashed var(--border-2)}
+
+  /* karty zakładek */
+  .tabcard{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--c,var(--accent));border-radius:0 8px 8px 0;padding:16px 20px;margin:20px 0;max-width:76ch}
+  .tabcard h4{margin:0 0 8px}
+  .tabcard p{margin:0 0 8px;font-size:.9rem;color:var(--muted)}
+  .tabcard p:last-child{margin-bottom:0}
+
+  .tbl-wrap{overflow-x:auto;margin:22px 0;border:1px solid var(--border);border-radius:6px}
+  table{border-collapse:collapse;width:100%;font-size:.855rem;min-width:520px;background:var(--surface)}
+  th{text-align:left;font-family:var(--mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);font-weight:500;padding:11px 14px;border-bottom:1px solid var(--border-2);background:var(--surface-2);white-space:nowrap}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:top;color:var(--muted);line-height:1.5}
+  tr:last-child td{border-bottom:none}
+  td:first-child{color:var(--ink)}
+  td code{background:transparent;border:none;padding:0;color:var(--ink);font-weight:500}
+
+  .note{border-left:3px solid var(--accent);background:var(--accent-bg);padding:14px 18px;margin:22px 0;border-radius:0 5px 5px 0;font-size:.89rem;max-width:72ch}
+  .note p{margin:0;max-width:none}
+  .note p+p{margin-top:9px}
+  .note .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:6px}
+  .note.warn{border-left-color:var(--warn-br);background:var(--warn-bg)}
+  .note.warn .lbl{color:var(--warn-ink)}
+  .note.ok{border-left-color:var(--good);background:var(--good-bg)}
+  .note.ok .lbl{color:var(--good)}
+
+  .story{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 6px 6px 0;padding:14px 18px;margin:16px 0;max-width:74ch}
+  .story .s{margin:0 0 10px;font-size:.95rem;color:var(--ink);max-width:none;font-style:italic}
+  .story .s b{font-style:normal}
+  .story .c{margin:0;padding-top:10px;border-top:1px dashed var(--border-2);font-size:.84rem;color:var(--muted);line-height:1.65;max-width:none}
+  .story .c b{color:var(--ink);font-weight:600}
+
+  ol.steps{padding-left:0;list-style:none;counter-reset:s;margin:22px 0;max-width:70ch}
+  ol.steps li{counter-increment:s;position:relative;padding-left:40px;margin-bottom:14px;font-size:.91rem;color:var(--muted)}
+  ol.steps li::before{content:counter(s);position:absolute;left:0;top:1px;width:24px;height:24px;border-radius:50%;background:var(--surface-2);border:1px solid var(--border-2);color:var(--ink);font-family:var(--mono);font-size:11px;display:flex;align-items:center;justify-content:center}
+  ol.steps li b{color:var(--ink);font-weight:600}
+
+  ul.plain{padding-left:20px;margin:14px 0;max-width:70ch}
+  ul.plain li{margin-bottom:8px;color:var(--muted);font-size:.91rem}
+  ul.plain li b{color:var(--ink);font-weight:600}
+
+  .footer{grid-column:1/-1;border-top:1px solid var(--border);padding-top:26px;margin-top:20px;font-size:.82rem;color:var(--faint)}
+  a{color:var(--accent)}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">Podręcznik użytkownika · panel organizatora</p>
+    <h1>Podręcznik EventBoard</h1>
+    <p class="standfirst">
+      Przejście przez każdą zakładkę panelu i przez pełną ścieżkę obsługi —
+      od zapytania z publicznego profilu, przez proces i agendę, po rozliczenie.
+      Wszystkie zrzuty pochodzą z działającego środowiska demo.
+    </p>
+    <div class="meta-row">
+      <span><b>Rola</b> organizator / sala</span>
+      <span><b>Panel</b> /pl/app</span>
+      <span><b>Demo</b> scripts/seed-demo-org.mjs</span>
+    </div>
+  </header>
+
+  <nav class="toc">
+    <p>Podstawy</p>
+    <a href="#sciezka"><b>01</b>Ścieżka obsługi</a>
+    <a href="#start"><b>02</b>Pierwsze kroki</a>
+    <p>Zakładki</p>
+    <a href="#dashboard"><b>03</b>Dashboard</a>
+    <a href="#kalendarz"><b>04</b>Kalendarz</a>
+    <a href="#eventy"><b>05</b>Eventy</a>
+    <a href="#karta"><b>06</b>Karta eventu</a>
+    <a href="#zapytania"><b>07</b>Zapytania</a>
+    <a href="#finanse"><b>08</b>Finanse</a>
+    <a href="#zespol"><b>09</b>Zespół</a>
+    <a href="#konfiguracja"><b>10</b>Konfiguracja</a>
+    <a href="#ustawienia"><b>11</b>Ustawienia</a>
+    <p>Na zewnątrz</p>
+    <a href="#procesy"><b>12</b>Procesy</a>
+    <a href="#klient"><b>13</b>Widok klienta</a>
+    <a href="#luki"><b>14</b>Czego brakuje</a>
+  </nav>
+
+  <main>
+
+    <!-- 01 -->
+    <section id="sciezka">
+      <h2><span class="num">01</span>Ścieżka obsługi</h2>
+      <p class="lede">
+        Cała aplikacja układa się w jeden ciąg. Zakładki nie są osobnymi narzędziami —
+        każda obsługuje inny odcinek tej samej drogi.
+      </p>
+
+      <div class="flow">
+        <div class="fstep"><span class="k">01</span><div class="t">Zapytanie</div><div class="d">Klient wysyła formularz z publicznego profilu sali.</div><div class="w">Zapytania</div></div>
+        <div class="fstep"><span class="k">02</span><div class="t">Event</div><div class="d">Zapytanie staje się eventem z datą, typem i liczbą gości.</div><div class="w">Eventy</div></div>
+        <div class="fstep"><span class="k">03</span><div class="t">Proces</div><div class="d">Event dostaje ścieżkę obsługi z krokami i rolami.</div><div class="w">Karta eventu</div></div>
+        <div class="fstep"><span class="k">04</span><div class="t">Ustalenia</div><div class="d">Menu, harmonogram dnia, zadania produkcyjne.</div><div class="w">Karta eventu</div></div>
+        <div class="fstep"><span class="k">05</span><div class="t">Agenda</div><div class="d">Dokument z danych zebranych w procesie.</div><div class="w">Karta eventu</div></div>
+        <div class="fstep"><span class="k">06</span><div class="t">Rozliczenie</div><div class="d">Zadatek, raty, dopłata końcowa.</div><div class="w">Finanse</div></div>
+      </div>
+
+      <p>
+        Pod spodem trzy rzeczy ustawia się <b>raz</b>, a potem działają dla każdego eventu:
+        kategorie eventów i moduły (Ustawienia), własne typy obiektów i procesy
+        (Konfiguracja) oraz blokady terminów (Kalendarz).
+      </p>
+
+      <div class="note">
+        <span class="lbl">Zasada, która porządkuje resztę</span>
+        <p>
+          Zakładki górnego poziomu są <b>przeglądem wielu eventów</b> — kalendarz, lista,
+          pieniądze, zapytania. Cała praca nad pojedynczym przyjęciem dzieje się na
+          <b>karcie eventu</b>. Jeśli szukasz konkretnego pola i nie ma go w zakładce,
+          prawie na pewno jest na karcie.
+        </p>
+      </div>
+    </section>
+
+    <!-- 02 -->
+    <section id="start">
+      <h2><span class="num">02</span>Pierwsze kroki</h2>
+      <p class="lede">
+        Świeża organizacja jest pusta. Trzy ustawienia sprawiają, że reszta panelu
+        zaczyna mieć sens.
+      </p>
+
+      <ol class="steps">
+        <li><b>Wejdź w Ustawienia.</b> Pierwsze otwarcie zakłada pięć kategorii systemowych — Wesele, Komunia, Wigilia, Firmowe, Inne. Bez nich formularz nowego eventu ma pustą listę typów i nie da się nic utworzyć.</li>
+        <li><b>Sprawdź link profilu publicznego.</b> W Ustawieniach jest adres <code>/org/&lt;slug&gt;</code> — to on trafia do klientów i to z niego wpadają zapytania.</li>
+        <li><b>Zbuduj proces w Konfiguracji.</b> Choćby prosty, liniowy. Event bez procesu działa, ale nie prowadzi zespołu za rękę.</li>
+        <li><b>Zablokuj terminy niedostępne</b> w Kalendarzu, żeby nie przyjąć rezerwacji na remont albo imprezę zamkniętą.</li>
+      </ol>
+
+      <div class="note warn">
+        <span class="lbl">Kolejność ma znaczenie</span>
+        <p>
+          Kategorie seedują się dopiero przy <b>pierwszym wejściu w Ustawienia</b>, nie przy
+          zakładaniu organizacji. Jeśli od razu pójdziesz w Eventy, lista „Typ eventu”
+          będzie pusta i wyjdzie na to, że formularz jest zepsuty.
+        </p>
+      </div>
+    </section>
+
+    <!-- 03 -->
+    <section id="dashboard">
+      <h2><span class="num">03</span><span class="dot" style="background:var(--t1)"></span>Dashboard</h2>
+      <p class="lede">
+        Ekran otwarcia dnia: cztery liczby, rozkład pracy w czasie i skróty, które
+        układasz sam.
+      </p>
+
+      <figure>
+        <img src="__IMG_10__" alt="Dashboard z licznikami, pipeline etapów i obciążeniem miesięcznym">
+        <figcaption><code>/pl/app/dashboard</code> — pulpit organizacji.</figcaption>
+      </figure>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Element</th><th>Co pokazuje</th><th>Do czego służy</th></tr></thead>
+          <tbody>
+            <tr><td>Eventy</td><td>Liczba wszystkich eventów organizacji.</td><td>Skala obłożenia.</td></tr>
+            <tr><td>Zespół</td><td>Liczba członków organizacji.</td><td>Kontrola dostępów.</td></tr>
+            <tr><td>Czeka na decyzję</td><td>Eventy zatrzymane na kroku wymagającym działania.</td><td>To jest kolejka na dziś.</td></tr>
+            <tr><td>Przychody (opłacone)</td><td>Suma płatności oznaczonych jako opłacone.</td><td>Realny wpływ, nie wartość kontraktów.</td></tr>
+            <tr><td>Pipeline etapów</td><td>Rozkład eventów po krokach procesu.</td><td>Gdzie się korkuje obsługa.</td></tr>
+            <tr><td>Obciążenie miesięczne</td><td>Liczba osób w kolejnych miesiącach.</td><td>Planowanie obsady i zakupów.</td></tr>
+            <tr><td>Nadchodzące eventy</td><td>Najbliższe terminy.</td><td>Co jest tuż za rogiem.</td></tr>
+            <tr><td>Skróty</td><td>Własne linki, edytowalne przyciskiem „Edytuj”.</td><td>Wejście w miejsca używane codziennie.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note">
+        <span class="lbl">Jak to czytać</span>
+        <p>
+          <b>Czeka na decyzję</b> i <b>Pipeline etapów</b> mają sens dopiero, gdy eventy mają
+          przypisany proces. Bez procesu pipeline pokazuje „Brak procesu”, a licznik decyzji
+          stoi na zerze, choć pracy jest dużo.
+        </p>
+      </div>
+
+      <h3>Powiadomienia</h3>
+      <p>
+        Dzwonek w górnym pasku zbiera zdarzenia wymagające reakcji organizacji.
+        Wpadają tam trzy rodzaje sygnałów, wszystkie wywołane działaniem z zewnątrz:
+      </p>
+      <ul class="plain">
+        <li><b>Klient ukończył krok procesu</b> — np. para wybrała menu w portalu. Powiadomienie niesie nazwę kroku i link do karty eventu.</li>
+        <li><b>Odpowiedź klienta w portalu</b> — wypełniony formularz albo akceptacja.</li>
+        <li><b>Nowe zapytanie ofertowe</b> z publicznego profilu.</li>
+      </ul>
+      <p>
+        Kroki wykonane przez zespół powiadomień nie generują — dzwonek pokazuje wyłącznie
+        to, co przyszło z zewnątrz i czeka na Waszą odpowiedź.
+      </p>
+    </section>
+
+    <!-- 04 -->
+    <section id="kalendarz">
+      <h2><span class="num">04</span><span class="dot" style="background:var(--t2)"></span>Kalendarz</h2>
+      <p class="lede">
+        Siatka miesiąca z eventami i blokadami. Podstawowe narzędzie przy odpowiadaniu
+        na pytanie „czy macie wolny termin”.
+      </p>
+
+      <figure>
+        <img src="__IMG_11__" alt="Kalendarz miesięczny z eventami i zablokowanymi terminami">
+        <figcaption><code>/pl/app/calendar</code> — kalendarz z blokadami terminów.</figcaption>
+      </figure>
+
+      <ul class="plain">
+        <li><b>Klik w dzień</b> otwiera tworzenie eventu z podstawioną datą.</li>
+        <li><b>Klik w event</b> przenosi do jego agendy.</li>
+        <li><b>Blokada</b> oznacza dzień jako niedostępny — z powodem, np. „Remont sali głównej”.</li>
+        <li><b>Nowy event</b> tworzy event bez wychodzenia z kalendarza.</li>
+      </ul>
+
+      <div class="story">
+        <p class="s">Jako <b>manager</b> chcę zablokować sylwestra na imprezę zamkniętą, żeby
+        nikt z zespołu nie obiecał tego terminu parze pytającej o wesele.</p>
+        <p class="c">Blokada → data <code>31.12</code> → powód „Impreza zamknięta — sylwester”.
+        Dzień zostaje oznaczony w siatce dla całego zespołu.</p>
+      </div>
+    </section>
+
+    <!-- 05 -->
+    <section id="eventy">
+      <h2><span class="num">05</span><span class="dot" style="background:var(--t3)"></span>Eventy</h2>
+      <p class="lede">
+        Lista wszystkich przyjęć z filtrami statusu. Stąd wchodzi się w konkretną kartę.
+      </p>
+
+      <figure>
+        <img src="__IMG_12__" alt="Lista eventów z filtrami statusów">
+        <figcaption><code>/pl/app/events</code> — cztery eventy różnych kategorii.</figcaption>
+      </figure>
+
+      <h4>Statusy</h4>
+      <p>
+        <b>Szkic</b> → <b>Potwierdzony</b> → <b>Zakończony</b> → <b>Archiwalny</b>.
+        Status zmienia się przyciskiem na karcie i filtruje listę u góry. Jest niezależny
+        od kroku procesu: proces mówi <i>co się teraz dzieje</i>, status mówi
+        <i>czy to jeszcze sprzedaż, czy już historia</i>.
+      </p>
+
+      <h4>Tworzenie eventu</h4>
+      <p>
+        Formularz pyta o typ, nazwę, datę, liczbę gości i jedną rzecz, która ma dalsze
+        konsekwencje — <b>„To jest wesele”</b>. Zaznaczenie odblokowuje portal dla pary
+        (link i PIN), czyli osobny widok dla klienta.
+      </p>
+
+      <h4>Akcje na karcie listy</h4>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Akcja</th><th>Efekt</th></tr></thead>
+          <tbody>
+            <tr><td>Otwórz</td><td>Przejście do pełnej karty eventu.</td></tr>
+            <tr><td>Edytuj</td><td>Zmiana nazwy, daty, liczby gości, typu.</td></tr>
+            <tr><td>Duplikuj</td><td>Kopia eventu — przydatne przy cyklicznych imprezach firmowych.</td></tr>
+            <tr><td>Link dla klienta</td><td>Adres portalu dla pary wraz z PIN-em.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 06 -->
+    <section id="karta">
+      <h2><span class="num">06</span><span class="dot" style="background:var(--t4)"></span>Karta eventu</h2>
+      <p class="lede">
+        Najważniejszy ekran w aplikacji. Wszystko, co dotyczy jednego przyjęcia, jest tutaj —
+        od procesu, przez menu i harmonogram, po pieniądze i widgety.
+      </p>
+
+      <h3><span class="dot" style="background:var(--t7)"></span>Proces obsługi</h3>
+      <figure>
+        <img src="__IMG_20__" alt="Panel procesu na karcie eventu">
+        <figcaption>
+          Oś kroków: ukończone przekreślone z datą i rolą, bieżący rozwinięty z panelem
+          działania, przyszłe wyszarzone. Pasek u góry pokazuje postęp.
+        </figcaption>
+      </figure>
+      <p>
+        Event bez procesu pokazuje w tym miejscu wybór ścieżki i przycisk
+        <b>Rozpocznij proces</b>. Szczegóły działania silnika opisuje osobna
+        <a href="#procesy">dokumentacja procesów</a>.
+      </p>
+
+      <h3><span class="dot" style="background:var(--t2)"></span>Warianty menu</h3>
+      <figure>
+        <img src="__IMG_21__" alt="Warianty menu z daniami">
+        <figcaption>
+          Każdy wariant ma opis, uwagi o alergenach i listę dań z kategorią, ceną,
+          dopłatą i znacznikami wege / gluten / bezgluten.
+        </figcaption>
+      </figure>
+      <p>
+        Warianty są tym, z czego para wybiera w portalu. Etykieta wariantu wraca potem
+        do procesu jako wartość warunku <code>client_choice</code>, więc <b>nazwa wariantu
+        musi zgadzać się dokładnie</b> z wartością wpisaną w rozgałęzieniu.
+      </p>
+
+      <h3><span class="dot" style="background:var(--t5)"></span>Harmonogram dnia</h3>
+      <figure>
+        <img src="__IMG_22__" alt="Harmonogram dnia z godzinami i opisami">
+        <figcaption>Godzina, tytuł i opis — od ceremonii po poczęstunek nocny.</figcaption>
+      </figure>
+      <p>
+        Harmonogram zasila agendę i eksport PDF. To ten sam materiał, z którego prowadzący
+        korzysta na sali, więc opisy warto pisać operacyjnie: gdzie, ile osób, co ma być
+        gotowe.
+      </p>
+
+      <h3><span class="dot" style="background:var(--t3)"></span>Checklista produkcyjna</h3>
+      <figure>
+        <img src="__IMG_25__" alt="Checklista produkcyjna z przypisaniem">
+        <figcaption>Zadania z przypisaniem do osoby z zespołu.</figcaption>
+      </figure>
+
+      <h3><span class="dot" style="background:var(--t8)"></span>Płatności klienta</h3>
+      <figure>
+        <img src="__IMG_23__" alt="Płatności klienta z podsumowaniem opłacone i do zapłaty">
+        <figcaption>
+          Ręczne śledzenie wpłat: nazwa, kwota, termin. Podsumowanie rozbija sumę na
+          <b>opłacone</b> i <b>do zapłaty</b>, a wartości te agregują się w zakładce Finanse.
+        </figcaption>
+      </figure>
+      <div class="note">
+        <span class="lbl">To nie jest bramka płatnicza</span>
+        <p>
+          Płatności odnotowuje się ręcznie — aplikacja nie pobiera pieniędzy ani nie łączy
+          się z bankiem. Oznaczenie „opłacone” to decyzja człowieka, który zobaczył przelew.
+        </p>
+      </div>
+
+      <h3><span class="dot" style="background:var(--t6)"></span>Pulpit eventu (widgety)</h3>
+      <figure>
+        <img src="__IMG_24__" alt="Pulpit eventu z widgetami">
+        <figcaption>
+          Widgety dokładane per event. Dodawanie prowadzi przez dwa kroki: wybór typu,
+          potem nazwa i widoczność.
+        </figcaption>
+      </figure>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Typ</th><th>Do czego</th></tr></thead>
+          <tbody>
+            <tr><td><span class="sw" style="background:var(--t7)"></span>Scenariusz</td><td>Minutowy plan prowadzącego z trybem live — pokazuje bieżący i następny punkt.</td></tr>
+            <tr><td><span class="sw" style="background:var(--t6)"></span>Notatka</td><td>Wolny tekst: uwagi, instrukcje, ustalenia telefoniczne.</td></tr>
+            <tr><td><span class="sw" style="background:var(--t3)"></span>Checklista</td><td>Lista do odhaczenia z licznikiem ukończenia.</td></tr>
+            <tr><td><span class="sw" style="background:var(--t4)"></span>Statystyka</td><td>Liczba z jednostką i trendem.</td></tr>
+            <tr><td><span class="sw" style="background:var(--t5)"></span>Link</td><td>Szybki dostęp do adresów — playlisty, dysku ze zdjęciami, umowy.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Każdy widget ma przełącznik widoczności: <b>Prywatny</b> (tylko zespół) albo
+        <b>Portal klienta</b>. Klik w plakietkę przełącza to bez wchodzenia w ustawienia.
+      </p>
+
+      <h3>Pozostałe sekcje karty</h3>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Sekcja</th><th>Zastosowanie</th></tr></thead>
+          <tbody>
+            <tr><td>Generuj agendę</td><td>Składa dokument z danych eventu i kroków procesu.</td></tr>
+            <tr><td>Dokumenty eventu</td><td>Generowanie z szablonów zdefiniowanych w Konfiguracji.</td></tr>
+            <tr><td>Konwersacja z klientem</td><td>Wątek wiadomości powiązany z eventem.</td></tr>
+            <tr><td>Akceptacje agendy</td><td>Pięć sekcji do zatwierdzenia: Ogólne, Goście, Kuchnia, Menu, Harmonogram.</td></tr>
+            <tr><td>Kosztorys / wycena</td><td>Wyliczenie z cen menu razy liczba gości plus pozycje dodatkowe.</td></tr>
+            <tr><td>Terminy</td><td>Deadline wyboru menu i listy gości przez klienta.</td></tr>
+            <tr><td>Szablony</td><td>Zapisanie eventu jako szablon do ponownego użycia.</td></tr>
+            <tr><td>Generuj umowę (DOCX)</td><td>Eksport umowy do edycji w edytorze tekstu.</td></tr>
+            <tr><td>Eksport PDF</td><td>Harmonogram dnia i menu jako osobne pliki.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- AGENDA -->
+    <section id="agenda">
+      <h2><span class="num">07</span><span class="dot" style="background:var(--t7)"></span>Agenda i dokumenty</h2>
+      <p class="lede">
+        Agenda jest tym, po co istnieje reszta systemu. Wszystko, co wpisujesz przez
+        tygodnie obsługi — menu, godziny, ustalenia z pary, decyzje kuchni — zbiega się
+        w jednym dokumencie, który w dniu imprezy trzyma w ręku obsługa.
+      </p>
+
+      <div class="note">
+        <span class="lbl">Dlaczego to zmienia sposób pracy</span>
+        <p>
+          W typowej sali agenda powstaje ręcznie: ktoś przepisuje ustalenia z maili,
+          notatek i rozmów do pliku Word, dzień przed imprezą. Tutaj agenda jest
+          <b>składana z danych, które już są w systemie</b> — a kroki procesu dosyłają
+          do niej kolejne informacje w miarę, jak zapadają decyzje. Nie ma etapu
+          przepisywania, więc nie ma też miejsca, w którym coś wypada.
+        </p>
+      </div>
+
+      <h3>Skąd agenda bierze dane</h3>
+      <p>
+        Renderowanie dokumentu buduje jedną płaską mapę wartości z trzech warstw.
+        Późniejsza warstwa nadpisuje wcześniejszą, więc dane z procesu wygrywają
+        z wartościami domyślnymi.
+      </p>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Warstwa</th><th>Skąd</th><th>Przykładowe klucze</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>1 · Pola eventu</td>
+              <td>Karta eventu, menu, harmonogram dnia.</td>
+              <td><code>event.name</code>, <code>event.date</code>, <code>event.estimatedGuestCount</code>, <code>event.menuVariants</code>, <code>event.dayScheduleItems</code></td>
+            </tr>
+            <tr>
+              <td>2 · Pola kategorii</td>
+              <td>Własne pola zdefiniowane przy typie eventu.</td>
+              <td><code>custom.motyw_przewodni</code>, <code>custom.kolor_dekoracji</code></td>
+            </tr>
+            <tr>
+              <td>3 · Dane z procesu</td>
+              <td>Mapowania pól na ukończonych krokach procesu.</td>
+              <td><code>agenda.menu</code>, <code>agenda.uwagiFinalne</code> — nazwy nadajesz sam</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Trzy drogi do agendy</h3>
+
+      <h4>1 · Kreator harmonogramu — „Generuj agendę”</h4>
+      <figure>
+        <img src="__IMG_29__" alt="Kreator agendy — krok wyboru źródła">
+        <figcaption>
+          Kreator prowadzi przez trzy kroki: <b>Źródło → Podgląd → Zapis</b>.
+        </figcaption>
+      </figure>
+      <p>
+        W kroku <b>Źródło</b> możesz dopisać instrukcje zwykłym zdaniem — na przykład
+        „ceremonia w plenerze o 15, tort po 20, poczęstunek nocny”. W kroku
+        <b>Podgląd</b> dostajesz gotowe punkty z godzinami i opisami, każdy do edycji.
+        W kroku <b>Zapis</b> decydujesz, czy punkty mają trafić do harmonogramu dnia,
+        czy od razu wyjść jako plik.
+      </p>
+
+      <h4>2 · Agenda tekstowa w formacie sali</h4>
+      <p>
+        Osobna ścieżka składa agendę w ustalonym układzie: data, liczba osób, miejsce,
+        organizator, osoba odpowiedzialna, okoliczność, dzień tygodnia, potem godziny
+        z punktami, sekcje menu i scenariusz. Wynik pobiera się jako <code>.docx</code>.
+      </p>
+      <div class="note">
+        <span class="lbl">Działa bez konfiguracji AI</span>
+        <p>
+          Jeśli model językowy jest podpięty, układa treść sam. Jeśli nie —
+          a domyślnie <code>AI_PROVIDER</code> stoi na <code>mock</code> — wchodzi
+          <b>deterministyczny generator</b>, który składa agendę z tych samych danych
+          według stałego wzorca. Funkcja nigdy nie zostawia użytkownika z pustym plikiem.
+        </p>
+      </div>
+
+      <h4>3 · Dokument z szablonu A4</h4>
+      <figure>
+        <img src="__IMG_31__" alt="Builder szablonu dokumentu — paleta bloków i kartka A4">
+        <figcaption>
+          <code>/pl/app/settings/document-templates/new</code> — pusta kartka A4, na którą
+          przeciągasz bloki z palety po lewej, a potem wiążesz ich sloty z polami danych.
+        </figcaption>
+      </figure>
+      <p>
+        To najbardziej elastyczna droga: projektujesz własny układ dokumentu raz,
+        a potem generujesz go dla dowolnego eventu z podstawionymi danymi.
+      </p>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Element buildera</th><th>Zawartość</th></tr></thead>
+          <tbody>
+            <tr><td>Bloki</td><td>Nagłówek, Sekcja, Tekst, Kolumny, Tabela, Obraz, Odstęp, Nowa strona.</td></tr>
+            <tr><td>Pola danych</td><td>Pogrupowane: Event, Notatki, Menu, Agenda, Goście.</td></tr>
+            <tr><td>Ustawienia strony</td><td>Format A4 lub Letter, orientacja, marginesy, czcionki nagłówka i tekstu, kolory.</td></tr>
+            <tr><td>Właściwości slotu</td><td>Klucz pola, placeholder oraz prompt dla modelu językowego.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <figure>
+        <img src="__IMG_30__" alt="Lista szablonów dokumentów">
+        <figcaption><code>/pl/app/settings/document-templates</code> — zapisane szablony.</figcaption>
+      </figure>
+
+      <div class="note warn">
+        <span class="lbl">Paleta nie pokazuje wszystkich pól</span>
+        <p>
+          Lista pól do przeciągnięcia zawiera jedenaście kluczy eventu. Pola własne
+          kategorii (<code>custom.*</code>) i klucze przysyłane przez proces
+          (np. <code>agenda.menu</code>) <b>działają przy renderowaniu, ale nie są
+          w palecie</b> — trzeba je wpisać ręcznie w polu „Klucz pola”. Warto więc
+          trzymać spis kluczy, których używacie w mapowaniach.
+        </p>
+      </div>
+
+      <h3>Od kroku procesu do gotowego dokumentu</h3>
+      <p>
+        To jest połączenie, dla którego cała reszta ma sens. Krok procesu zbiera dane,
+        mapowanie przenosi je pod nazwany klucz, a dokument ten klucz drukuje.
+      </p>
+
+      <ol class="steps">
+        <li><b>Para wybiera menu</b> w portalu — krok <code>MENU_SELECTION</code> zapisuje etykietę wariantu.</li>
+        <li><b>Mapowanie pola</b> na tym kroku przenosi <code>selectedVariantLabel</code> pod klucz <code>agenda.menu</code>.</li>
+        <li><b>Wartość ląduje</b> w magazynie danych agendy tego eventu.</li>
+        <li><b>Szablon dokumentu</b> ma slot z kluczem <code>agenda.menu</code> — przy generowaniu wchodzi tam wybór pary, bez przepisywania.</li>
+      </ol>
+
+      <div class="story">
+        <p class="s">Jako <b>szef sali</b> chcę, żeby wybór menu i uwagi z ostatniej rozmowy
+        z parą same znalazły się w agendzie, żeby dzień przed imprezą nie przeklejać
+        niczego z maili.</p>
+        <p class="c">
+          Na kroku „Agenda zatwierdzona” dwa mapowania:
+          <code>selectedVariantLabel → agenda.menu</code> oraz
+          <code>note → agenda.uwagiFinalne</code> z transformacją <code>join_newline</code>.
+          Oba klucze wstawione jako sloty w szablonie A4.
+        </p>
+      </div>
+
+      <h3>Akceptacje agendy</h3>
+      <figure>
+        <img src="__IMG_27__" alt="Panel akceptacji agendy z pięcioma sekcjami">
+        <figcaption>
+          Pięć sekcji do zatwierdzenia: Ogólne, Goście, Kuchnia, Menu, Harmonogram.
+          Licznik u góry pokazuje postęp.
+        </figcaption>
+      </figure>
+      <p>
+        Każdą sekcję można zaakceptować albo odrzucić osobno. Dopiero komplet akceptacji
+        oznacza agendę jako uzgodnioną — to bramka przed drukiem i przed wysłaniem
+        dokumentu parze.
+      </p>
+
+      <h3>Generowanie dokumentu na evencie</h3>
+      <figure>
+        <img src="__IMG_28__" alt="Panel dokumentów eventu">
+        <figcaption>
+          Sekcja <b>Dokumenty eventu</b> na karcie: wybierasz szablon, dostajesz dokument
+          wypełniony danymi tego konkretnego przyjęcia.
+        </figcaption>
+      </figure>
+
+      <h4>Co jeszcze wychodzi z karty</h4>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Eksport</th><th>Zawartość</th></tr></thead>
+          <tbody>
+            <tr><td>Agenda <code>.docx</code></td><td>Pełna agenda w formacie sali, do dalszej edycji.</td></tr>
+            <tr><td>PDF — harmonogram dnia</td><td>Same godziny z punktami, do wywieszenia na zapleczu.</td></tr>
+            <tr><td>PDF — menu</td><td>Karta menu z wariantami i alergenami.</td></tr>
+            <tr><td>Umowa <code>.docx</code></td><td>Umowa z danymi eventu i kwotami.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 08 -->
+    <section id="zapytania">
+      <h2><span class="num">07</span><span class="dot" style="background:var(--t5)"></span>Zapytania</h2>
+      <p class="lede">
+        Wejście lejka. Zapytania trafiają tu z publicznego profilu sali — nie da się
+        ich dodać ręcznie z panelu.
+      </p>
+
+      <figure>
+        <img src="__IMG_13__" alt="Lista zapytań ofertowych">
+        <figcaption><code>/pl/app/leads</code> — zapytania wysłane przez formularz publiczny.</figcaption>
+      </figure>
+
+      <p>
+        Zapytanie niesie imię i nazwisko, kontakt, preferowaną datę, liczbę gości i treść
+        wiadomości. Ma status <b>NEW → CONTACTED → WON / LOST</b>, a wygrane zapytanie
+        można przekuć w event.
+      </p>
+
+      <div class="story">
+        <p class="s">Jako <b>manager</b> chcę zobaczyć zapytanie z datą i liczbą gości, żeby
+        w kalendarzu od razu sprawdzić, czy w ogóle mamy ten termin wolny.</p>
+        <p class="c">Zapytania → wybierz pozycję → sprawdź datę w Kalendarzu → jeśli wolne,
+        konwertuj na event i przypisz proces.</p>
+      </div>
+
+      <div class="note warn">
+        <span class="lbl">Zapytania biorą się z jednego miejsca</span>
+        <p>
+          Jeśli lista jest pusta mimo rozmów z klientami, to znaczy, że nikt nie użył
+          formularza z <code>/org/&lt;slug&gt;</code>. Ten link trzeba świadomie rozesłać —
+          znajdziesz go w Ustawieniach.
+        </p>
+      </div>
+    </section>
+
+    <!-- 08 -->
+    <section id="finanse">
+      <h2><span class="num">08</span><span class="dot" style="background:var(--t8)"></span>Finanse</h2>
+      <p class="lede">
+        Zbiorczy widok pieniędzy ze wszystkich eventów. Sam nic nie wprowadza — agreguje
+        płatności wpisane na kartach.
+      </p>
+
+      <figure>
+        <img src="__IMG_14__" alt="Finanse z podsumowaniem przychodów">
+        <figcaption><code>/pl/app/finances</code> — opłacone, do zapłaty i wartość kontraktów.</figcaption>
+      </figure>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Miara</th><th>Znaczenie</th></tr></thead>
+          <tbody>
+            <tr><td>Opłacone</td><td>Suma płatności oznaczonych jako zapłacone — realny wpływ.</td></tr>
+            <tr><td>Do zapłaty</td><td>Wystawione, jeszcze nieopłacone raty i dopłaty.</td></tr>
+            <tr><td>Wartość kontraktów</td><td>Łączna wartość ustaleń, niezależnie od tego, co wpłynęło.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        Rozdzielenie tych trzech liczb jest celowe: <b>wartość kontraktów</b> mówi, ile
+        sprzedano, <b>opłacone</b> — ile faktycznie jest na koncie, a <b>do zapłaty</b>
+        wskazuje, po co trzeba zadzwonić.
+      </p>
+    </section>
+
+    <!-- 09 -->
+    <section id="zespol">
+      <h2><span class="num">09</span><span class="dot" style="background:var(--t1)"></span>Zespół</h2>
+      <p class="lede">Lista osób w organizacji wraz z rolami.</p>
+
+      <figure>
+        <img src="__IMG_15__" alt="Lista członków zespołu z rolami">
+        <figcaption><code>/pl/app/team</code> — użytkownik, e-mail, rola.</figcaption>
+      </figure>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Rola</th><th>Zakres</th></tr></thead>
+          <tbody>
+            <tr><td>OWNER — Właściciel</td><td>Pełny dostęp, w tym edytor procesów.</td></tr>
+            <tr><td>MANAGER</td><td>Prowadzenie eventów i edycja procesów.</td></tr>
+            <tr><td>STAFF — Pracownik</td><td>Praca na eventach; <b>bez</b> dostępu do edytora procesów.</td></tr>
+            <tr><td>VIEWER</td><td>Podgląd; <b>bez</b> edycji procesów.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note">
+        <span class="lbl">Role zespołu a role w procesie to dwie różne rzeczy</span>
+        <p>
+          Rola w zespole decyduje o <b>uprawnieniach w aplikacji</b>. Rola na kroku procesu
+          (Kucharz, Kelner, Barman, Koordynator albo dowolna własna) opisuje jedynie,
+          <b>kto ma wykonać ten krok</b> — jest etykietą organizacyjną, nie kontrolą dostępu.
+        </p>
+      </div>
+    </section>
+
+    <!-- 10 -->
+    <section id="konfiguracja">
+      <h2><span class="num">10</span><span class="dot" style="background:var(--t4)"></span>Konfiguracja</h2>
+      <p class="lede">
+        Ustawiasz raz, działa przy każdym evencie. Cztery kafle na górze prowadzą do
+        obszarów konfiguracji, niżej definiujesz własne obiekty i przypisujesz procesy.
+      </p>
+
+      <figure>
+        <img src="__IMG_16__" alt="Konfiguracja organizacji z kreatorem typów obiektów">
+        <figcaption><code>/pl/app/settings/configuration</code> — kreator typu obiektu i przypisanie procesu.</figcaption>
+      </figure>
+
+      <h4>Własne typy obiektów</h4>
+      <p>Kreator prowadzi przez cztery kroki:</p>
+      <ol class="steps">
+        <li><b>Podstawowe dane</b> — nazwa i opis obiektu.</li>
+        <li><b>Gdzie ma być widoczny</b> — wybór kartotek: Karta eventu, Portal klienta, Agenda, Dokumenty, Zapytania, Finanse.</li>
+        <li><b>Powiązanie z procesem</b> — opcjonalne; pola powiązanego obiektu stają się kandydatami przy mapowaniu do agendy.</li>
+        <li><b>Pola obiektu</b> — Tekst, Liczba, Data, Kwota, Lista; kolejność zmieniasz przeciąganiem.</li>
+      </ol>
+
+      <div class="story">
+        <p class="s">Jako <b>manager</b> chcę mieć obiekt „Kontakt do pary” widoczny na karcie
+        eventu i w dokumentach, żeby dane do umowy były w jednym miejscu, a nie w mailach.</p>
+        <p class="c">Kartoteki: Karta eventu + Dokumenty. Pola: imiona pary (tekst),
+        telefon (tekst), termin degustacji (data).</p>
+      </div>
+
+      <h4>Przypisanie procesu do eventów</h4>
+      <p>
+        Wybierasz proces i zaznaczasz eventy, które mają go używać.
+        <b>Zaznaczenie jest pełną listą, nie dopiskiem</b> — eventy odznaczone tracą ten proces.
+      </p>
+    </section>
+
+    <!-- 11 -->
+    <section id="ustawienia">
+      <h2><span class="num">11</span><span class="dot" style="background:var(--t6)"></span>Ustawienia</h2>
+      <p class="lede">Dane organizacji, link publiczny i kategorie eventów z modułami.</p>
+
+      <figure>
+        <img src="__IMG_17__" alt="Ustawienia z kategoriami eventów">
+        <figcaption><code>/pl/app/settings</code> — organizacja, profil publiczny, kategorie.</figcaption>
+      </figure>
+
+      <p>
+        <b>Kategorie eventów</b> decydują, jaki typ wybierasz przy zakładaniu przyjęcia,
+        i mogą nieść własne pola, które trafiają potem do agendy jako klucze
+        <code>custom.*</code>. Pięć kategorii systemowych — Wesele, Komunia, Wigilia,
+        Firmowe, Inne — zakłada się przy pierwszym wejściu w Ustawienia; własne dodajesz
+        przyciskiem na dole.
+      </p>
+
+      <div class="note warn">
+        <span class="lbl">Moduły przy kategorii na razie nic nie zmieniają</span>
+        <p>
+          Każda kategoria pokazuje listę modułów (menu, harmonogram, budżet, stoliki,
+          dostawcy…), ale <b>karta eventu ich nie czyta</b> — wyświetla ten sam komplet
+          sekcji niezależnie od typu. Zaznaczanie modułów zapisuje się, lecz dziś nie
+          wpływa na to, co widzisz na evencie.
+        </p>
+      </div>
+    </section>
+
+    <!-- 12 -->
+    <section id="procesy">
+      <h2><span class="num">12</span><span class="dot" style="background:var(--t7)"></span>Procesy</h2>
+      <p class="lede">
+        Ścieżki obsługi z krokami, rolami i rozgałęzieniami. Tutaj skrót — pełne
+        omówienie silnika jest w osobnym dokumencie.
+      </p>
+
+      <figure>
+        <img src="__IMG_18__" alt="Lista procesów obsługi">
+        <figcaption><code>/pl/app/settings/workflows</code> — proces pokazuje swój łańcuch kroków.</figcaption>
+      </figure>
+
+      <figure>
+        <img src="__IMG_19__" alt="Edytor procesu">
+        <figcaption>Edytor: nagłówek procesu, nawigator kroków i karta każdego węzła z zakładkami Podstawowe / Mapowanie pól / Warunki.</figcaption>
+      </figure>
+
+      <p>Każdy krok ma trzy niezależne ustawienia:</p>
+      <ul class="plain">
+        <li><b>Typ węzła</b> — ile wyjść ma krok: <code>ACTION</code> (jedno), <code>DECISION</code> (wiele, zależnie od warunków), <code>PARALLEL</code>, <code>END</code>.</li>
+        <li><b>Akcja</b> — co się dzieje: formularz klienta, wybór menu, zatwierdzenie, płatność, dokument, agenda, wiadomość.</li>
+        <li><b>Wykonuje</b> — kto: role systemowe, role obsługi (Kucharz, Kelner, Barman, Koordynator) albo dowolna rola własna.</li>
+      </ul>
+
+      <div class="note">
+        <span class="lbl">Pełna dokumentacja silnika</span>
+        <p>
+          Model danych, kolejność rozstrzygania warunków, mapowanie pól do agendy oraz
+          typy węzłów rozpisane na user stories:
+          <a href="https://claude.ai/code/artifact/77b85411-f884-4609-ba1b-96abba08c1bd">Silnik procesów WeddingBoard</a>.
+        </p>
+      </div>
+    </section>
+
+    <!-- 13 -->
+    <section id="klient">
+      <h2><span class="num">13</span><span class="dot" style="background:var(--t2)"></span>Widok klienta</h2>
+      <p class="lede">
+        Dwie powierzchnie, które widzi ktoś z zewnątrz: profil publiczny przed
+        podpisaniem i portal po.
+      </p>
+
+      <h3>Profil publiczny</h3>
+      <figure>
+        <img src="__IMG_26__" alt="Publiczny profil organizatora z formularzem zapytania">
+        <figcaption>
+          <code>/org/&lt;slug&gt;</code> — wizytówka sali z formularzem „Zapytanie o dostępność”.
+          To jedyna droga, którą zapytania trafiają do panelu.
+        </figcaption>
+      </figure>
+      <p>
+        Profil pokazuje dane kontaktowe, adres, pojemność i przedział cenowy — o ile są
+        uzupełnione. Puste pola po prostu się nie renderują.
+      </p>
+
+      <h3>Portal pary</h3>
+      <p>
+        Dostępny dla eventów oznaczonych jako wesele. Link z tokenem i PIN znajdziesz na
+        liście eventów pod <b>„Link dla klienta”</b>. Para widzi wyłącznie kroki procesu
+        przypisane do roli <b>Klient</b> lub <b>Klient + Manager</b> oraz widgety oznaczone
+        jako widoczne w portalu — wewnętrzne ustalenia zostają po Waszej stronie.
+      </p>
+    </section>
+
+    <!-- 14 -->
+    <section id="luki">
+      <h2><span class="num">14</span>Czego brakuje</h2>
+      <p class="lede">
+        Rzeczy, które warto znać przed wdrożeniem u klienta — żeby nie odkryć ich
+        przy pierwszym prawdziwym weselu.
+      </p>
+
+      <h4>W panelu</h4>
+      <ul class="plain">
+        <li><b>Zapraszanie do zespołu nie ma interfejsu.</b> Zakładka Zespół wyświetla listę i role, ale nie ma z niej jak dodać kolejnej osoby.</li>
+        <li><b>Płatności są ręczne.</b> Brak integracji z bankiem czy bramką — „opłacone” oznacza człowiek, który zobaczył przelew.</li>
+        <li><b>Zapytania wpływają tylko z profilu publicznego.</b> Nie da się dopisać ręcznie telefonicznego zapytania, więc część lejka bywa niewidoczna w statystykach.</li>
+      </ul>
+
+      <div class="note ok">
+        <span class="lbl">Naprawione w tej wersji</span>
+        <p>
+          Publiczny profil organizatora zwracał 404, a po odblokowaniu trasy — 500, więc
+          zapytania ofertowe nie mogły w ogóle dotrzeć. Zapis procesu nadawał krokom nowe
+          identyfikatory, przez co rozgałęzienia przestawały działać po pierwszej edycji.
+          Cele gałęzi trzeba było wpisywać jako surowe identyfikatory. Role obsługi
+          wyświetlały się jako wartości techniczne. Wszystko to działa już poprawnie.
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="footer">
+    Panel: <code>/pl/app</code> · Profil publiczny: <code>/org/&lt;slug&gt;</code> · Portal pary: <code>/pl/portal/&lt;token&gt;</code><br>
+    Środowisko demo odtwarza <code>node scripts/seed-demo-org.mjs &lt;url&gt; &lt;katalog-zrzutów&gt;</code>
+  </div>
+
+</div>

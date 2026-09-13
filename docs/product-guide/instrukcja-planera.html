@@ -1,0 +1,1128 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Twój niezbędnik — Wedding AI Planner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ivory: #f8f6f1;
+        --white: #fefdfb;
+        --cream: #f5f3ee;
+        --ink: #2d3824;
+        --ink-muted: #4a5c3e;
+        --olive: #7d8d6e;
+        --olive-dark: #6a7a5c;
+        --olive-light: #8f9e82;
+        --gold: #9a8554;
+        --line: rgba(125, 141, 110, 0.22);
+        --card-glass: rgba(254, 253, 251, 0.88);
+        --shadow-soft: 0 10px 30px rgba(12, 10, 9, 0.06);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Montserrat", system-ui, sans-serif;
+        font-weight: 400;
+        letter-spacing: 0.01em;
+        -webkit-font-smoothing: antialiased;
+        color: var(--ink);
+        background-color: #faf9f6;
+        background-image: url("../../background/background.png");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        line-height: 1.55;
+        min-height: 100vh;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image: repeating-linear-gradient(
+            90deg,
+            transparent 0,
+            transparent 2px,
+            rgba(12, 10, 9, 0.006) 2px,
+            rgba(12, 10, 9, 0.006) 3px
+          ),
+          repeating-linear-gradient(
+            0deg,
+            transparent 0,
+            transparent 2px,
+            rgba(12, 10, 9, 0.005) 2px,
+            rgba(12, 10, 9, 0.005) 3px
+          );
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .wrap {
+        position: relative;
+        z-index: 1;
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 40px 28px 120px;
+      }
+
+      h1 {
+        margin: 0 0 16px;
+        font-family: "Great Vibes", cursive;
+        font-weight: 400;
+        font-size: clamp(2.5rem, 6vw, 3.75rem);
+        line-height: 1.15;
+        letter-spacing: 0.02em;
+        color: var(--ink);
+      }
+
+      h2,
+      h3,
+      .meta h3 {
+        font-family: "Playfair Display", Georgia, serif;
+        font-weight: 500;
+        letter-spacing: -0.02em;
+        color: var(--ink);
+      }
+
+      .hero {
+        background: var(--card-glass);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        padding: 36px;
+        margin-bottom: 28px;
+        box-shadow: var(--shadow-soft);
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid rgba(125, 141, 110, 0.45);
+        color: var(--olive-dark);
+        background: rgba(255, 252, 246, 0.95);
+        border-radius: 999px;
+        padding: 8px 14px;
+        font-size: 12px;
+        font-weight: 500;
+        margin-bottom: 14px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .lead {
+        margin: 0;
+        color: var(--ink-muted);
+        font-size: clamp(16px, 2vw, 19px);
+        font-weight: 400;
+        line-height: 1.7;
+        max-width: 920px;
+      }
+
+      .kpis {
+        margin-top: 22px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        gap: 16px;
+      }
+
+      .kpi {
+        background: rgba(255, 255, 255, 0.65);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 14px 16px;
+        box-shadow: 0 2px 10px rgba(12, 10, 9, 0.04);
+      }
+
+      .kpi strong {
+        font-family: "Playfair Display", Georgia, serif;
+        font-size: 20px;
+        font-weight: 600;
+        display: block;
+        margin-bottom: 4px;
+        letter-spacing: -0.01em;
+        color: var(--ink);
+      }
+
+      .kpi span {
+        font-size: 13px;
+        color: var(--ink-muted);
+        font-weight: 400;
+      }
+
+      .slide {
+        display: none;
+        opacity: 0;
+      }
+
+      .slide.active {
+        display: block;
+        opacity: 1;
+        animation: slideFadeIn 0.35s ease;
+      }
+
+      @keyframes slideFadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .section,
+      .interactive {
+        margin: 32px 0;
+        background: var(--card-glass);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        padding: 28px;
+        box-shadow: var(--shadow-soft);
+      }
+
+      .section h2,
+      .interactive h2 {
+        margin: 0 0 10px;
+        font-size: clamp(22px, 2.6vw, 28px);
+      }
+
+      .section p,
+      .interactive p {
+        margin: 0 0 16px;
+        color: var(--ink-muted);
+        font-weight: 400;
+      }
+
+      .value-list {
+        margin: 0 0 20px;
+        padding-left: 18px;
+        color: var(--ink-muted);
+      }
+
+      .value-list li {
+        margin-bottom: 8px;
+        line-height: 1.6;
+      }
+
+      .progress {
+        width: 100%;
+        height: 12px;
+        border-radius: 999px;
+        background: rgba(236, 232, 222, 0.9);
+        overflow: hidden;
+        margin: 14px 0;
+      }
+
+      .progress > span {
+        display: block;
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, var(--olive-light) 0%, var(--olive) 55%, var(--olive-light) 100%);
+        background-size: 200% 100%;
+        animation: progressPulse 2.6s ease-in-out infinite;
+        transition: width 0.25s ease;
+      }
+
+      @keyframes progressPulse {
+        0% {
+          background-position: 0% 50%;
+          filter: saturate(95%);
+        }
+        50% {
+          background-position: 100% 50%;
+          filter: saturate(115%);
+        }
+        100% {
+          background-position: 0% 50%;
+          filter: saturate(95%);
+        }
+      }
+
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 16px;
+      }
+
+      .step {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 14px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(252, 251, 248, 0.9));
+        transition: all 0.22s ease;
+      }
+
+      .step:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(12, 10, 9, 0.06);
+      }
+
+      .step label {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--ink);
+      }
+
+      .step small {
+        display: block;
+        color: var(--ink-muted);
+        margin-top: 8px;
+        line-height: 1.45;
+        font-weight: 400;
+      }
+
+      .flow-step {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 18px;
+        height: 18px;
+        margin-top: 1px;
+        border-radius: 6px;
+        border: 1.5px solid rgba(101, 111, 90, 0.5);
+        background: #fff;
+        cursor: pointer;
+        position: relative;
+        flex-shrink: 0;
+        transition: all 0.2s ease;
+      }
+
+      .flow-step:checked {
+        background: linear-gradient(180deg, #91a080, #7b8a6d);
+        border-color: #7b8a6d;
+      }
+
+      .flow-step:checked::after {
+        content: "";
+        position: absolute;
+        left: 5px;
+        top: 2px;
+        width: 4px;
+        height: 8px;
+        border: solid #fff;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+      }
+
+      .step:has(.flow-step:checked) {
+        background: rgba(246, 246, 243, 0.95);
+        border-color: rgba(143, 155, 122, 0.35);
+      }
+
+      .step:has(.flow-step:checked) label,
+      .step:has(.flow-step:checked) small {
+        color: #6f756d;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+        gap: 24px;
+      }
+
+      .card {
+        display: grid;
+        grid-template-columns: minmax(250px, 40%) minmax(300px, 60%);
+        align-items: stretch;
+        border: 1px solid rgba(125, 141, 110, 0.15);
+        border-radius: 18px;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 4px 16px rgba(12, 10, 9, 0.05);
+        transition: transform 0.24s ease, box-shadow 0.24s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 14px 30px rgba(12, 10, 9, 0.08);
+      }
+
+      .meta {
+        padding: 16px 16px 14px;
+      }
+
+      .meta h3 {
+        margin: 0 0 7px;
+        font-size: 17px;
+        font-weight: 600;
+      }
+
+      .meta p {
+        margin: 0;
+        font-size: 14px;
+        color: var(--ink-muted);
+        line-height: 1.5;
+      }
+
+      .meta-toggle {
+        margin-top: 8px;
+        border: 1px solid rgba(125, 141, 110, 0.2);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.75);
+        overflow: hidden;
+      }
+
+      .meta-toggle summary {
+        list-style: none;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.02em;
+        color: var(--olive-dark);
+        padding: 8px 10px;
+        border-bottom: 1px solid rgba(125, 141, 110, 0.14);
+        user-select: none;
+      }
+
+      .meta-toggle summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .meta-toggle summary::after {
+        content: "Rozwiń";
+        float: right;
+        color: var(--ink-muted);
+        font-weight: 400;
+      }
+
+      .meta-toggle[open] summary::after {
+        content: "Zwiń";
+      }
+
+      .meta-toggle-content {
+        padding: 10px;
+      }
+
+      .meta-toggle-content p,
+      .meta-toggle-content .sig {
+        margin: 0;
+      }
+
+      .sig {
+        margin-top: 9px;
+        border-top: 1px dashed rgba(125, 141, 110, 0.25);
+        padding-top: 9px;
+        font-size: 12px;
+        line-height: 1.5;
+        color: var(--ink-muted);
+      }
+
+      .sig strong {
+        color: var(--gold);
+        font-weight: 600;
+      }
+
+      .shot {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        display: block;
+        cursor: zoom-in;
+        border-left: 1px solid var(--line);
+        object-fit: cover;
+        object-position: top center;
+        background: var(--cream);
+        border-radius: 0 20px 20px 0;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+      }
+
+      .quality-note {
+        margin-top: 10px;
+        font-size: 12px;
+        color: var(--ink-muted);
+      }
+
+      .cta {
+        margin-top: 22px;
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        border: 1px solid rgba(125, 141, 110, 0.42);
+        background: rgba(255, 253, 250, 0.95);
+        color: var(--ink);
+        border-radius: 999px;
+        padding: 11px 18px;
+        font-family: "Montserrat", sans-serif;
+        font-weight: 500;
+        font-size: 14px;
+        letter-spacing: 0.02em;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: border-color 0.2s, background 0.2s;
+      }
+
+      .btn:hover {
+        border-color: var(--olive);
+        background: #fff;
+      }
+
+      .btn.primary {
+        border-color: var(--olive);
+        background: var(--olive);
+        color: #fff;
+        box-shadow: 0 8px 20px rgba(125, 141, 110, 0.22);
+      }
+
+      .btn.primary:hover {
+        background: var(--olive-dark);
+        border-color: var(--olive-dark);
+      }
+
+      .lightbox {
+        position: fixed;
+        inset: 0;
+        z-index: 999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(10, 13, 18, 0.88);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+      }
+
+      .lightbox.open {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+      }
+
+      .lightbox img {
+        max-width: 100%;
+        max-height: 92vh;
+        border-radius: 12px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+      }
+
+      .close {
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        border-radius: 999px;
+        padding: 10px 14px;
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0.95);
+        font-family: "Montserrat", sans-serif;
+      }
+
+      .tour-controls {
+        position: fixed;
+        left: 50%;
+        bottom: 16px;
+        transform: translateX(-50%);
+        z-index: 120;
+        width: min(980px, calc(100vw - 24px));
+        background: rgba(254, 253, 251, 0.82);
+        border: 1px solid rgba(125, 141, 110, 0.2);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border-radius: 18px;
+        box-shadow: 0 12px 34px rgba(12, 10, 9, 0.12);
+        padding: 10px 12px;
+      }
+
+      .tour-top {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .tour-progress {
+        flex: 1;
+      }
+
+      .tour-top strong {
+        min-width: 108px;
+        font-size: 13px;
+        font-weight: 500;
+      }
+
+      .tour-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 8px;
+      }
+
+      .video-placeholder {
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        overflow: hidden;
+        background: linear-gradient(180deg, var(--ivory), var(--cream));
+        box-shadow: var(--shadow-soft);
+        padding: 48px 28px;
+        text-align: center;
+      }
+
+      .video-placeholder p {
+        margin: 0;
+        max-width: 520px;
+        margin-left: auto;
+        margin-right: auto;
+        color: var(--ink-muted);
+        font-size: 15px;
+      }
+
+      @media (max-width: 980px) {
+        .card {
+          grid-template-columns: 1fr;
+        }
+        .shot {
+          border-left: 0;
+          border-top: 1px solid var(--line);
+          border-radius: 0 0 20px 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <section class="hero">
+        <span class="badge">Krok po kroku z Wedding AI Planner</span>
+        <h1>Macie to pod kontrolą</h1>
+        <p class="lead">
+          Ta instrukcja jest napisana dokładnie pod Was: żebyście w każdym momencie przygotowań wiedzieli, gdzie kliknąć, co ustawić i jaki efekt to da
+          w realnej organizacji. Wedding AI Planner nie jest tylko zbiorem funkcji - to operacyjny system pracy pary młodej, który porządkuje decyzje,
+          redukuje stres informacyjny i pomaga zamienić setki drobnych tematów w jeden czytelny plan działania.
+        </p>
+        <p class="lead">
+          Czytajcie tę stronę jak mapę procesu. Każda sekcja mówi nie tylko "co jest w module", ale przede wszystkim: jak to wpływa na Wasz budżet,
+          czas, komunikację z gośćmi i współpracę z usługodawcami. Dzięki temu podejmujecie decyzje szybciej, spokojniej i bez wracania do tych samych
+          pytań co tydzień.
+        </p>
+        <div class="kpis">
+          <div class="kpi"><strong>Jeden panel</strong><span>wszystko w jednym miejscu, bez skakania między notatkami</span></div>
+          <div class="kpi"><strong>Wsparcie AI</strong><span>zadania, usadzenie gości, szybsze decyzje</span></div>
+          <div class="kpi"><strong>RSVP od A do Z</strong><span>potwierdzenia, dane i preferencje w jednej bazie</span></div>
+          <div class="kpi"><strong>Portal gościa</strong><span>informacje o weselu i księga życzeń online</span></div>
+        </div>
+        <div class="cta">
+          <a class="btn primary" href="#guide-flow">Zacznijcie od checklisty</a>
+          <a class="btn" href="#start">Przejdźcie do opisu ekranów</a>
+        </div>
+      </section>
+
+      <section class="section" id="guide-flow">
+        <h2>Checklista — od pierwszych ustaleń po wielki dzień</h2>
+        <p>
+          Traktujcie tę checklistę jak Wasz mini rytuał organizacyjny: raz w tygodniu siadacie razem na 15-20 minut, odhaczacie wykonane etapy
+          i od razu widzicie, gdzie są największe dźwignie postępu. To prosty nawyk, który znacząco obniża napięcie, bo zamiast "wydaje się, że
+          stoimy w miejscu" macie twardy, widoczny progres.
+        </p>
+        <ul class="value-list">
+          <li>Macie wspólny obraz sytuacji - bez domysłów i bez przerzucania się "kto o czym pamięta".</li>
+          <li>Łatwiej priorytetyzujecie działania, gdy zbliża się termin płatności, podpisania umowy lub wysyłki przypomnień do gości.</li>
+          <li>W trudniejszych tygodniach możecie skupić się tylko na 1-2 krokach, zamiast próbować robić wszystko jednocześnie.</li>
+        </ul>
+        <div class="steps">
+          <div class="step"><label><input type="checkbox" class="flow-step" /> Ustaliliśmy datę i budżet</label><small>Od tego zależy cała reszta — macie realny horyzont decyzji.</small></div>
+          <div class="step"><label><input type="checkbox" class="flow-step" /> Mamy listę zadań w planerze</label><small>Rozpisane etapy, terminy i to, kto za co odpowiada.</small></div>
+          <div class="step"><label><input type="checkbox" class="flow-step" /> Skonfigurowaliśmy budżet</label><small>Kategorie, plan i kontrola — mniej niespodzianek finansowych.</small></div>
+          <div class="step"><label><input type="checkbox" class="flow-step" /> Goście i RSVP</label><small>Zbieracie potwierdzenia i dane potrzebne sali i cateringu.</small></div>
+          <div class="step"><label><input type="checkbox" class="flow-step" /> Usadzenie i układ sali</label><small>Propozycja od AI, Wy dopracowujecie szczegóły pod swoją wizję.</small></div>
+          <div class="step"><label><input type="checkbox" class="flow-step" /> Plan dnia i menu</label><small>Harmonogram dla Was i dla obsługi — mniej pytań „o której?”. </small></div>
+          <div class="step"><label><input type="checkbox" class="flow-step" /> Portal gościa</label><small>Jedno miejsce z informacjami — mniej powtarzalnych wiadomości.</small></div>
+          <div class="step"><label><input type="checkbox" class="flow-step" /> Na bieżąco w planerze</label><small>Wracacie tu w swoim tempie — bez presji, za to z porządkiem.</small></div>
+        </div>
+      </section>
+
+      <section id="start" class="section">
+        <h2>1) Pierwsze kroki i logowanie</h2>
+        <p>
+          Ten etap buduje fundament całej dalszej pracy. Dobrze skonfigurowany start oznacza, że od pierwszego dnia tworzycie porządek w danych,
+          a nie "kolejną aplikację do sprawdzenia". To bardzo ważne, bo największy chaos organizacyjny zwykle zaczyna się tam, gdzie informacje
+          o weselu są rozrzucone między notatnik, komunikator i kilka arkuszy.
+        </p>
+        <div class="grid">
+          <article class="card">
+            <div class="meta">
+              <h3>Strona startowa</h3>
+              <p>
+                Ten ekran jasno komunikuje, że będziecie pracować na jednym systemie obejmującym zadania, budżet, listę gości i harmonogram dnia.
+                Dzięki temu już na wejściu ustawicie właściwe oczekiwanie: nie "testujemy kolejne narzędzie", tylko wdrażamy centrum dowodzenia Waszym weselem.
+              </p>
+              <div class="sig"><strong>Dla Was:</strong> zapiszcie adres planera w ulubionych i ustawcie go jako stały punkt startowy. To drobna rzecz, ale skraca codzienny powrót do planowania i buduje nawyk regularnej pracy.</div>
+            </div>
+            <img class="shot" src="./assets/railway-public/01-landing-hero.png" alt="Strona startowa" loading="lazy" />
+          </article>
+          <article class="card">
+            <div class="meta">
+              <h3>Logowanie</h3>
+              <p>
+                Logowanie porządkuje dostęp do wszystkich ustaleń: od listy gości po budżet i statusy zadań. To eliminuje ryzyko pracy na nieaktualnych
+                wersjach danych i daje bezpieczeństwo, że każde z Was widzi to samo, aktualne źródło informacji.
+              </p>
+              <div class="sig"><strong>Dla Was:</strong> ustalcie wspólną zasadę dostępu do konta już na początku. Zmniejsza to liczbę pytań "gdzie to było?" i oszczędza czas szczególnie w intensywnych tygodniach.</div>
+            </div>
+            <img class="shot" src="./assets/railway-public/07-sign-in.png" alt="Logowanie" loading="lazy" />
+          </article>
+          <article class="card">
+            <div class="meta">
+              <h3>Rejestracja</h3>
+              <p>
+                Rejestracja została zaprojektowana tak, żeby wejście do systemu było możliwie szybkie i bez barier. W praktyce oznacza to, że od razu
+                przechodzicie do realnych działań, zamiast tracić energię na skomplikowany onboarding i wieloetapową konfigurację.
+              </p>
+              <div class="sig"><strong>Dla Was:</strong> po pierwszym logowaniu wybierzcie jeden moduł na start (najczęściej budżet albo goście), a następnie dokładacie kolejne. Taki sekwencyjny model utrzymuje tempo i nie przytłacza.</div>
+            </div>
+            <img class="shot" src="./assets/railway-public/09-sign-up.png" alt="Rejestracja" loading="lazy" />
+          </article>
+        </div>
+      </section>
+
+      <section id="dashboard" class="section">
+        <h2>2) Pulpit — centrum Waszego wesela</h2>
+        <p>
+          Dashboard jest miejscem, które daje Wam strategiczny ogląd całości przygotowań. W jednym widoku łączy postęp zadań, sytuację budżetową,
+          dane o gościach i rekomendacje działań. Z perspektywy pary młodej to kluczowe, bo pomaga szybciej podejmować decyzje bez przekopywania się
+          przez wszystkie moduły po kolei.
+        </p>
+        <div class="grid">
+          <article class="card">
+            <div class="meta">
+              <h3>Przewodnik po modułach</h3>
+              <p>
+                Przewodnik rozbija duży proces organizacji wesela na czytelne etapy. Dzięki temu zawsze wiecie, co jest kolejnym sensownym krokiem,
+                a co może poczekać. To chroni przed chaotycznym działaniem i pozwala utrzymać spokojne, przewidywalne tempo przygotowań.
+              </p>
+              <div class="sig"><strong>Dla Was:</strong> kiedy czujecie przeciążenie ilością tematów, wróćcie do tej sekcji i wybierzcie jeden najważniejszy punkt na dziś. Zrobienie jednej rzeczy dobrze daje większy efekt niż pięć rozpoczętych bez końca.</div>
+            </div>
+            <img class="shot" src="./assets/final-manual/screen-01.png" alt="Przewodnik modułów" loading="lazy" />
+          </article>
+          <article class="card">
+            <div class="meta">
+              <h3>Liczby i podpowiedzi</h3>
+              <p>
+                Zestaw wskaźników pokazuje to, co naprawdę wpływa na organizację: liczbę potwierdzonych gości, poziom realizacji zadań i stan budżetu.
+                W połączeniu z podpowiedziami AI daje to szybkie "co robić teraz", zamiast zgadywania, gdzie jest największe ryzyko opóźnienia.
+              </p>
+              <div class="sig"><strong>Dla Was:</strong> róbcie cotygodniowy przegląd KPI i zapisujcie 2-3 decyzje na kolejny tydzień. Ta rutyna znacząco ogranicza odkładanie tematów na ostatni moment.</div>
+            </div>
+            <img class="shot" src="./assets/final-manual/screen-02.png" alt="Pulpit" loading="lazy" />
+          </article>
+          <article class="card">
+            <div class="meta">
+              <h3>Dane wydarzenia</h3>
+              <p>
+                Parametry wydarzenia są podstawą wielu dalszych decyzji, dlatego ich centralna edycja ma realną wartość operacyjną. Aktualizacja daty,
+                lokalizacji czy założeń finansowych w jednym miejscu zapobiega sytuacji, w której różne osoby pracują na sprzecznych informacjach.
+              </p>
+              <div class="sig"><strong>Dla Was:</strong> przy każdej większej zmianie (sala, budżet, harmonogram) aktualizujcie ten moduł jako pierwszy krok. To zabezpiecza całą resztę procesu przed efektem domina.</div>
+            </div>
+            <img class="shot" src="./assets/final-manual/screen-03.png" alt="Edycja wydarzenia" loading="lazy" />
+          </article>
+        </div>
+      </section>
+
+      <section id="tasks" class="section">
+        <h2>3) Zadania</h2>
+        <p>
+          Moduł zadań przekłada wielki projekt "organizacja wesela" na konkretne, mierzalne działania. To tutaj zamieniacie ogólne plany na realną
+          egzekucję: kto, co, do kiedy i z jakim priorytetem. Dla pary młodej oznacza to mniej napięcia, bo zamiast pamiętać wszystko w głowie,
+          możecie opierać się na klarownej liście z odpowiedzialnościami.
+        </p>
+        <div class="grid">
+          <article class="card">
+            <div class="meta">
+              <h3>Tablica zadań</h3>
+              <p>
+                Widok tablicy pozwala filtrować zadania i szybko wyłapywać to, co blokuje dalsze kroki. Dzięki statusom i priorytetom od razu widzicie,
+                które tematy wymagają decyzji dziś, a które mogą być spokojnie zaplanowane na później bez ryzyka dla terminu wydarzenia.
+              </p>
+              <div class="sig"><strong>Dla Was:</strong> przypisujcie właściciela do każdego większego zadania, także jeśli pomaga świadek lub rodzina. Jednoznaczna odpowiedzialność praktycznie eliminuje sytuacje "myślałam, że to już zrobione".</div>
+            </div>
+            <img class="shot" src="./assets/final-manual/screen-04.png" alt="Zadania" loading="lazy" />
+          </article>
+        </div>
+      </section>
+
+      <section id="budget" class="section">
+        <h2>4) Budżet</h2>
+        <p>
+          Budżet to moduł, który najczęściej decyduje o komforcie całych przygotowań. Kiedy planowane i faktyczne koszty są aktualne, łatwo podejmować
+          świadome decyzje: gdzie warto dopłacić, a gdzie lepiej utrzymać dyscyplinę. To realna ochrona przed nerwowym cięciem wydatków na końcówce.
+        </p>
+        <div class="grid">
+          <article class="card">
+            <div class="meta">
+              <h3>Wydatki według kategorii</h3>
+              <p>
+                Podział na kategorie finansowe i widok odchyleń daje szybki sygnał, gdzie budżet zaczyna "uciekać". W praktyce zyskujecie możliwość
+                reagowania wcześniej: renegocjować, przesunąć środki albo zmienić wariant usługi, zanim koszt stanie się problemem krytycznym.
+              </p>
+              <div class="sig"><strong>Dla Was:</strong> wpisujcie kwoty faktyczne natychmiast po zaliczkach i dopłatach. Aktualność danych to największa przewaga tego modułu - bez niej nawet najlepszy plan traci wartość.</div>
+            </div>
+            <img class="shot" src="./assets/final-manual/screen-05.png" alt="Budżet" loading="lazy" />
+          </article>
+        </div>
+      </section>
+
+      <section id="guests" class="section">
+        <h2>5) Goście i RSVP</h2>
+        <p>
+          Moduł gości porządkuje najtrudniejszy obszar organizacyjny: dane, które stale się zmieniają. Potwierdzenia obecności, preferencje menu,
+          noclegi, transport i dodatkowe uwagi są w jednym miejscu, dzięki czemu podejmujecie decyzje na podstawie aktualnych informacji, a nie
+          niepełnych wiadomości z różnych kanałów.
+        </p>
+        <div class="grid">
+          <article class="card">
+            <div class="meta">
+              <h3>Lista gości</h3>
+              <p>
+                Lista gości daje Wam natychmiastowy obraz frekwencji i kompletności danych. To podstawa do rozmów z salą, cateringiem czy hotelami,
+                bo możecie od razu podać liczby i statusy bez ręcznego liczenia potwierdzeń z SMS-ów, Messengerów i telefonów. Te dane są też
+                później wykorzystywane przez moduł usadzania, więc porządna lista gości realnie wpływa na jakość automatycznych propozycji stołów.
+              </p>
+              <div class="sig"><strong>Dla Was:</strong> przed każdą ważną rozmową z usługodawcą sprawdźcie ten ekran i wyeksportujcie aktualny stan. Unikniecie kosztownych korekt "na ostatniej prostej".</div>
+            </div>
+            <img class="shot" src="./assets/final-manual/screen-06.png" alt="Lista gości" loading="lazy" />
+          </article>
+          <article class="card">
+            <div class="meta">
+              <h3>Formularz RSVP</h3>
+              <p>
+                Konfigurator RSVP pozwala zbierać dane, które mają realny wpływ na logistykę dnia: diety, noclegi, transport i ograniczenia gości.
+                Dobrze ustawiony formularz zmniejsza liczbę późniejszych telefonów i poprawek, a to oszczędza czas i energię całej parze. System
+                umożliwia też wygenerowanie dedykowanego linku RSVP wraz z kodem QR, który możecie umieścić w zaproszeniach lub wysłać cyfrowo,
+                aby gość jednym skanem trafił bezpośrednio do formularza odpowiedzi. Po wysłaniu odpowiedzi przez gościa od razu widzicie
+                zaktualizowany status potwierdzenia na liście gości.
+              </p>
+              <div class="sig"><strong>Dla Was:</strong> projektujcie pytania oszczędnie i konkretnie, a po konfiguracji od razu wygenerujcie link + QR do RSVP. Taki duet znacząco zwiększa odsetek szybkich odpowiedzi i redukuje liczbę gości, którzy „odkładają” formularz na później.</div>
+            </div>
+            <img class="shot" src="./assets/final-manual/screen-07.png" alt="Konfiguracja RSVP" loading="lazy" />
+          </article>
+          <article class="card">
+            <div class="meta">
+              <h3>Nowy gość</h3>
+              <p>
+                Karta gościa porządkuje dane jednostkowe tak, aby później automatycznie zasilały inne moduły - przede wszystkim usadzenie i komunikację.
+                To pomaga uniknąć dublowania pracy i ogranicza ryzyko przeoczeń przy większej liczbie zaproszonych osób.
+              </p>
+              <div class="sig"><strong>Dla Was:</strong> dodawajcie od razu oznaczenia relacji i ważnych preferencji. Taka dyscyplina danych bardzo przyspiesza późniejszy etap rozmieszczenia gości przy stołach.</div>
+            </div>
+            <img class="shot" src="./assets/final-manual/screen-08.png" alt="Dodawanie gościa" loading="lazy" />
+          </article>
+          <article class="card">
+            <div class="meta">
+              <h3>Widok tabeli</h3>
+              <p>
+                Edycja tabelaryczna to narzędzie do szybkiej aktualizacji wielu rekordów jednocześnie. Przy dużej liście gości oszczędza znaczną ilość
+                czasu i pozwala zamykać poprawki seryjnie, zamiast przechodzić przez dziesiątki pojedynczych formularzy.
+              </p>
+              <div class="sig"><strong>Dla Was:</strong> wykorzystujcie ten widok przy "falach odpowiedzi" po wysyłce przypomnień. W kilkanaście minut zamkniecie zmiany, które ręcznie zajęłyby kilka godzin.</div>
+            </div>
+            <img class="shot" src="./assets/final-manual/screen-09.png" alt="Tabela gości" loading="lazy" />
+          </article>
+        </div>
+      </section>
+
+      <section id="seating" class="section">
+        <h2>6) Stoły i układ sali</h2>
+        <p>
+          Usadzenie gości to jeden z najbardziej czasochłonnych i emocjonalnych elementów organizacji wesela. AI Seating skraca ten proces, generując
+          sensowną bazę wyjściową na podstawie relacji, preferencji i ograniczeń logistycznych. Wy zachowujecie pełną kontrolę nad ostateczną decyzją,
+          ale startujecie z lepszego punktu niż "pusta kartka".
+        </p>
+        <div class="grid">
+          <article class="card">
+            <div class="meta">
+              <h3>Konfigurator usadzenia</h3>
+              <p>
+                Algorytm analizuje dane gości i parametry wydarzenia, żeby zaproponować logiczne rozmieszczenie minimalizujące konflikty i błędy.
+                Uwzględnia przy tym informacje z profili gości i RSVP (np. preferencje, ograniczenia i relacje), więc propozycja stołów opiera się
+                na faktycznie zebranych danych, a nie na domysłach. W efekcie oszczędzacie czas na ręcznym przesuwaniu wszystkich od zera i możecie
+                skupić się na jakości finalnych korekt.
+              </p>
+              <div class="sig"><strong>Dla Was:</strong> uruchomcie pierwszy układ odpowiednio wcześniej i traktujcie go jako wersję roboczą. Iteracyjne poprawki dają dużo lepszy rezultat niż jedna długa sesja tuż przed weselem.</div>
+            </div>
+            <img class="shot" src="./assets/final-manual/screen-10.png" alt="Konfigurator stołów" loading="lazy" />
+          </article>
+          <article class="card">
+            <div class="meta">
+              <h3>Mapa sali</h3>
+              <p>
+                Wizualna mapa sali pozwala zweryfikować, czy plan jest praktyczny pod kątem poruszania się gości, pracy obsługi i przebiegu atrakcji.
+                To znacząco redukuje ryzyko nieporozumień z menedżerem sali, dekoratorami oraz ekipą techniczną.
+              </p>
+              <div class="sig"><strong>Dla Was:</strong> wysyłajcie ten widok przed spotkaniami organizacyjnymi. Wspólny obraz planu skraca ustalenia i eliminuje dwuznaczne interpretacje.</div>
+            </div>
+            <img class="shot" src="./assets/final-manual/screen-11.png" alt="Układ sali" loading="lazy" />
+          </article>
+          <article class="card">
+            <div class="meta">
+              <h3>Elementy na planie</h3>
+              <p>
+                Kreator elementów umożliwia odwzorowanie faktycznej przestrzeni obiektu: przejść, stref, przeszkód i punktów krytycznych. Im lepsze
+                odwzorowanie rzeczywistości, tym mniej improwizacji i niespodzianek podczas ustawiania sali w dniu realizacji.
+              </p>
+              <div class="sig"><strong>Dla Was:</strong> poświęćcie chwilę na dokładne odwzorowanie sali. Ten etap zwraca się w postaci spokojniejszego dnia ślubu i mniejszej liczby awaryjnych zmian.</div>
+            </div>
+            <img class="shot" src="./assets/final-manual/screen-12.png" alt="Kreator elementów" loading="lazy" />
+          </article>
+        </div>
+      </section>
+
+      <section id="day" class="section">
+        <h2>7) Plan dnia i menu</h2>
+        <p>
+          Harmonogram dnia przekłada Waszą wizję wesela na sekwencję działań, którą rozumie każdy uczestnik organizacji: para, świadkowie, sala,
+          DJ, fotograf i koordynator. To właśnie ten moduł najmocniej wpływa na płynność wydarzenia i ogranicza nerwowe decyzje podejmowane "na gorąco".
+        </p>
+        <div class="grid">
+          <article class="card">
+            <div class="meta">
+              <h3>Oś czasu wesela</h3>
+              <p>
+                Oś czasu łączy kluczowe momenty wydarzenia z informacjami operacyjnymi i menu, dzięki czemu wszystkie osoby zaangażowane działają
+                według tego samego scenariusza. To obniża liczbę przestojów i pytań w krytycznych godzinach dnia ślubu.
+              </p>
+              <div class="sig"><strong>Dla Was:</strong> dzień przed weselem udostępnijcie finalną wersję osi czasu wszystkim osobom decyzyjnym. Jedna wspólna "wersja prawdy" to prosty sposób na spokojniejszy przebieg całego dnia.</div>
+            </div>
+            <img class="shot" src="./assets/final-manual/screen-13.png" alt="Plan dnia" loading="lazy" />
+          </article>
+        </div>
+      </section>
+
+      <section id="vendors" class="section">
+        <h2>8) Usługodawcy</h2>
+        <p>
+          Współpraca z usługodawcami wymaga szybkiego dostępu do kontaktów, ustaleń i statusów. Ten moduł centralizuje komunikację operacyjną,
+          żebyście nie tracili czasu na odszukiwanie informacji w wielu wątkach wiadomości. To szczególnie ważne w końcówce przygotowań, gdy tempo
+          kontaktów wyraźnie rośnie.
+        </p>
+        <p>
+          To jest też właściwe miejsce na przechowywanie dokumentów operacyjnych i rozliczeniowych związanych z konkretnymi wykonawcami:
+          faktur, potwierdzeń zaliczek, aneksów, wycen czy ustaleń mailowych. Dzięki temu cały kontekst współpracy z danym usługodawcą
+          macie w jednym module i nie mieszacie dokumentów finansowych z dokumentacją polityk aplikacji.
+        </p>
+        <div class="grid">
+          <article class="card">
+            <div class="meta">
+              <h3>Baza kontaktów</h3>
+              <p>
+                Baza usługodawców porządkuje kluczowe informacje: zakres współpracy, terminy, płatności i status realizacji. Dzięki temu łatwiej
+                kontrolować, co jest już domknięte, a które ustalenia wymagają jeszcze potwierdzenia lub doprecyzowania.
+              </p>
+              <div class="sig"><strong>Dla Was:</strong> po każdym kontakcie aktualizujcie notatkę i dołączajcie dokumenty rozliczeniowe (faktury, potwierdzenia przelewów, umowy). Kilka minut porządkowania po rozmowie oszczędza godziny odtwarzania ustaleń pod presją czasu.</div>
+            </div>
+            <img class="shot" src="./assets/final-manual/screen-14.png" alt="Usługodawcy" loading="lazy" />
+          </article>
+        </div>
+      </section>
+
+      <section id="portal" class="section">
+        <h2>9) Portal gościa</h2>
+        <p>
+          Portal gościa to Wasze oficjalne źródło informacji dla wszystkich zaproszonych. Gdy komunikaty są zebrane w jednym miejscu, znacząco
+          spada liczba powtarzalnych pytań i ryzyko, że różne osoby dostaną różne wersje informacji. Dla pary młodej oznacza to mniej obsługi
+          "mikrospraw" i więcej przestrzeni na finalne dopracowanie wydarzenia.
+        </p>
+        <div class="grid">
+          <article class="card">
+            <div class="meta">
+              <h3>Ustawienia portalu</h3>
+              <p>
+                Konfiguracja portalu umożliwia publikację planu dnia, dojazdu, zasad uczestnictwa oraz aktualnych komunikatów bez potrzeby
+                wielokrotnego odpisywania na te same pytania. To zamienia rozproszoną komunikację w przewidywalny, łatwy do utrzymania kanał.
+              </p>
+              <div class="sig"><strong>Dla Was:</strong> umieśćcie link do portalu w każdym kanale kontaktu z gośćmi. Jedno spójne źródło informacji znacząco odciąża Wasz telefon w ostatnich tygodniach przed weselem.</div>
+            </div>
+            <img class="shot" src="./assets/final-manual/screen-15.png" alt="Portal gościa" loading="lazy" />
+          </article>
+        </div>
+      </section>
+
+      <section id="account" class="section">
+        <h2>10) Konto i subskrypcja</h2>
+        <p>
+          Moduł konta domyka stronę formalną i techniczną pracy w systemie. Utrzymanie porządku w danych subskrypcyjnych, dokumentach i ustawieniach
+          dostępu przekłada się na ciągłość działania - bez przestojów, niespodzianek rozliczeniowych i problemów z udostępnianiem informacji.
+        </p>
+        <div class="grid">
+          <article class="card">
+            <div class="meta">
+              <h3>Dane i płatność</h3>
+              <p>
+                W tym widoku kontrolujecie status subskrypcji oraz dane rozliczeniowe potrzebne do stabilnego korzystania z planera. To pozwala
+                planować koszty narzędzia i uniknąć sytuacji, w której dostęp zostaje przerwany w kluczowym etapie przygotowań.
+              </p>
+              <div class="sig"><strong>Dla Was:</strong> przeglądajcie ten ekran przed końcem okresu rozliczeniowego. Regularna kontrola formalności to mniejsze ryzyko nieplanowanych przerw i stresu technicznego.</div>
+            </div>
+            <img class="shot" src="./assets/final-manual/screen-16.png" alt="Konto" loading="lazy" />
+          </article>
+          <article class="card">
+            <div class="meta">
+              <h3>Polityki aplikacji i konfiguracja chatbota</h3>
+              <p>
+                Ten moduł służy do zarządzania dokumentacją produktową i zasadami działania aplikacji: polityką prywatności, regulaminem,
+                instrukcjami użycia oraz konfiguracją zakresu odpowiedzi chatbota. Dzięki temu macie kontrolę nad tym, jakie treści są
+                publikowane użytkownikom i na jakiej podstawie chatbot odpowiada gościom, usługodawcom lub innym odbiorcom.
+              </p>
+              <div class="sig"><strong>Dla Was:</strong> trzymajcie tutaj wyłącznie treści polityk i dokumentację aplikacji. Faktury, umowy i potwierdzenia płatności zapisujcie w module <em>Usługodawcy</em>, przy konkretnym vendorze - to najczytelniejszy podział operacyjny.</div>
+            </div>
+            <img class="shot" src="./assets/final-manual/screen-17.png" alt="Konto rozszerzone" loading="lazy" />
+          </article>
+        </div>
+        <p class="quality-note">Podpowiedź: zrzuty możecie powiększyć kliknięciem — wygodniej na telefonie przy porównywaniu szczegółów.</p>
+      </section>
+
+    </div>
+
+    <div class="tour-controls">
+      <div class="tour-top">
+        <div class="tour-progress">
+          <div class="progress"><span id="progressBar"></span></div>
+        </div>
+        <strong id="progressLabel">Slajd 1 / 1</strong>
+      </div>
+      <div class="tour-actions">
+        <button id="prevBtn" class="btn" type="button">Wstecz</button>
+        <button id="nextBtn" class="btn primary" type="button">Dalej</button>
+      </div>
+    </div>
+
+    <div id="lightbox" class="lightbox" aria-hidden="true">
+      <button id="closeBtn" class="close" type="button">Zamknij</button>
+      <img id="lightboxImg" src="" alt="Powiększony zrzut ekranu" />
+    </div>
+
+    <script>
+      const box = document.getElementById("lightbox");
+      const boxImg = document.getElementById("lightboxImg");
+      const closeBtn = document.getElementById("closeBtn");
+      const progressBar = document.getElementById("progressBar");
+      const progressLabel = document.getElementById("progressLabel");
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+      const slides = Array.from(document.querySelectorAll("section.hero, section.section"));
+
+      let currentSlide = 0;
+
+      function updateSlideProgress() {
+        const total = slides.length;
+        const viewed = currentSlide + 1;
+        const percent = total ? (viewed / total) * 100 : 0;
+        progressBar.style.width = `${percent}%`;
+        progressLabel.textContent = `Slajd ${viewed} / ${total}`;
+      }
+
+      function renderSlide(index) {
+        slides.forEach((slide, i) => {
+          slide.classList.remove("active", "slide");
+          slide.classList.add("slide");
+          if (i === index) {
+            slide.classList.add("active");
+          }
+        });
+        prevBtn.disabled = index === 0;
+        nextBtn.textContent = index === slides.length - 1 ? "Koniec" : "Dalej";
+        updateSlideProgress();
+      }
+
+      function nextSlide() {
+        if (currentSlide < slides.length - 1) {
+          currentSlide += 1;
+          renderSlide(currentSlide);
+        }
+      }
+
+      function prevSlide() {
+        if (currentSlide > 0) {
+          currentSlide -= 1;
+          renderSlide(currentSlide);
+        }
+      }
+
+      nextBtn.addEventListener("click", nextSlide);
+      prevBtn.addEventListener("click", prevSlide);
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight") nextSlide();
+        if (e.key === "ArrowLeft") prevSlide();
+        if (e.key === "Escape") box.classList.remove("open");
+      });
+
+      document.querySelectorAll(".shot").forEach((img) => {
+        img.addEventListener("click", () => {
+          boxImg.src = img.src;
+          box.classList.add("open");
+        });
+      });
+
+      // Reduce visible text on cards: main description collapsed by default,
+      // "Dla Was" expanded by default (but still collapsible).
+      document.querySelectorAll(".card .meta").forEach((meta) => {
+        const description = meta.querySelector("p");
+        const sig = meta.querySelector(".sig");
+
+        if (description && !description.closest("details")) {
+          const descDetails = document.createElement("details");
+          descDetails.className = "meta-toggle";
+
+          const summary = document.createElement("summary");
+          summary.textContent = "Opis modułu";
+          descDetails.appendChild(summary);
+
+          const content = document.createElement("div");
+          content.className = "meta-toggle-content";
+          content.appendChild(description);
+          descDetails.appendChild(content);
+
+          meta.insertBefore(descDetails, sig ?? null);
+        }
+
+        if (sig && !sig.closest("details")) {
+          const tipsDetails = document.createElement("details");
+          tipsDetails.className = "meta-toggle";
+          tipsDetails.open = true;
+
+          const summary = document.createElement("summary");
+          summary.textContent = "Dla Was";
+          tipsDetails.appendChild(summary);
+
+          const content = document.createElement("div");
+          content.className = "meta-toggle-content";
+          content.appendChild(sig);
+          tipsDetails.appendChild(content);
+
+          meta.appendChild(tipsDetails);
+        }
+      });
+
+      closeBtn.addEventListener("click", () => box.classList.remove("open"));
+      box.addEventListener("click", (e) => {
+        if (e.target === box) box.classList.remove("open");
+      });
+
+      renderSlide(currentSlide);
+      window.nextSlide = nextSlide;
+      window.prevSlide = prevSlide;
+    </script>
+  </body>
+</html>

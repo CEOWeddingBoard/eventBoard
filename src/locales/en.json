@@ -1,0 +1,1626 @@
+{
+  "Billing": {
+    "subscribeCta": "Monthly subscription — {price} / month",
+    "addCardCta": "Subscribe — 59 PLN / month",
+    "paywallAddCardTitle": "Subscribe to continue",
+    "paywallAddCardDescription": "Your free month has ended. Subscribe monthly to keep using Wedding Board.",
+    "paywallFailedTitle": "Payment failed",
+    "paywallFailedDescription": "We could not charge your subscription (card declined, expired, or insufficient funds). Update your card or subscribe again to restore access.",
+    "paywallTitle": "Payment required",
+    "paywallDescription": "Your free month has ended. Subscribe (59 PLN/month) to keep using the planner.",
+    "onboardingPaymentIntro": "Add your card — no charge for 30 days, then PLN 59/month. Cancel anytime.",
+    "onboardingPaymentDone": "All set — your first month is free. First payment in 30 days.",
+    "confirmingPayment": "Confirming payment…",
+    "onboardingStepNeedPayment": "Add your card in step 2 — a free month first, then create your wedding.",
+    "onboardingStepNeedTerms": "Accept the terms first (step 1) to create your wedding.",
+    "onboardingTrialBullet": "One month free — no card upfront. After 30 days, 59 PLN/month.",
+    "trialBannerDays": "Free period ends in {days} days — subscribe to keep access.",
+    "trialBannerOneDay": "Free period ends tomorrow — subscribe to keep access.",
+    "trialBannerLastDay": "Free period ends today — subscribe to keep access.",
+    "trialBannerCta": "Subscribe"
+  },
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "export": "Export",
+    "import": "Import",
+    "yes": "Yes",
+    "no": "No",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "finish": "Finish",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Info"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "tasks": "Tasks",
+    "budget": "Budget",
+    "guests": "Guests",
+    "analytics": "Analytics",
+    "photos": "Photos",
+    "moodboard": "Inspirations",
+    "gifts": "Gifts",
+    "website": "Wedding Website",
+    "seating": "Seating",
+    "day": "Organization",
+    "vendors": "Vendors",
+    "portal": "Portal",
+    "google": "Google",
+    "account": "Account",
+    "settings": "Settings",
+    "logout": "Logout",
+    "language": "Language"
+  },
+  "Dashboard": {
+    "emptyState": {
+      "title": "Welcome to the Wedding Board",
+      "subtitle": "Start by creating your event."
+    },
+    "hero": {
+      "coupleLine": "Bride: {brideName} · Groom: {groomName}",
+      "dateNotSet": "Date has not been set",
+      "editWedding": "Edit your wedding",
+      "googleCalendar": "Google Calendar",
+      "calendarHint": {
+        "title": "",
+        "description": "",
+        "link": ""
+      }
+    },
+    "stats": {
+      "guests": {
+        "title": "Guests",
+        "subtitle": "{confirmed} of {total} invited"
+      },
+      "tasks": {
+        "title": "Tasks",
+        "subtitle": "completed"
+      },
+      "budget": {
+        "title": "Budget",
+        "subtitle": "total budget"
+      },
+      "analyticsLink": "Analytics",
+      "viewAnalytics": "View Analytics"
+    },
+    "header": {
+      "/dashboard": {
+        "title": "Dashboard",
+        "subtitle": "Overview of your wedding plan."
+      },
+      "/dashboard/tasks": {
+        "title": "Tasks",
+        "subtitle": "Manage tasks and track progress."
+      },
+      "/dashboard/budget": {
+        "title": "Budget",
+        "subtitle": "Expenses and budget breakdown."
+      },
+      "/dashboard/guests": {
+        "title": "Guests",
+        "subtitle": "Guest list and invitations."
+      },
+      "/dashboard/seating": {
+        "title": "Seating",
+        "subtitle": "Seating plan for your guests."
+      },
+      "/dashboard/day": {
+        "title": "Organization",
+        "subtitle": "Day timeline and menu."
+      },
+      "/dashboard/vendors": {
+        "title": "Vendors",
+        "subtitle": "Vendor contacts and details."
+      },
+      "/dashboard/google": {
+        "title": "Google",
+        "subtitle": ""
+      },
+      "/dashboard/account": {
+        "title": "Account",
+        "subtitle": "Wedding details, subscription and payment."
+      },
+      "/dashboard/portal": {
+        "title": "Guest portal",
+        "subtitle": "Wishes and information for guests."
+      },
+      "/dashboard/help": {
+        "title": "Planner handbook",
+        "subtitle": "Module-by-module guide — how to use the app."
+      },
+      "/dashboard/new": {
+        "title": "New wedding",
+        "subtitle": "Create a new event."
+      }
+    },
+    "components": {
+      "recentTasks": {
+        "title": "Next Task",
+        "noTasks": "No upcoming tasks",
+        "noTitle": "No title",
+        "dueDate": "Due date",
+        "priority": "Priority",
+        "overdue": "Overdue by",
+        "today": "Today",
+        "tomorrow": "Tomorrow",
+        "days": "days",
+        "day": "day"
+      },
+      "rsvpStatus": {
+        "title": "RSVP Status",
+        "confirmedGuests": "Confirmed guests",
+        "pending": "Pending",
+        "declined": "Declined",
+        "manageGuests": "Manage guests"
+      },
+      "budgetChart": {
+        "title": "Budget Summary",
+        "totalSpent": "Total spent",
+        "remaining": "Remaining",
+        "categories": "Categories",
+        "totalBudget": "Total budget",
+        "setTotalBudget": "Set total budget to see chart.",
+        "breakdownByCategory": "Breakdown by category",
+        "spent": "Spent"
+      },
+      "onboarding": {
+        "title": "First steps",
+        "subtitle": "Check off items as you go. Not sure where to start? Click the highlighted step or the Guide button in the bottom-left corner.",
+        "progress": "{done} of {total} completed",
+        "nextStep": "Do this next",
+        "openGuide": "Open guide",
+        "dismiss": "Hide checklist",
+        "steps": {
+          "guests": "Add guests and RSVP",
+          "guestsDesc": "Click Add guest or import CSV — you need a list before seating and headcount.",
+          "budget": "Set your budget",
+          "budgetDesc": "Enter the total and categories (venue, catering, photo). Update actual amounts after each payment.",
+          "tasks": "Generate AI tasks",
+          "tasksDesc": "On the Tasks tab, use the AI generator or add your first task manually.",
+          "seating": "Seat guests at tables",
+          "seatingDesc": "Add tables, set rules, then click Generate AI plan once you have guests.",
+          "portal": "Set up the guest portal",
+          "portalDesc": "Configure the URL, description, dress code and map — one link for everyone.",
+          "day": "Plan the wedding day",
+          "dayDesc": "Under Organization, add the day timeline and wedding menu.",
+          "vendors": "Add vendors",
+          "vendorsDesc": "Save venue, photographer, DJ contacts — they appear in wedding-day mode."
+        }
+      },
+      "aiToday": {
+        "title": "AI: Today / This Week",
+        "fallbackTitle": "Upcoming tasks",
+        "today": "Today",
+        "thisWeek": "This week",
+        "noTasks": "No tasks for today or this week.",
+        "cta": "Go to tasks"
+      },
+      "generatePlan": {
+        "title": "Generate AI Plan",
+        "description": "Let AI help you create a personalized wedding plan",
+        "button": "Generate Plan"
+      },
+      "aiSeatingPlanner": {
+        "title": "AI Guest Seating Planner",
+        "description": "Automatically seat guests at tables based on defined rules and preferences.",
+        "goToPlanner": "Go to planner"
+      },
+      "guestsClient": {
+        "title": "Guests",
+        "noGuests": "No guests. Add guests or import from CSV.",
+        "tableCaption": "Wedding guest list.",
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "confirmation": "Confirmation",
+        "preferences": "Preferences",
+        "allergies": "Allergies",
+        "unknown": "Unknown",
+        "confirmed": "Confirmed",
+        "declined": "Declined",
+        "none": "None",
+        "failedToLoad": "Failed to load guests."
+      },
+      "vendorsClient": {
+        "title": "Vendors",
+        "loading": "Loading vendors...",
+        "noVendors": "No vendors.",
+        "name": "Name",
+        "category": "Category",
+        "contact": "Contact",
+        "phone": "Phone",
+        "status": "Status",
+        "failedToLoad": "Failed to load vendors."
+      },
+      "tasksBoard": {
+        "statusUpdated": "Task status updated successfully.",
+        "error": "An error occurred."
+      }
+    }
+  },
+  "Tasks": {
+    "title": "Task List",
+    "subtitle": "Your wedding checklist",
+    "addTask": "Add Task",
+    "filterByCategory": "Filter by category",
+    "noEventMessage": "Please create an event first.",
+    "categories": {
+      "all": "All",
+      "planning": "Planning",
+      "vendors": "Vendors",
+      "attire": "Attire",
+      "guests": "Guests",
+      "ceremony": "Ceremony",
+      "reception": "Reception"
+    },
+    "priorities": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "statuses": {
+      "todo": "To Do",
+      "inProgress": "In Progress",
+      "done": "Done",
+      "skipped": "Skipped"
+    },
+    "aiSuggestions": "AI Suggestions",
+    "generateTasks": "Generate AI Tasks",
+    "form": {
+      "taskTitle": "Task Title",
+      "addTask": "Add Task",
+      "adding": "Adding...",
+      "cancel": "Cancel",
+      "taskAdded": "Task added successfully.",
+      "error": "An error occurred."
+    },
+    "validation": {
+      "titleMinLength": "Task title must be at least 3 characters."
+    },
+    "assigneeRoles": {
+      "TOGETHER": "Together",
+      "BRIDE": "Bride",
+      "GROOM": "Groom",
+      "PARENTS": "Parents",
+      "WITNESSES": "Witnesses",
+      "OTHER": "Other",
+      "none": "Not selected"
+    },
+    "taskCard": {
+      "roleLabels": {
+        "TOGETHER": "Together",
+        "BRIDE": "Bride",
+        "GROOM": "Groom",
+        "PARENTS": "Parents",
+        "WITNESSES": "Witnesses",
+        "OTHER": "Other"
+      }
+    },
+    "addTaskDialog": {
+      "title": "Add New Task",
+      "description": "Enter task details. It will be added to the 'To Do' column.",
+      "titleLabel": "Title",
+      "assigneeLabel": "Responsible",
+      "assigneePlaceholder": "Who will perform this task?",
+      "cancel": "Cancel",
+      "save": "Save Task",
+      "saving": "Saving..."
+    },
+    "taskForm": {
+      "editTitle": "Edit task",
+      "editDescription": "Update details, due date, or status.",
+      "edit": "Edit",
+      "saveChanges": "Save changes",
+      "updated": "Task updated.",
+      "titlePlaceholder": "e.g. Order flowers",
+      "descriptionLabel": "Description (optional)",
+      "descriptionPlaceholder": "Notes, links, phone numbers…",
+      "statusLabel": "Status",
+      "priorityLabel": "Priority",
+      "categoryLabel": "Category",
+      "dueDateLabel": "Due date",
+      "searchPlaceholder": "Search tasks…",
+      "noSearchResults": "No tasks match your search.",
+      "boardHint": "Click a task to edit. Drag using the ⋮⋮ handle. Use the circle to mark done.",
+      "dragHandle": "Drag task",
+      "expandDetails": "Expand task details",
+      "collapseDetails": "Collapse task details",
+      "markDone": "Mark as done",
+      "markUndone": "Mark as not done"
+    },
+    "board": {
+      "emptyTitle": "No tasks yet",
+      "emptyDescription": "Generate an AI task plan or add your first task manually.",
+      "tabs": {
+        "board": "Board",
+        "timeline": "Timeline"
+      },
+      "filters": {
+        "allRoles": "All roles ({count})",
+        "allCategories": "All categories"
+      },
+      "roleLabels": {
+        "TOGETHER": "Together",
+        "BRIDE": "Bride",
+        "GROOM": "Groom",
+        "PARENTS": "Parents",
+        "WITNESSES": "Witnesses",
+        "OTHER": "Other"
+      }
+    },
+    "generateTasksButton": {
+      "label": "Generate AI task plan"
+    },
+    "deleteTask": "Delete task",
+    "page": {
+      "eventNotFound": "Event not found. Create it in the dashboard first.",
+      "preparingView": "Preparing tasks view..."
+    },
+    "kanban": {
+      "dragHint": "Grab a task by the ⋮⋮ handle and drag it to another column — the status updates as soon as you hover over the column.",
+      "dropHere": "Drop here",
+      "emptyColumn": "Drag a task here",
+      "expandToDrop": "Expand column or drop here",
+      "statusUpdateError": "Could not update task status.",
+      "scrollLeft": "Scroll board left",
+      "scrollRight": "Scroll board right",
+      "deleteError": "Failed to delete task.",
+      "deleteSuccess": "Task deleted.",
+      "networkError": "Connection error.",
+      "confirmDeleteTitle": "Delete this task?",
+      "confirmDeleteDescription": "This action cannot be undone. The task will be permanently removed.",
+      "cancel": "Cancel",
+      "confirmDelete": "Delete"
+    },
+    "timeline": {
+      "noTasks": "No tasks to display.",
+      "allCategories": "All ({count})",
+      "groups": {
+        "overdue": "Overdue",
+        "urgent": "Urgent (next month)",
+        "soon": "Soon (1-3 months)",
+        "midTerm": "Mid-term (3-6 months)",
+        "longTerm": "Long-term planning (over 6 months)",
+        "completed": "Completed"
+      }
+    }
+  },
+  "Budget": {
+    "title": "Budget Management",
+    "subtitle": "Control your wedding costs",
+    "noEventMessage": "Please create an event first.",
+    "totalBudget": "Total Budget",
+    "spent": "Spent",
+    "remaining": "Remaining",
+    "addItem": "Add Item",
+    "categories": {
+      "venue": "Venue",
+      "catering": "Catering",
+      "photography": "Photography",
+      "music": "Music",
+      "flowers": "Flowers",
+      "attire": "Attire",
+      "transport": "Transport",
+      "other": "Other"
+    },
+    "detailedCategories": {
+      "Sala weselna": "Wedding Venue",
+      "Catering": "Catering",
+      "Alkohol": "Alcohol",
+      "Fotograf / Kamera": "Photographer / Videographer",
+      "Muzyka / DJ": "Music / DJ",
+      "Kwiaty / Dekoracje": "Flowers / Decorations",
+      "Suknia / Garnitur": "Wedding Dress / Suit",
+      "Zaproszenia / Papeteria": "Invitations / Stationery",
+      "Tort": "Wedding Cake",
+      "Transport": "Transport",
+      "Uroda (fryzura, makijaż)": "Beauty (Hair, Makeup)",
+      "Noclegi": "Accommodation",
+      "Inne": "Other"
+    },
+    "statuses": {
+      "PLANNED": "Planned",
+      "PAID": "Paid"
+    },
+    "form": {
+      "serviceType": "Service Type",
+      "name": "Name",
+      "namePlaceholder": "e.g. XYZ Venue, Photographer John Doe",
+      "plannedAmount": "Planned Amount ($)",
+      "actualAmount": "Actual Amount",
+      "status": "Status",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saving": "Saving...",
+      "itemAdded": "Budget item added successfully.",
+      "itemUpdated": "Budget item updated successfully.",
+      "error": "An error occurred."
+    },
+    "validation": {
+      "nameMinLength": "Name must be at least 3 characters.",
+      "selectServiceType": "Select service type.",
+      "amountPositive": "Amount must be positive."
+    },
+    "aiOptimization": "AI Optimization",
+    "overBudgetWarning": "Over budget!",
+    "budgetSuggestions": "Budget suggestions"
+  },
+  "Account": {
+    "coupleSection": "Bride & groom",
+    "brideLabel": "Bride",
+    "groomLabel": "Groom",
+    "noEvent": "No event — create a wedding from the dashboard.",
+    "payerSection": "Payer details",
+    "email": "Email",
+    "fullName": "Full name",
+    "subscriptionTitle": "Subscription",
+    "trialActive": "Trial until {date}",
+    "stripeTrialing": "Trial active — first charge on {date}",
+    "billingFailed": "Subscription paused — payment failed. Update your card in the billing portal.",
+    "trialEnded": "Trial ended on {date}",
+    "paidSince": "Paid since {date}",
+    "noSubscription": "No active subscription",
+    "getSubscription": "Subscribe — 59 PLN / month",
+    "renewSubscription": "Renew access",
+    "manageSubscription": "Manage billing",
+    "cancelSubscription": "Cancel subscription",
+    "cancelDialogTitle": "Cancel subscription?",
+    "cancelDialogDescription": "You keep full access until {date}. After that, your plan will not renew and we will not charge you again.",
+    "cancelDialogDescriptionNoDate": "Your subscription will end at the close of the current billing period. Until then, you keep full access.",
+    "cancelDialogConfirm": "Yes, cancel",
+    "cancelDialogDismiss": "Keep subscription",
+    "cancelScheduled": "Your subscription ends on {date}. You keep full access until then.",
+    "cancelTrialScheduled": "Cancellation scheduled — trial runs until {date}, then the plan will not renew.",
+    "reactivateSubscription": "Resume subscription",
+    "cancelSuccess": "Your subscription will cancel at the end of the current period.",
+    "reactivateSuccess": "Your subscription has been resumed.",
+    "cancelError": "Could not update your subscription.",
+    "addPayment": "Add payment",
+    "trialHint": "You can subscribe at any time to keep access after the trial ends.",
+    "redirecting": "Redirecting…",
+    "backToAccount": "Back to Account",
+    "instruction": {
+      "title": "How to use the planner",
+      "intro": "Same order as the guide (bottom-left button) and the first-steps checklist on the dashboard.",
+      "guideHint": "Turn on Guide in the app for menu hints and quick jumps to each module.",
+      "back": "Back to account settings",
+      "goToModule": "Go to module"
+    },
+    "collaboration": {
+      "title": "Collaboration — the couple",
+      "description": "One subscription for the couple. Generate a link and PIN — your partner enters without an account or second payment.",
+      "oneSubscriptionHint": "Link valid for 30 days. A new link revokes the previous one.",
+      "securityHint": "Share with your partner privately.",
+      "setPinTitle": "Set a PIN for your partner (4–6 digits)",
+      "pinPlaceholder": "PIN",
+      "pinConfirmPlaceholder": "Repeat PIN",
+      "generateLink": "Generate link",
+      "regenerateLink": "Generate new link",
+      "revokeLink": "Revoke access",
+      "activeLink": "Active partner link",
+      "expiresOn": "Valid until {date}",
+      "lastUsed": "last used {date}",
+      "showOnceTitle": "Copy now — link and PIN are shown only once",
+      "linkLabel": "Link",
+      "pinLabel": "PIN",
+      "validDays": "Valid for {days} days",
+      "copied": "Copied: {label}",
+      "copyError": "Could not copy",
+      "linkGenerated": "Link generated",
+      "generateError": "Could not generate link",
+      "linkRevoked": "Partner access revoked",
+      "revokeError": "Could not revoke access",
+      "pinTooShort": "PIN must be at least 4 digits",
+      "pinMismatch": "PINs do not match",
+      "partnerView": "You have shared access to {owner}'s wedding.",
+      "loadError": "Could not load collaboration data."
+    }
+  },
+  "GoogleCalendar": {},
+  "Guests": {
+    "title": "Guest List",
+    "subtitle": "Manage your guest list",
+    "noEventMessage": "Please create an event first.",
+    "addGuest": "Add Guest",
+    "importCsv": "Import CSV",
+    "exportCsv": "Export CSV",
+    "downloadTemplate": "Download template",
+    "importGuests": "Import guests",
+    "cardView": "Card list",
+    "tableView": "Table view",
+    "editGuest": "Edit guest",
+    "addNewGuest": "Add new guest",
+    "importInstructionsTitle": "How to import guests",
+    "importInstructions": "1) Download the Excel template (.xlsx). 2) Open in Excel. 3) Fill in First name and Last name (only these two are required). 4) Save the file. 5) Select the file and click Import.",
+    "selectFile": "Select CSV file",
+    "importSuccess": "Guests imported successfully.",
+    "importError": "Import failed. Allowed: Excel (.xlsx, .xls) or CSV. Required columns: First name, Last name.",
+    "sendInvitations": "Send Invitations",
+    "rsvpStatus": "RSVP Status",
+    "generateInvitations": "Generate AI Invitations",
+    "generateInvitationsDialog": {
+      "title": "Generate Invitations",
+      "description": "Create personalized invitations for your guests",
+      "templateReady": "Invitation template ready. Select guests.",
+      "selectAtLeastOneGuest": "Select at least one guest",
+      "selectGuestsDescription": "Select guests and generate email invitations or download PDF for printing (A5).",
+      "cancel": "Cancel",
+      "back": "Back",
+      "next": "Next",
+      "generate": "Generate",
+      "selectAll": "Select All",
+      "selectNone": "Select None",
+      "generating": "Generating...",
+      "generated": "Generated",
+      "sendEmail": "Send Email",
+      "downloadPdf": "Download PDF"
+    },
+    "statuses": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "declined": "Declined",
+      "invited": "RSVP sent"
+    },
+    "statusLabels": {
+      "PENDING": "Pending",
+      "INVITED": "RSVP sent",
+      "CONFIRMED": "Confirmed",
+      "DECLINED": "Declined"
+    },
+    "form": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "phone": "Phone",
+      "notes": "Notes",
+      "isChild": "Child",
+      "addGuest": "Add Guest",
+      "updateGuest": "Update Guest",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saving": "Saving...",
+      "guestAdded": "Guest added successfully.",
+      "guestUpdated": "Guest updated successfully.",
+      "error": "An error occurred."
+    },
+    "validation": {
+      "firstNameRequired": "First name is required.",
+      "lastNameRequired": "Last name is required.",
+      "invalidEmail": "Invalid email format."
+    },
+    "addGuestDialog": {
+      "title": "Add New Guest",
+      "description": "Enter guest details to add them to the list.",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "group": "Group",
+      "cancel": "Cancel",
+      "saveGuest": "Save Guest",
+      "saving": "Saving..."
+    },
+    "table": {
+      "description": "Excel-like view. Rows without the required field (name) are highlighted in red. Fill in the data and click Save – all valid rows will be saved and empty rows will be removed.",
+      "saveRows": "Save ({count} {count, plural, one {row} other {rows}})",
+      "addRow": "Add row",
+      "invalidRowsHint": "Rows highlighted in red have missing required data (name) and will not be saved.",
+      "noValidRows": "No rows with required data (name).",
+      "headerFullName": "Name",
+      "headerEmail": "Email",
+      "headerPhone": "Phone",
+      "headerStatus": "Status",
+      "headerFoodPreference": "Dietary preferences",
+      "headerAllergies": "Allergies",
+      "headerWinietka": "Place card",
+      "headerSeatingNotes": "Seating notes",
+      "headerAccommodation": "Accommodation",
+      "headerTransport": "Transport",
+      "headerTransportDetails": "Transport details",
+      "headerNotes": "Notes",
+      "placeholderFullName": "Name *",
+      "placeholderEmail": "email@example.com",
+      "placeholderPhone": "+48...",
+      "placeholderFood": "e.g. vegetarian",
+      "placeholderAllergies": "e.g. nuts",
+      "placeholderWinietka": "e.g. Uncle John",
+      "placeholderSeatingNotes": "e.g. near couple",
+      "placeholderTransportDetails": "pickup address",
+      "placeholderNotes": "Notes",
+      "statusPending": "Pending",
+      "statusConfirmed": "Confirmed",
+      "statusDeclined": "Declined"
+    }
+  },
+  "Seating": {
+    "title": "Seating Plan",
+    "subtitle": "Arrange guests at tables",
+    "noEventMessage": "Please create an event first.",
+    "addTable": "Add Table",
+    "generatePlan": "Generate AI Plan",
+    "exportPdf": "Export PDF",
+    "aiPlanner": "AI Seating Planner",
+    "rules": {
+      "mustSitTogether": "Must sit together",
+      "cannotSitTogether": "Cannot sit together",
+      "sameTable": "Same table"
+    },
+    "capacity": "Capacity",
+    "occupied": "Occupied seats",
+    "available": "Available seats",
+    "addTableDialog": {
+      "title": "Add New Table",
+      "description": "Configure a new table by specifying its name and number of seats.",
+      "tableName": "Table Name",
+      "numberOfSeats": "Number of Seats",
+      "coupleTable": "Couple's Table",
+      "cancel": "Cancel",
+      "saveTable": "Save Table",
+      "saving": "Saving..."
+    },
+    "seatingRules": {
+      "addNewRule": "Add new rule",
+      "selectRuleType": "Select rule type",
+      "selectGuests": "Select guests...",
+      "addRule": "Add",
+      "existingRules": "Existing rules",
+      "noRulesDefined": "No rules defined.",
+      "ruleTypes": {
+        "SAME_TABLE": "Must sit at the same table",
+        "MUST_SIT_TOGETHER": "Must sit next to each other",
+        "CANNOT_SIT_TOGETHER": "Cannot sit next to each other",
+        "PREFER_SIT_TOGETHER": "Prefer to sit together",
+        "UNDEFINED_RULE": "Undefined rule"
+      },
+      "messages": {
+        "selectAtLeastTwoGuests": "Select at least two guests to create a rule.",
+        "ruleAdded": "Rule added successfully.",
+        "ruleDeleted": "Rule deleted successfully.",
+        "addRuleError": "Failed to add rule.",
+        "deleteRuleError": "Failed to delete rule.",
+        "noGuests": "No guests",
+        "unknownGuests": "Unknown guests"
+      }
+    }
+  },
+  "Vendors": {
+    "title": "Vendor Directory",
+    "subtitle": "Find the best vendors",
+    "noEventMessage": "Please create an event first.",
+    "addVendor": "Add Vendor",
+    "categories": {
+      "venue": "VENUE",
+      "catering": "CATERING",
+      "photography": "PHOTOGRAPHY",
+      "music": "MUSIC",
+      "flowers": "FLORAL",
+      "transport": "TRANSPORT",
+      "other": "OTHER"
+    },
+    "detailedCategories": {
+      "Sala weselna": "Wedding Venue",
+      "Catering": "Catering",
+      "Alkohol": "Alcohol",
+      "Fotograf / Kamera": "Photographer / Videographer",
+      "Muzyka / DJ": "Music / DJ",
+      "Kwiaty / Dekoracje": "Flowers / Decorations",
+      "Suknia / Garnitur": "Wedding Dress / Suit",
+      "Zaproszenia / Papeteria": "Invitations / Stationery",
+      "Tort": "Wedding Cake",
+      "Transport": "Transport",
+      "Uroda (fryzura, makijaż)": "Beauty (Hair, Makeup)",
+      "Noclegi": "Accommodation",
+      "Inne": "Other"
+    },
+    "status": {
+      "researching": "Researching",
+      "contacted": "Contacted",
+      "negotiating": "Negotiating",
+      "booked": "Booked",
+      "rejected": "Rejected"
+    },
+    "compareVendors": "Compare Vendors",
+    "compare": {
+      "selectVendors": "Select vendors to compare",
+      "category": "Category",
+      "email": "Email",
+      "phone": "Phone",
+      "website": "Website",
+      "contactPerson": "Contact person",
+      "notes": "Notes",
+      "documents": "Documents",
+      "noSelection": "Select at least 2 vendors to compare",
+      "maxSelection": "You can compare up to 5 vendors"
+    },
+    "aiNegotiation": "AI Negotiation",
+    "form": {
+      "name": "Vendor Name",
+      "category": "Category",
+      "contact": "Contact Person",
+      "email": "Email",
+      "phone": "Phone",
+      "notes": "Notes",
+      "addVendor": "Add Vendor",
+      "updateVendor": "Update Vendor",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saving": "Saving...",
+      "vendorAdded": "Vendor added successfully.",
+      "vendorUpdated": "Vendor updated successfully.",
+      "error": "An error occurred."
+    },
+    "validation": {
+      "nameMinLength": "Name must be at least 3 characters.",
+      "selectCategory": "Select a category.",
+      "invalidEmail": "Invalid email format."
+    },
+    "vendorList": {
+      "addVendor": "Add Vendor",
+      "editVendor": "Edit Vendor",
+      "addNewVendor": "Add New Vendor",
+      "noVendors": "No vendors",
+      "noVendorsDescription": "You don't have any vendors yet. Add your first vendor to start organizing your wedding.",
+      "addFirstVendor": "Add first vendor",
+      "edit": "Edit",
+      "documents": "Documents",
+      "delete": "Delete",
+      "contracts": "contracts",
+      "invoices": "invoices",
+      "confirmDelete": "Are you sure you want to delete this vendor?",
+      "confirmDeleteDescription": "This action cannot be undone. All documents associated with this vendor will also be deleted.",
+      "cancel": "Cancel",
+      "deleteVendor": "Delete Vendor",
+      "vendorDeleted": "Vendor deleted successfully."
+    }
+  },
+  "Events": {
+    "title": "Your Events",
+    "subtitle": "Manage your weddings",
+    "createEvent": "Create New Wedding",
+    "eventName": "Event Name",
+    "eventDate": "Wedding Date",
+    "noEvents": "You don't have any events yet",
+    "weddingDate": "Wedding Date",
+    "daysUntil": "days until wedding",
+    "form": {
+      "newWedding": "New Wedding",
+      "brideAndGroomInfo": "Enter bride and groom information and event date",
+      "brideName": "Bride (full name)",
+      "groomName": "Groom (full name)",
+      "eventName": "Event Name",
+      "weddingDate": "Wedding Date",
+      "estimatedGuests": "Estimated number of guests",
+      "targetBudget": "Target budget",
+      "budgetCurrency": "Budget currency",
+      "guestPortalSection": "Guest portal page",
+      "guestPortalEnabled": "Enable guest portal",
+      "guestPortalSlug": "Page address (slug)",
+      "guestPortalSlugHint": "The link will look like: https://yourdomain/en/w/your-page-address. Use lowercase letters and hyphens.",
+      "guestPortalDescription": "Description on the page (visible to guests)",
+      "guestPortalDescriptionPlaceholder": "Write a few sentences for your guests: welcome message, logistics, schedule, etc.",
+      "guestPortalDressCode": "Dress code (optional)",
+      "guestPortalDressCodePlaceholder": "e.g. Elegant, Black tie, Pastel colors",
+      "guestPortalMapUrl": "Maps link (Google Maps)",
+      "ceremonyLocationName": "Ceremony location (church / civil office)",
+      "ceremonyLocationNamePlaceholder": "e.g. St. Anne Church, City Hall Krakow",
+      "ceremonyLocationUrl": "Ceremony map link",
+      "receptionLocationName": "Reception location",
+      "receptionLocationNamePlaceholder": "e.g. Magnolia Venue",
+      "receptionLocationUrl": "Reception map link",
+      "createWedding": "Create Wedding",
+      "saving": "Saving...",
+      "weddingCreated": "Wedding created successfully!",
+      "creationError": "Failed to create wedding.",
+      "fillRequiredFields": "Please fill in the event name and wedding date.",
+      "bridePlaceholder": "e.g. Anna Kowalska",
+      "groomPlaceholder": "e.g. Piotr Nowak",
+      "partnerEmail": "Partner email (shared access)",
+      "partnerEmailPlaceholder": "e.g. groom@email.com",
+      "partnerEmailHint": "Optional — we'll send an invite after creating the wedding. One subscription for the couple.",
+      "eventPlaceholder": "e.g. Anna and Piotr's Wedding",
+      "guestsPlaceholder": "e.g. 80",
+      "budgetPlaceholder": "e.g. 50000"
+    },
+    "editForm": {
+      "editWedding": "Edit Wedding",
+      "updateBrideGroomDetails": "Update bride and groom details and event information",
+      "weddingUpdated": "Wedding updated successfully!",
+      "updateError": "Failed to update wedding.",
+      "fillRequiredFields": "Please fill in the event name and wedding date.",
+      "editYourWedding": "Edit your wedding"
+    }
+  },
+  "RsvpForm": {
+    "title": "RSVP Confirmation",
+    "subtitle": "Thank you for your time",
+    "isAttendingLabel": "Will you be attending?",
+    "attending": "Yes, I'll be there!",
+    "notAttending": "No, I can't make it.",
+    "needsHotelLabel": "Do you need accommodation?",
+    "needsTransportLabel": "Do you need transport?",
+    "foodPreferenceLabel": "Food Preference",
+    "foodPreferencePlaceholder": "e.g., Vegetarian, Vegan",
+    "allergiesLabel": "Allergies",
+    "allergiesPlaceholder": "e.g., Peanuts, Gluten",
+    "notesLabel": "Message to the couple",
+    "notesPlaceholder": "Leave a message...",
+    "submitButton": "Submit RSVP",
+    "submitSuccess": "Your RSVP has been submitted successfully!",
+    "submitError": "Failed to submit your RSVP. Please try again.",
+    "confirmationSent": "Your confirmation has been sent.",
+    "confirmationThankYou": "Thank you!"
+  },
+  "RsvpPage": {
+    "title": "You're invited, {firstName}!",
+    "subtitle": "Please fill out the form below to RSVP.",
+    "invalidTokenTitle": "Invalid Invitation",
+    "invalidTokenMessage": "The invitation link is invalid or has expired."
+  },
+  "SeatingPage": {
+    "title": "Seating Planner",
+    "subtitle": "Arrange your guests at the tables.",
+    "generateButton": "Generate Seating Plan"
+  },
+  "Auth": {
+    "title": "Wedding Board",
+    "subtitle": "Choose how you want to continue",
+    "signUpTitle": "Try Wedding Board",
+    "signUpDesc": "Create an account with email or Google. Then terms and wedding setup — one month free, no card.",
+    "signInTitle": "I have an account – log in",
+    "signInDesc": "Sign in with email, Google, etc. and return to your planner",
+    "backToHome": "Back to home",
+    "accountTypeTitle": "I am a...",
+    "coupleTitle": "Couple",
+    "coupleDesc": "Plan your own wedding — guest list, budget, seating plan, tasks and more.",
+    "coupleSignUp": "Create account",
+    "coupleSignIn": "Log in",
+    "organizerSignUp": "Create account",
+    "organizerSignIn": "Log in",
+    "backToRoleChoice": "Back",
+    "organizerTitle": "Wedding Organizer",
+    "organizerDesc": "Manage multiple weddings for your clients — dedicated tools for professionals.",
+    "organizerPrice": "59 PLN/month",
+    "dualAccountHint": "You can manage your own wedding and work as an organizer — just pick one to start with. You'll be able to add the other role later in settings.",
+    "chooseContextTitle": "Choose context",
+    "chooseContextSubtitle": "You have access to both roles. Pick the one you want to use now.",
+    "chooseCoupleDesc": "Plan your wedding — guests, budget, seating, tasks.",
+    "proTitle": "Organizer",
+    "chooseVenueDesc": "Manage weddings for your clients.",
+    "chooseVenueDescNamed": "Manage {name} and other weddings."
+  },
+  "VenuePro": {
+    "cardTitle": "Wedding venue — manage your venue profile",
+    "cardDesc": "Add your venue to Wedding Board and reach couples who are planning their wedding."
+  },
+  "VenueLanding": {
+    "metaTitle": "Wedding venue management system | Wedding Board",
+    "metaDescription": "CRM, reservations, offers, contracts, guests, menu, tables, timeline and payments in one system. From 199 PLN/month. Try the ROI calculator.",
+    "heroTitle": "More weddings. Less paperwork. Better margins.",
+    "heroSubtitle": "A complete wedding venue management system. From the first couple inquiry to the final settlement — all in one dashboard. No Excel, no Word, no sticky notes.",
+    "heroCta": "See demo — 30 days free",
+    "heroNote": "No card. No commitment. Cancel anytime.",
+    "problemTitle": "Excel costs your venue more than you think",
+    "problemDesc": "Reservations in Excel, offers in Word, contracts printed and scanned, corrections over the phone, payments on paper. Sound familiar?",
+    "problemItem1": "~12h/week on admin — that's 600h/year lost",
+    "problemItem2": "Risk of date conflicts — 1-2 lost weddings per year",
+    "problemItem3": "Slow inquiry-to-contract cycle — couples choose faster venues",
+    "problemItem4": "No analytics — you don't know which months are weak",
+    "solutionTitle": "One system instead of 6 tools",
+    "solutionDesc": "Wedding Board replaces Excel, Word, notepad, email, phone and paper calendar. 60% less admin. More time for sales.",
+    "feature1Title": "CRM and sales pipeline",
+    "feature1Desc": "Every inquiry in the system — from NEW through QUOTE to WON. Automatic follow-ups. No lead gets lost.",
+    "feature2Title": "PDF offers in 2 minutes",
+    "feature2Desc": "Pricing calculator: package × guests + extras. Professional PDF with logo, menu and pricing. Couple accepts online with one click.",
+    "feature3Title": "Couple portal 24/7",
+    "feature3Desc": "Couples fill in guests, choose menu, arrange tables online. You see everything live. No more emails and calls about dietary needs.",
+    "feature4Title": "Kitchen BEO sheet",
+    "feature4Desc": "Auto-portions, allergen list per table, cooking timeline. Kitchen gets a ready sheet before every wedding. Zero errors.",
+    "feature5Title": "E-signature contracts",
+    "feature5Desc": "Contract templates, one-click generation, online signing by both parties. No more printing and scanning.",
+    "feature6Title": "Reviews and reputation",
+    "feature6Desc": "Auto-request 48h after the wedding. Couple leaves stars. Reviews on your marketplace profile. Free marketing.",
+    "pricingTitle": "Simple pricing — one wedding covers the annual cost",
+    "pricingStarter": "Starter",
+    "pricingStarterPrice": "199 PLN",
+    "pricingStarterDesc": "up to 20 weddings/year",
+    "pricingStarterFeatures": ["Reservation calendar", "PDF offers", "Couple portal", "Online contracts", "Corrections", "Chat", "PDF export"],
+    "pricingPro": "Pro",
+    "pricingProPrice": "299 PLN",
+    "pricingProDesc": "unlimited weddings",
+    "pricingProFeatures": ["Everything in Starter", "CRM + pipeline", "Kitchen BEO", "Analytics & reports", "Auto reviews", "Staff scheduler", "Marketplace"],
+    "pricingPremium": "Premium",
+    "pricingPremiumPrice": "399 PLN",
+    "pricingPremiumDesc": "unlimited + dedicated support",
+    "pricingPremiumFeatures": ["Everything in Pro", "1:1 onboarding", "API access", "24h priority support", "Dedicated account manager"],
+    "pricingRecommended": "RECOMMENDED",
+    "pricingNote": "30 days free. No card. Cancel anytime.",
+    "roiTitle": "How much will you save? Adjust the sliders.",
+    "roiSubtitle": "Match the numbers to your venue and see concrete results.",
+    "caseTitle": "Pod Dębami Venue: +29% weddings with the same team",
+    "caseBefore1": "45 weddings/year — 3-person team",
+    "caseBefore2": "Reservations in Excel — 2 date conflicts in 2024",
+    "caseBefore3": "Offers in Word — 45 min per offer",
+    "caseAfter1": "58 weddings/year — +29% same team",
+    "caseAfter2": "0 date conflicts — blocking calendar",
+    "caseAfter3": "PDF offer in 2 min — 22x faster",
+    "caseResult": "+13 weddings × 38 000 PLN = 494 000 PLN additional annual revenue. System cost: 3 588 PLN.",
+    "ctaTitle": "Start free. First month 0 PLN.",
+    "ctaSubtitle": "No card. No commitment. 7-day implementation with 1:1 onboarding.",
+    "ctaButton": "Create venue account",
+    "ctaContact": "Questions?",
+    "ctaEmail": "kontakt@weddingboard.pl"
+  },
+  "LanguageSwitcher": {
+    "polish": "Polski",
+    "english": "English",
+    "changeLanguage": "Change language"
+  },
+  "Error": {
+    "title": "An Error Occurred",
+    "description": "We're sorry for the inconvenience. Please try refreshing the page or come back later.",
+    "retry": "Try Again",
+    "home": "Go to Homepage",
+    "details": "Error details (development only)"
+  },
+  "Landing": {
+    "appName": "Wedding Board",
+    "login": "Log in",
+    "signUp": "Sign up",
+    "navApp": "App",
+    "navAppCta": "Start planning",
+    "mainNavAria": "Main navigation",
+    "appMetaTitle": "Wedding planning app online",
+    "appMetaDescription": "Wedding Board — wedding planning app online: guests, RSVP, budget, AI seating plan. 30 days free, no card required. Browser-based at weddingboard.pl.",
+    "heroTitle": "Wedding planning app online",
+    "heroSubtitle": "Wedding Board keeps guests, spending, floor plan and deadlines together. No copying between files. First month costs nothing.",
+    "heroBadge": "Start free",
+    "ctaStart": "Start planning",
+    "ctaLogin": "Have an account? Log in",
+    "noCard": "No card upfront — 30 days free, then 59 PLN/month. Cancel anytime.",
+    "seoIntro": "Looking for a wedding planning app that needs no install? Wedding Board runs in your browser — guest list with RSVP, budget, seating, tasks and PDF for the venue.",
+    "painHeadline": "A wedding has a lot of moving parts. Easier when they're not spread across five different places.",
+    "featuresSectionTitle": "What's inside",
+    "feature1Title": "Stop jumping between files",
+    "feature1Desc": "Guests, budget, tables, tasks and venue contacts — one page open. The spreadsheets can stay closed.",
+    "feature2Title": "Guest list and RSVP",
+    "feature2Desc": "Import from Excel, send invitations, see who confirmed. Guest clicks a link — you see the answer straight away.",
+    "feature3Title": "Table plan without manual layout",
+    "feature3Desc": "Set rules: who must sit together, who should stay apart. The app proposes a layout — you tweak what you want. Then PDF for the venue and place cards.",
+    "seatingHeadline": "Seating guests without a late-night paper session",
+    "seatingIntro": "You know Aunt Kate can't sit next to Uncle John — but with 80 guests and twelve tables, something gets missed. Enter the rules here; the app does the layout.",
+    "seatingBullet1": "Write rules once: must sit together, cannot sit together, prefer nearby. Pick guests from the list and you're done.",
+    "seatingBullet2": "Per guest you can add preferences (e.g. near the couple) and place card text — used when generating the plan.",
+    "seatingBullet3": "One click for a full draft plan. Drag to adjust, or regenerate when the guest list changes.",
+    "seatingBullet4": "PDF for the venue: ready plan with table numbers and guest list — hand it to staff. Plus service list in PDF for catering.",
+    "seatingBullet5": "Place cards: separate PDF with names — print and hand to the venue.",
+    "feature4Title": "A budget that won't surprise you at the end",
+    "feature4Desc": "Split into categories, enter planned and actual amounts. See immediately where you're over.",
+    "feature5Title": "Tasks with dates",
+    "feature5Desc": "A to-do list with deadlines and priorities. Add your own or generate a starter plan based on your wedding date.",
+    "feature6Title": "Vendors at hand",
+    "feature6Desc": "Venue, catering, photographer, DJ — numbers, emails and notes for each. No digging through WhatsApp history.",
+    "alwaysAvailableHeadline": "Phone, tablet, laptop — same account",
+    "alwaysAvailableText": "Check the guest list on your phone at a family dinner, fix the budget on your laptop in the evening. Log in and you always have the latest version.",
+    "pricingTitle": "Simple pricing",
+    "pricingTrial": "Start free",
+    "pricingTrialDesc": "Full app for 30 days with no card required. Subscribe (PLN 59/month) when you decide to stay.",
+    "pricingAfter": "Then one plan",
+    "pricingMonthly": "Monthly",
+    "pricingMonthlyPrice": "59 PLN",
+    "pricingPerMonth": "month",
+    "planPremiumLabel": "Coming soon",
+    "planPremiumTitle": "Premium plan",
+    "planPremiumPrice": "$24",
+    "planPremiumPeriod": "month",
+    "planPremiumDesc": "Everything in the basic plan plus:",
+    "planPremiumFeature1": "Invitation generator — design and send from the app.",
+    "planPremiumFeature2": "Stationery — matching place cards, menus and thank-you cards without a separate designer.",
+    "planPremiumOnePrice": "One app instead of three tools and invoices from a graphic designer.",
+    "pricingCancel": "Cancel whenever — no notice period.",
+    "pricingCta": "Start planning",
+    "venueSectionEyebrow": "For wedding venues",
+    "venueSectionTitle": "Manage your wedding venue in one system",
+    "venueSectionDesc": "CRM, reservations, offers, contracts, guests, menu, tables, timeline, payments and analytics — all in one dashboard. Less paperwork, more bookings.",
+    "venueSectionFeature1": "Reservation calendar with date blocking — no more date conflicts",
+    "venueSectionFeature2": "Menu, packages and pricing calculator — PDF offer in 2 minutes",
+    "venueSectionFeature3": "Couple portal — guests, dietary needs and seating online 24/7",
+    "venueSectionFeature4": "Automatic payment reminders and follow-ups",
+    "venueSectionPrice": "from 199 PLN / month · unlimited weddings on Pro plan",
+    "venueSectionCta": "Learn more for venues",
+    "faqTitle": "Questions we get most often",
+    "faq": [
+      {
+        "question": "How much does it cost?",
+        "answer": "PLN 59 per month after the first 30 days. You test everything free for a month — full app, no limits. Cancel in account settings, no phone call needed."
+      },
+      {
+        "question": "Do I need a card to start?",
+        "answer": "No. Sign up without a card and use the full app free for 30 days. You only pay (PLN 59/month) if you choose to continue after the trial."
+      },
+      {
+        "question": "What's actually in the app?",
+        "answer": "Guest list with RSVP, budget, table plan with seating rules, tasks, vendor contacts and PDF export (floor plan, place cards). One shared account for the couple."
+      },
+      {
+        "question": "Does it replace a wedding planner?",
+        "answer": "No — it's for organising yourself. It won't run your wedding day, but it handles guests, budget and tables better than spreadsheets and sticky notes."
+      },
+      {
+        "question": "Does it work on my phone?",
+        "answer": "Yes, in the browser — nothing to install. Phone, tablet and desktop, same account."
+      }
+    ],
+    "finalCta": "Take the first step",
+    "finalCtaSub": "30 days at PLN 0 · No card · Cancel anytime",
+    "socialProofTitle": "Why couples switch from Excel",
+    "socialProofSubtitle": "Concrete benefits you see within minutes — no empty promises.",
+    "socialProof1Title": "AI seating plan",
+    "socialProof1Desc": "Set your rules — the system seats everyone. PDF for the venue and place cards without an all-nighter.",
+    "socialProof2Title": "Import from Excel",
+    "socialProof2Desc": "Guest list in seconds. RSVP, statuses and notes in one place.",
+    "socialProof3Title": "One account for both of you",
+    "socialProof3Desc": "Plan together on the same account — no more emailing files back and forth.",
+    "socialProofMagazine": "Guides and checklists in the Wedding Board magazine →",
+    "footerCreator": "Creator: Koda Labs Simple Joint Stock Company",
+    "footerDataAdmin": "Data controller: Koda Labs Simple Joint Stock Company",
+    "heroHook": "Guest list in one tab, budget in a note, seating on paper — sound familiar?",
+    "navAppSeo": "Wedding planning app",
+    "breadcrumbApp": "Wedding planning app",
+    "seoSectionTitle": "What to look for in a wedding planning app",
+    "seoSectionBody": "A good wedding planning app connects your guest list, budget and table plan — so you never copy the same data three times. Wedding Board runs in the browser at weddingboard.pl: CSV import, RSVP links, spending tracker and venue PDF export. One shared account for the couple. Try 30 days free — no card required."
+  },
+  "Home": {
+    "metaTitle": "Wedding planning — guides, trends and to-do lists 2026",
+    "metaDescription": "Wedding Board journal: timeline, budget, RSVP, seating and wedding trends. Articles for couples planning in Poland.",
+    "eyebrow": "Wedding planning",
+    "heroTitle": "Knowledge first, tools when you're ready",
+    "heroSubtitle": "Guides, seasonal trends and practical to-do lists — before you open a spreadsheet. Turn on the app when it feels like the right moment.",
+    "gatewayCoupleTitle": "Planning my own wedding",
+    "gatewayCoupleDesc": "Guest list, budget, AI seating plan and tasks — all in one place, no spreadsheets or sticky notes.",
+    "gatewayCoupleCta": "Start planning",
+    "gatewayVenueTitle": "I run a wedding venue",
+    "gatewayVenueDesc": "CRM, reservations, quotes, contracts and couple portal in one dashboard. Less admin, more weddings.",
+    "gatewayVenueCta": "For venues",
+    "gatewayMagazineTitle": "Looking for tips & inspiration",
+    "gatewayMagazineDesc": "Articles, checklists and trends — knowledge first, decisions later. Wedding Board journal.",
+    "gatewayMagazineCta": "Read the journal",
+    "ctaMagazine": "Read the journal",
+    "ctaApp": "Explore the app",
+    "ctaTrial": "Try free",
+    "trendingEyebrow": "Wedding season 2026",
+    "trendingTitle": "What couples are choosing right now",
+    "trendingSubtitle": "Selected articles from our journal — practical tips for the decisions you need to make before the wedding.",
+    "trendingItems": [
+      {
+        "hook": "Wedding planning from the bride's perspective — what's really on your plate?",
+        "slug": "planowanie-wesela-perspektywa-panny-mlodej"
+      },
+      {
+        "hook": "Groom's guide: the suit is just the beginning. Your real action plan.",
+        "slug": "planowanie-wesela-perspektywa-pana-mlodego"
+      },
+      {
+        "hook": "Wedding trends 2026 — quiet luxury, live pizza and AI planning",
+        "slug": "trendy-weselne-2026-co-wiraluje"
+      }
+    ],
+    "latestTitle": "Latest from the journal",
+    "viewAllArticles": "View all articles",
+    "topicsTitle": "Topics for you",
+    "articlesCount": "articles",
+    "appTeaserTitle": "Wedding planning app — without five files at once",
+    "appTeaserDesc": "Wedding Board is an online wedding planning app: guests, budget, table plan and deadlines in one account.",
+    "appTeaserNote": "30 days at PLN 0 · No card · Cancel anytime",
+    "appTeaserEyebrow": "Wedding planning app",
+    "ctaAppTeaser": "See the wedding planning app"
+  },
+  "SignIn": {
+    "title": "Log in",
+    "subtitle": "Sign in to your Wedding Board",
+    "backToHome": "Back to home",
+    "metaTitle": "Log in to Wedding Board",
+    "metaDescription": "Sign in to Wedding Board and continue planning your wedding: guests, budget, seating and tasks."
+  },
+  "SignUp": {
+    "title": "Sign up",
+    "subtitle": "Create your Wedding Board account",
+    "backToHome": "Back to home",
+    "metaTitle": "Create an account — 30 days free, no card",
+    "metaDescription": "Create a Wedding Board account: guest list, budget, AI seating plan. 30 days free — no card required.",
+    "benefits": "Manage <strong>tasks</strong>, <strong>budget</strong>, <strong>guests</strong> and <strong>day schedule</strong> — without jumping between five different tools."
+  },
+  "Welcome": {
+    "title": "You're in Wedding Board",
+    "trialStarted": "You have a <strong>free month</strong> — use it as much as you like.",
+    "noCard": "No card upfront — 30 days free, then 59 PLN/month. Cancel in account settings.",
+    "cta": "Go to planning",
+    "ctaCouple": "Go to planning",
+    "ctaVenue": "Manage venue",
+    "bothPathsHint": "You can add the second role later in account settings."
+  },
+  "Plan": {
+    "nextStep": {
+      "label": "Preparation plan",
+      "progress": "Step {current} of {total}",
+      "cta": "Go to module",
+      "howTo": "How to do this?",
+      "expand": "All steps ({done}/{total})",
+      "collapse": "Collapse list",
+      "snooze": "Remind me tomorrow",
+      "openHandbook": "Full handbook"
+    },
+    "steps": {
+      "guests": {
+        "title": "Guests and RSVP",
+        "why": "Without a list you cannot plan venue size, catering or tables.",
+        "hint": "Add guest or Import guests (Excel template).",
+        "emptyTitle": "No guests yet",
+        "emptyDescription": "Add your first guest or import a list from a file.",
+        "emptyCta": "Add first guest"
+      },
+      "budget": {
+        "title": "Budget",
+        "why": "Track spending before it gets out of hand.",
+        "hint": "Set the total amount and expense categories.",
+        "emptyTitle": "Budget not set up yet",
+        "emptyDescription": "Enter the total budget and first categories (venue, catering, photo).",
+        "emptyCta": "Set up budget"
+      },
+      "tasks": {
+        "title": "Tasks",
+        "why": "A checklist keeps preparation on track week by week.",
+        "hint": "Add a task manually (+) or optionally use the AI generator button.",
+        "emptyTitle": "No tasks",
+        "emptyDescription": "Add a task manually or try the optional AI generator.",
+        "emptyCta": "Go to tasks"
+      },
+      "seating": {
+        "title": "Seating plan",
+        "why": "Seating without guests means hours of manual work.",
+        "hint": "Set table count and click Assign guests (AI), then drag to adjust.",
+        "emptyTitle": "No tables",
+        "emptyDescription": "Make sure you have guests first — then add tables.",
+        "emptyCta": "Open seating plan"
+      },
+      "portal": {
+        "title": "Guest portal",
+        "why": "One link instead of dozens of messages with questions.",
+        "hint": "Set the page URL, description and directions.",
+        "emptyTitle": "Portal not configured",
+        "emptyDescription": "Enable the portal and set the slug you will share with guests.",
+        "emptyCta": "Configure portal"
+      },
+      "day": {
+        "title": "Wedding day organization",
+        "why": "A timeline is the foundation for a calm wedding day.",
+        "hint": "Add times, locations and key programme points.",
+        "emptyTitle": "No timeline yet",
+        "emptyDescription": "Outline the ceremony, reception and key moments.",
+        "emptyCta": "Start organization"
+      },
+      "vendors": {
+        "title": "Vendors",
+        "why": "All contacts in one place.",
+        "hint": "Add venue, photo, DJ — save phone and email.",
+        "emptyTitle": "No vendors",
+        "emptyDescription": "Save key people and companies as soon as you book them.",
+        "emptyCta": "Add vendor"
+      }
+    },
+    "footer": {
+      "stepOfPlan": "Step {n} of the preparation plan",
+      "backToDashboard": "Back to dashboard",
+      "moreInHandbook": "More in the handbook"
+    },
+    "hintBar": {
+      "dismiss": "Got it",
+      "moreInHandbook": "More in the handbook →"
+    },
+    "account": {
+      "showPlanAgain": "Show plan on dashboard",
+      "openHandbook": "Open handbook"
+    },
+    "completed": {
+      "title": "Preparation plan complete",
+      "description": "You have the basics — refine details in each section."
+    }
+  },
+  "Handbook": {
+    "title": "Planner handbook",
+    "fabLabel": "Handbook",
+    "intro": "Module-by-module guide — only features available in the app. Open from the bottom-left icon or Account tab.",
+    "toc": "Table of contents",
+    "backToDashboard": "Back to dashboard",
+    "goToModule": "Go to module",
+    "sections": {
+      "overview": {
+        "title": "Introduction",
+        "summary": "Suggested workflow: guests and budget first, then tasks, seating, portal, day timeline and vendors.",
+        "steps": {
+          "1": {
+            "title": "Handbook icon",
+            "body": "On every dashboard screen — bottom left. Opens this guide (on the current module it scrolls to the matching section)."
+          },
+          "2": {
+            "title": "Table of contents",
+            "body": "Pick a module on the left (on mobile: expand Table of contents) — Guests, Budget, Tasks, etc."
+          },
+          "3": {
+            "title": "Steps in each section",
+            "body": "Each module has a short summary and numbered steps — what to click in the menu and forms."
+          },
+          "4": {
+            "title": "Go to module",
+            "body": "At the bottom of a section, Go to module → opens that tab in the app."
+          }
+        }
+      },
+      "guests": {
+        "title": "Guests and RSVP",
+        "summary": "Guest list for catering, seating and invitations. Card or table view; Excel import; configurable RSVP form.",
+        "steps": {
+          "1": {
+            "title": "Open Guests",
+            "body": "Choose Guests in the menu. RSVP summary appears at the top after first responses."
+          },
+          "2": {
+            "title": "Add or import",
+            "body": "Add guest (gold button) or Import guests — download the Excel template, fill First and Last name columns, upload and click Import from CSV."
+          },
+          "3": {
+            "title": "RSVP and guest link",
+            "body": "RSVP configuration — which fields guests see. On the card: Generate link, copy the URL or download QR and share it with the guest."
+          },
+          "4": {
+            "title": "Status and edit",
+            "body": "Edit the guest card: name, phone, email, notes. Set RSVP status manually or it updates when the guest submits the form. Table view — edit many rows at once."
+          }
+        }
+      },
+      "budget": {
+        "title": "Budget",
+        "summary": "Target wedding budget (edit on dashboard) plus line items with planned and spent amounts. Dashboard chart shows usage.",
+        "steps": {
+          "1": {
+            "title": "Open Budget",
+            "body": "Choose Budget in the menu."
+          },
+          "2": {
+            "title": "Target budget",
+            "body": "On Dashboard click Edit your wedding, set Target budget and save. That alone marks the budget plan step as started."
+          },
+          "3": {
+            "title": "Add line item",
+            "body": "In Budget: Add item — name, category, planned amount, optional spent amount and status (planned / paid)."
+          },
+          "4": {
+            "title": "Track spending",
+            "body": "After each payment update the spent column. Table footer shows totals; dashboard shows the chart and overspend alert."
+          }
+        }
+      },
+      "tasks": {
+        "title": "Tasks",
+        "summary": "Checklist: Board (status columns) or Timeline. Add tasks manually; optional Generate AI task plan.",
+        "steps": {
+          "1": {
+            "title": "Open Tasks",
+            "body": "Choose Tasks in the menu."
+          },
+          "2": {
+            "title": "Add a task",
+            "body": "Click + Add — fill title, due date, priority, category, description. Save task adds it to the list."
+          },
+          "3": {
+            "title": "AI task plan (optional)",
+            "body": "Generate AI task plan — short questionnaire about your wedding. Requires working AI API on the server (otherwise you will see an error)."
+          },
+          "4": {
+            "title": "Board and filters",
+            "body": "Tabs Board / Timeline. On the board drag tasks between columns. Search and category/role filters narrow the list."
+          }
+        }
+      },
+      "seating": {
+        "title": "Seating plan",
+        "summary": "Seating configurator + Assign guests (AI), then table list with drag-and-drop and three PDF exports.",
+        "steps": {
+          "1": {
+            "title": "Guests first",
+            "body": "Under Guests build your list. When editing a guest you can set Place card text — AI uses it when seating."
+          },
+          "2": {
+            "title": "AI seating",
+            "body": "Under Seating plan: set Number of tables and Seats per table, click Assign guests (AI). Wait for completion — the list refreshes."
+          },
+          "3": {
+            "title": "Table list",
+            "body": "Table list tab: drag guests between tables (⋮⋮ handle). Add new table for a single extra table."
+          },
+          "4": {
+            "title": "PDF and layout",
+            "body": "Download place cards PDF, guest list by table, floor layout print. Layout tab — visual floor plan."
+          }
+        }
+      },
+      "portal": {
+        "title": "Guest portal",
+        "summary": "Public wedding page (custom URL). Guest book section collects messages after the page is live.",
+        "steps": {
+          "1": {
+            "title": "Open Portal",
+            "body": "Choose Portal in the menu."
+          },
+          "2": {
+            "title": "Enable the page",
+            "body": "Check Enable guest page, enter Page address (slug). Click Save configuration — the link appears below the form."
+          },
+          "3": {
+            "title": "Content",
+            "body": "Fill message for guests, dress code, ceremony and reception locations and Google Maps links."
+          },
+          "4": {
+            "title": "Share the link",
+            "body": "Copy the public page link and share it with guests. The per-guest RSVP link from Guests (with portal on) leads to that page with the confirmation form."
+          }
+        }
+      },
+      "day": {
+        "title": "Organization",
+        "summary": "Wedding day timeline and menu courses. Download PDF for schedule and menu.",
+        "steps": {
+          "1": {
+            "title": "Open Organization",
+            "body": "Choose Organization in the menu."
+          },
+          "2": {
+            "title": "Day timeline",
+            "body": "Add programme items with time, title, description and location. Edit or delete with row actions."
+          },
+          "3": {
+            "title": "Menu",
+            "body": "In the wedding menu section add courses (e.g. appetizer, main, cake) with a short description."
+          },
+          "4": {
+            "title": "PDF and contacts",
+            "body": "Download PDF – day schedule and Download PDF – menu. Vendor phone numbers live under Vendors."
+          }
+        }
+      },
+      "vendors": {
+        "title": "Vendors",
+        "summary": "Contacts for venue, photo, DJ, etc. Documents (contracts, invoices) and automatic Vendor panel link after you add an entry.",
+        "steps": {
+          "1": {
+            "title": "Open Vendors",
+            "body": "Choose Vendors in the menu."
+          },
+          "2": {
+            "title": "Add entry",
+            "body": "Add vendor — name, category, phone, email, website, notes. Save the form."
+          },
+          "3": {
+            "title": "Documents",
+            "body": "On the card: Manage documents — upload contracts and invoices (counters update on the card)."
+          },
+          "4": {
+            "title": "Vendor panel",
+            "body": "After save the card shows Vendor panel — copy icon sends the link. Info icon previews their panel data."
+          }
+        }
+      },
+      "account": {
+        "title": "Account and subscription",
+        "summary": "Wedding details, Stripe billing, partner PIN access, this handbook and legal documents.",
+        "steps": {
+          "1": {
+            "title": "Open Account",
+            "body": "Choose Account in the menu."
+          },
+          "2": {
+            "title": "Subscription",
+            "body": "Payment section: trial, card, invoices — when subscription is active on your account."
+          },
+          "3": {
+            "title": "Partner",
+            "body": "Partner collaboration — share access with a PIN for your partner."
+          },
+          "4": {
+            "title": "Handbook and legal",
+            "body": "Planner handbook — this page. Legal documents — terms and privacy policy."
+          }
+        }
+      }
+    }
+  },
+  "Blog": {
+    "navLabel": "Journal",
+    "metaTitle": "Wedding journal — planning knowledge & guides",
+    "metaTitleShort": "Wedding journal",
+    "metaDescription": "Articles on wedding planning: timeline, budget, guests, seating and tasks. Wedding Board journal.",
+    "eyebrow": "Wedding journal",
+    "title": "Knowledge for every stage of your journey",
+    "subtitle": "Guides on wedding planning — from first decisions to the big day. For couples who want to know what to do before they start.",
+    "readMore": "Read article",
+    "backToBlog": "Back to journal",
+    "breadcrumbHome": "Home",
+    "featuredLabel": "Featured",
+    "featuredTitle": "Editor's pick",
+    "allCategories": "All topics",
+    "viewCategory": "View more",
+    "categoriesAria": "Journal categories",
+    "emptyCategory": "New articles coming soon.",
+    "relatedEyebrow": "Continue reading",
+    "relatedTitle": "Related articles",
+    "footerTagline": "Guests, budget, tables and tasks — for couples planning their own wedding.",
+    "instagramLink": "Instagram",
+    "bottomCtaTitle": "Tired of five files at once?",
+    "bottomCtaDesc": "Guests, budget, table plan and deadlines — in the app instead of notes that are never up to date.",
+    "ctaTitle": "Try Wedding Board",
+    "ctaDesc": "Import guests from Excel, table seating, live budget. First month at PLN 0.",
+    "ctaButton": "Start planning",
+    "ctaNote": "30 days at PLN 0 · Cancel whenever",
+    "ctaInline": "Rather organise in the app than in Excel?",
+    "ctaLink": "Try Wedding Board",
+    "editorialByline": "Wedding Board Editorial",
+    "editorialLink": "Editorial"
+  },
+  "Editorial": {
+    "metaTitle": "Wedding Board Editorial — who writes our guides",
+    "metaDescription": "Meet the Wedding Board editorial team: how we write wedding guides, what sources we use, and how editorial expertise meets planning tools.",
+    "eyebrow": "Editorial",
+    "breadcrumb": "Editorial",
+    "title": "Wedding Board Editorial",
+    "lead": "The Wedding Board journal is built for couples planning a wedding with clarity, calm and respect for real budgets.",
+    "body1": "Editorial content is produced by the Wedding Board team, informed by wedding planners, couple feedback and anonymised patterns from the app: timelines, budgets, guest lists and seating. Every article is reviewed for relevance to current wedding planning practice.",
+    "body2": "We do not publish sponsored content without disclosure. When an article references Wedding Board features, we say so openly — the guide should remain useful even without an account.",
+    "principlesTitle": "Our editorial principles",
+    "principles": [
+      "Practical over trendy — guides should support decisions, not just Pinterest inspiration.",
+      "Real-world context — timelines, costs and vendor workflows that reflect how couples plan today.",
+      "Freshness — seasonal and numeric articles (budget, trends) are reviewed regularly.",
+      "Transparency — clear CTAs to the app; no hidden limitations.",
+      "Plain language — elegant, accessible copy without industry jargon."
+    ],
+    "ctaApp": "Explore the app"
+  },
+  "NotFound": {
+    "title": "Page Not Found",
+    "description": "Could not find the requested resource.",
+    "dashboard": "Go to Dashboard",
+    "back": "Go Back"
+  },
+  "Communication": {
+    "title": "Message Templates",
+    "filterGuests": "Filter guests:",
+    "allGuests": "All",
+    "generate": "Generate",
+    "copy": "Copy",
+    "copied": "Copied to clipboard",
+    "copyFailed": "Failed to copy",
+    "guestsInGroup": "Guests in this group:",
+    "withPhone": "With phone:",
+    "noGuestsInGroup": "No guests in this group.",
+    "selectedGuests": "Selected Guests",
+    "noPhone": "No phone"
+  },
+  "AlcoholCalculator": {
+    "title": "Wedding Alcohol Calculator",
+    "guests": "Number of guests",
+    "duration": "Wedding duration",
+    "guestProfile": "Guest profile (% drinking alcohol):",
+    "heavy": "Heavy drinkers",
+    "medium": "Moderate",
+    "light": "Light",
+    "none": "Non-drinkers / children",
+    "summer": "Summer season",
+    "winter": "Winter season",
+    "recommendedList": "Recommended shopping list",
+    "disclaimer": "This calculator is for estimation only. Actual consumption depends on many factors. Always order 10-15% extra."
+  },
+  "KopertyCalculator": {
+    "collected": "Collected",
+    "fromGuests": "from guests",
+    "average": "Average",
+    "perPerson": "per person",
+    "forecast": "Forecast",
+    "guestsCount": "guests",
+    "balance": "Balance",
+    "cost": "wedding cost",
+    "setCost": "set wedding cost",
+    "costRecovery": "Cost recovery",
+    "profit": "you're in profit!",
+    "title": "Cash gifts per guest",
+    "confirmedOnly": "Confirmed only",
+    "entries": "entries",
+    "showAll": "Show all",
+    "showLess": "Show less"
+  },
+  "DayOf": {
+    "weddingDay": "Wedding Day",
+    "guests": "guests",
+    "now": "NOW",
+    "next": "NEXT",
+    "emergencyContacts": "Emergency contacts",
+    "whatToBring": "What to bring",
+    "fullTimeline": "Full timeline",
+    "allVendors": "All vendors",
+    "collapse": "collapse",
+    "expand": "expand",
+    "locations": "Locations",
+    "ceremony": "Ceremony",
+    "reception": "Reception",
+    "footerLove": "Everything will be fine. It's your day."
+  },
+  "Venue": {
+    "guests": "Guests",
+    "menu": "Menu",
+    "seating": "Seating",
+    "schedule": "Schedule",
+    "contracts": "Contracts",
+    "payments": "Payments",
+    "offers": "Offers",
+    "dayOf": "Wedding Day",
+    "overview": "Overview",
+    "reservations": "Reservations",
+    "calendar": "Calendar",
+    "settings": "Settings",
+    "reports": "Reports",
+    "finances": "Finances",
+    "newReservation": "New reservation",
+    "addGuest": "Add guest",
+    "addItem": "Add item",
+    "save": "Save",
+    "send": "Send",
+    "edit": "Edit",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "search": "Search",
+    "noData": "No data",
+    "empty": "No entries yet",
+    "halls": "Halls",
+    "packages": "Packages",
+    "dishes": "Dishes",
+    "tables": "Tables",
+    "templates": "Templates",
+    "blockDate": "Block date",
+    "estimate": "Estimate",
+    "total": "Total",
+    "pending": "Pending",
+    "paid": "Paid",
+    "overdue": "Overdue",
+    "status": "Status",
+    "date": "Date",
+    "time": "Time",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "notes": "Notes",
+    "reason": "Reason",
+    "amount": "Amount",
+    "currency": "PLN",
+    "diet": "Diet",
+    "allergies": "Allergies",
+    "table": "Table",
+    "guestsCount": "Guests",
+    "capacity": "Capacity",
+    "createTemplate": "Create template",
+    "fillFields": "Fill fields",
+    "sendForSigning": "Send for signature",
+    "signedByCouple": "Signed by couple",
+    "signedByVenue": "Signed by venue",
+    "fullySigned": "Fully signed",
+    "importCsv": "Import CSV",
+    "applyTemplate": "Apply template"
+  }
+}

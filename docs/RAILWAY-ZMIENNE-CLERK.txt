@@ -1,0 +1,12 @@
+# Zmienne Clerk na Railway – DO SKOPIOWANIA (bez literówek)
+
+Skopiuj DOKŁADNIE te nazwy do Railway → Variables:
+
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+CLERK_SECRET_KEY
+
+Wartości: z https://dashboard.clerk.com → Twoja aplikacja → Configure → API Keys
+- Publishable key → wklej jako wartość NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+- Secret key → wklej jako wartość CLERK_SECRET_KEY
+
+Uwaga: bez spacji przed/po nazwie i wartości. Pełny klucz (np. pk_test_AbCdEf...), nie sam tekst "pk_test_...".

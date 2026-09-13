@@ -1,0 +1,2 @@
+ALTER TABLE "menu_variants" ADD COLUMN IF NOT EXISTS "guestCount" INTEGER;
+ALTER TABLE "menu_variants" ADD COLUMN IF NOT EXISTS "notes" TEXT;

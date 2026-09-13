@@ -1,0 +1,6 @@
+Zasady pracy:
+1. Zawsze zaczynaj od przeczytania README.txt i analizy istniejącej struktury.
+2. Każda nowa funkcja MUSI mieć testy jednostkowe i integracyjne.
+3. Po napisaniu kodu/testów, automatycznie uruchom testy w terminalu.
+4. Jeśli testy nie przejdą, naprawiaj kod/testy do skutku (max 5 iteracji).
+5. Używaj TypeScript i dbaj o standardy "Production Ready".
