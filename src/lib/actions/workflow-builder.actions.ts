@@ -20,7 +20,9 @@ export type WorkflowNodeData = {
     | "PAYMENT"
     | "DOCUMENT"
     | "AGENDA"
-    | "SEND_MESSAGE";
+    | "SEND_MESSAGE"
+    | "TABLE"
+    | "MENU_IMPORT";
   assigneeRole: "OWNER" | "MANAGER" | "STAFF" | "CLIENT" | "BOTH";
   sortOrder: number;
   color?: string;

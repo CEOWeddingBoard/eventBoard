@@ -57,6 +57,10 @@ export async function onRequestError(
     message: err.message,
   });
 
+  // Alerty ciągną Twilio i Resend — pakiety wyłącznie node'owe. W runtime edge
+  // nie ma czego ładować, a próba kończy się błędem bundlera (brak `crypto`).
+  if (process.env.NEXT_RUNTIME !== "nodejs") return;
+
   try {
     const { sendServerErrorAlert } = await import("@/lib/errors/alerting");
     await sendServerErrorAlert({

@@ -68,6 +68,10 @@ const ZRODLA: Record<string, SourceField[]> = {
     { key: "message", label: "Treść wiadomości" },
     ...WSPOLNE,
   ],
+  TABLE: [
+    { key: "rowCount", label: "Liczba wierszy", hint: "Ile pozycji klient wpisał w tabeli." },
+    ...WSPOLNE,
+  ],
   AGENDA: WSPOLNE,
   NONE: WSPOLNE,
 };
@@ -147,3 +151,62 @@ export const TRANSFORMS = [
   { value: "join_newline", label: "Każde w nowej linii" },
   { value: "date_pl", label: "Data po polsku" },
 ] as const;
+
+// ── Krok typu tabela / arkusz ────────────────────────────────────────────
+
+/**
+ * Krok tabelaryczny: lista gości, teksty na winietki, cokolwiek, co jest
+ * arkuszem. `fieldsJson` opisuje wtedy KOLUMNY, nie pojedyncze pola — jedna
+ * definicja `StepField` to jedna kolumna. Wypełnione wiersze wędrują w danych
+ * kroku pod kluczem `TABLE_ROWS_KEY`, a kolumna ze wskazanym `targetAgendaKey`
+ * oddaje do agendy swoje wartości zebrane z wszystkich wierszy.
+ */
+export const TABLE_ROWS_KEY = "__rows";
+
+export type TableRow = Record<string, string>;
+
+export function isTableStep(actionType: string | null | undefined): boolean {
+  return actionType === "TABLE";
+}
+
+/** Wiersze z danych kroku — odporne na to, że przyszło coś innego. */
+export function parseTableRows(raw: unknown): TableRow[] {
+  if (!Array.isArray(raw)) return [];
+  const out: TableRow[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== "object" || Array.isArray(item)) continue;
+    const row: TableRow = {};
+    for (const [k, v] of Object.entries(item as Record<string, unknown>)) {
+      row[k] = v == null ? "" : String(v);
+    }
+    out.push(row);
+  }
+  return out;
+}
+
+/** Czy wiersz ma cokolwiek wpisane — puste wiersze nie idą do agendy. */
+export function isRowFilled(row: TableRow): boolean {
+  return Object.values(row).some((v) => String(v ?? "").trim() !== "");
+}
+
+/**
+ * Co tabela odkłada w agendzie: dla każdej kolumny ze wskazanym miejscem
+ * w agendzie — jej wartości z kolejnych wierszy, każda w nowej linii.
+ */
+export function tableAgendaEntries(
+  columns: StepField[],
+  rows: TableRow[],
+): { targetAgendaKey: string; value: string }[] {
+  const filled = rows.filter(isRowFilled);
+  const out: { targetAgendaKey: string; value: string }[] = [];
+
+  for (const col of columns) {
+    if (!col.targetAgendaKey) continue;
+    const values = filled
+      .map((r) => String(r[col.key] ?? "").trim())
+      .filter((v) => v !== "");
+    if (values.length === 0) continue;
+    out.push({ targetAgendaKey: col.targetAgendaKey, value: values.join("\n") });
+  }
+  return out;
+}

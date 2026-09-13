@@ -4,7 +4,15 @@ import { createHash } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { revalidatePath } from "next/cache";
-import { SCHEDULE_AGENDA_KEY, type StepField } from "@/lib/workflow-agenda-fields";
+import {
+  SCHEDULE_AGENDA_KEY,
+  TABLE_ROWS_KEY,
+  isTableStep,
+  parseTableRows,
+  isRowFilled,
+  tableAgendaEntries,
+  type StepField,
+} from "@/lib/workflow-agenda-fields";
 
 export type ProcessNodeStatus = "pending" | "current" | "completed";
 
@@ -349,6 +357,28 @@ export async function completeProcessNode(
     stepFields = [];
   }
   await applyStepFields(eventId, currentNode.id, currentNode.name, stepFields, data);
+
+  // Krok tabelaryczny: `fieldsJson` opisuje kolumny, a wiersze przyszły pod
+  // TABLE_ROWS_KEY. Każda kolumna ze wskazanym miejscem w agendzie oddaje tam
+  // swoje wartości z kolejnych wierszy.
+  if (isTableStep(currentNode.actionType)) {
+    const rows = parseTableRows(data[TABLE_ROWS_KEY]);
+    const wpisy = tableAgendaEntries(stepFields, rows);
+    if (wpisy.length > 0) {
+      await applyStepFields(
+        eventId,
+        currentNode.id,
+        currentNode.name,
+        wpisy.map((w, i) => ({
+          key: `__tabela_${i}`,
+          label: currentNode.name,
+          type: "textarea" as const,
+          targetAgendaKey: w.targetAgendaKey,
+        })),
+        Object.fromEntries(wpisy.map((w, i) => [`__tabela_${i}`, w.value])),
+      );
+    }
+  }
 
   // Wybór menu to rzecz podstawowa — odkładamy go do agendy ZAWSZE, niezależnie
   // od tego, czy ktoś skonfigurował mapowanie na tym węźle. Bez tego procesy

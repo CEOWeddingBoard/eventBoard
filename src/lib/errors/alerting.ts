@@ -4,8 +4,12 @@ import "server-only";
  * Alert o awarii, który realnie dociera.
  *
  * Sam dashboard nie wystarczy — nikt nie ogląda go w sobotę w trakcie wesela.
- * Dlatego błąd 5xx idzie e-mailem (i SMS-em, jeśli skonfigurowany) na adres
- * z `ALERT_EMAIL` / `ALERT_SMS_TO`.
+ * Dlatego błąd 5xx idzie e-mailem na adres z `ALERT_EMAIL`.
+ *
+ * Świadomie bez SMS-a: ten moduł jest wołany z `onRequestError`
+ * w `src/instrumentation.ts`, które Next pakuje także dla runtime edge. Twilio
+ * ciągnie `crypto` i `stream`, więc sama obecność tego importu wywracała build.
+ * SMS zostaje tam, gdzie działa bez ryzyka — w cronach (runtime nodejs).
  *
  * Wysyłki są tłumione: ten sam błąd nie wyśle drugiego powiadomienia przez
  * `ALERT_DEDUP_MINUTES` (domyślnie 30), żeby awaria w pętli nie zasypała skrzynki.
@@ -78,17 +82,6 @@ export async function sendServerErrorAlert(a: AlertPayload): Promise<void> {
     }
   }
 
-  const sms = process.env.ALERT_SMS_TO;
-  if (sms) {
-    try {
-      const { sendSms, isSmsConfigured } = await import("@/lib/sms");
-      if (isSmsConfigured()) {
-        await sendSms(sms, `${subject}\n${a.message}`.slice(0, 300));
-      }
-    } catch (e) {
-      console.error("[alerting] nie udało się wysłać SMS-a", e);
-    }
-  }
 }
 
 /** Tylko do testów — czyści pamięć tłumienia powtórek. */

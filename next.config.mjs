@@ -28,6 +28,10 @@ const nextConfig = {
     "@react-pdf/renderer",
     "pdf-lib",
     "@serwist/next",
+    // Pakiety wyłącznie node'owe — bundler nie ma ich pakować do runtime edge.
+    "twilio",
+    "resend",
+    "jsonwebtoken",
   ],
   // Błędy typów blokują build — to jedyna informacja zwrotna o tym, co jest
   // zepsute, zanim dowie się o tym klient.
