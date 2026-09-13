@@ -119,6 +119,17 @@ Egzekwowanie ma dwie warstwy i obie są konieczne:
 - W UI: `canEditModule(moduleKey)` przekazywane jako `canEdit` do komponentu, który chowa
   przyciski zapisu.
 
+### Portal klienta (bez konta)
+
+`/{locale}/portal/[token]` — jedyne miejsce, gdzie klient końcowy wypełnia swoje kroki.
+Wejście wyłącznie tokenem z `generateEventClientLink`; token nieznany i wygasły dają
+**ten sam** komunikat, żeby nie zdradzać, który przypadek zaszedł.
+
+> **Bezpieczeństwo:** `completeProcessNode` to server action, czyli zwykły endpoint HTTP.
+> Klient legitymuje się tokenem (`clientToken`, z kontrolą wygaśnięcia), zespół obiektu —
+> sesją i przynależnością eventu do aktywnej przestrzeni. **Dodając akcję wołaną z portalu,
+> zweryfikuj token tak samo** — inaczej wystarczy znać ID eventu.
+
 ### Routing i dwa drzewa API
 
 `src/middleware.ts` łączy bramę sesji z `next-intl` (`localePrefix: "always"`). Konsekwencje:
@@ -158,6 +169,14 @@ src/lib/agenda/agenda-docx.ts   ZASZYTY układ DOCX (ręcznie składany OOXML)
   (`/app/settings/document-templates`) to oferty i umowy — osobna ścieżka (`src/lib/documents`,
   `src/lib/contracts`, `docxtemplater`).
 - `OrganizationWorkflow.stagesJson` jest DEPRECATED — proces to węzły `WorkflowNode`.
+- **Krok `TABLE`** — `fieldsJson` opisuje wtedy KOLUMNY, nie pola. Kolumna ze wskazanym
+  `targetAgendaKey` oddaje do agendy swoje wartości ze wszystkich wypełnionych wierszy
+  (`tableAgendaEntries`); wiersze jadą w danych kroku pod `TABLE_ROWS_KEY`.
+- **Krok `MENU_IMPORT`** — otwiera `MenuImportDialog`; reguły rozpoznawania menu są
+  ustawieniem obiektu (`/app/settings/menu-parser`), a nie konfiguracją kroku.
+- `src/lib/workflow-agenda-preview.ts` liczy, co proces odłoży w agendzie, i **musi
+  odwzorowywać runtime**. Zmieniasz `applyStepFields` — zmień też podgląd, bo inaczej
+  edytor obiecuje coś, czego agenda nie zrobi. Pilnują tego testy po obu stronach.
 
 ### Runtime DDL zamiast migracji
 
@@ -269,16 +288,30 @@ E2E: `e2e/auth.spec.ts` + `e2e/api/`; przeglądarki Chromium, Firefox, WebKit, P
 - Tłumaczenia zawsze przez next-intl (`useTranslations` / `getTranslations`).
 - Komentarze tylko tam, gdzie WHY jest nieoczywiste — istniejące komentarze są po polsku
   i tłumaczą decyzje, nie mechanikę; trzymaj ten styl.
-- **Błąd typu blokuje build** (`typescript.ignoreBuildErrors: false`). Żeby to było możliwe,
+- **Typy i lint blokują build** (`ignoreBuildErrors: false`, `ignoreDuringBuilds: false`)
+  i są krokami blokującymi w CI. Lint jest wyczyszczony do zera i ma tak zostać.
   `noUnusedLocals`/`noUnusedParameters` w `tsconfig.json` są `false` — nieużywane zmienne
-  raportuje ESLint. `eslint.ignoreDuringBuilds` nadal `true`: zostało ~90 zgłoszeń z czasów
-  starego produktu, w CI lint działa z `continue-on-error`.
+  raportuje ESLint jako ostrzeżenia.
+- **Uwaga przy czytaniu lintu:** `eslint-config-next` zgłasza ten sam błąd kilkanaście
+  razy. Licz zgłoszenia unikalne (plik + linia + reguła), nie surowe wiersze.
 - `next.config.mjs` → `experimental.serverActions.allowedOrigins` — nowa domena wymaga wpisu tutaj.
 - Reguła repo (`.cursor/rules/git-push-after-changes.mdc`): po skończonej zmianie commit i push na
   bieżący branch, chyba że użytkownik powie „tylko lokalnie”. Potwierdź przed pushem.
 - Reguła repo (`.cursorrules.txt`): nowa funkcja ma mieć testy, uruchamiane zaraz po napisaniu kodu.
 
 ---
+
+## Limity prób i eksport danych
+
+- `src/lib/api/rate-limit-db.ts` — trwały licznik prób (tabela `rate_limit_hits`).
+  Używany przy logowaniu i resecie hasła, bo licznik w pamięci procesu nie przeżywa
+  restartu ani drugiej instancji. **Awaria bazy nie blokuje logowania** — licznik ma
+  hamować zgadywanie haseł, a nie być kolejnym punktem awarii.
+  `src/lib/api/rate-limit.ts` (w pamięci) zostaje do ochrony przed zalewem żądań.
+- `GET /api/admin/space-export/<orgId>` — pełny JSON przestrzeni (RODO). Bez haseł
+  i tokenów. Dla nie-adminów **404, nie 403**.
+- Crony uwierzytelnia `isValidCronSecret` (nagłówek `x-cron-secret`; query dla zgodności).
+  Harmonogram: `.github/workflows/cron.yml`, wymaga sekretów `APP_URL` i `CRON_SECRET`.
 
 ## Monitoring
 

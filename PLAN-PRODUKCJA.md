@@ -155,7 +155,10 @@ klienta. Dla nie-adminów 404, nie 403 — tak jak panel admina.
 
 - [x] **6.1** Usunąć `@serwist/*` i `@clerk/*` albo podpiąć PWA świadomie.
 - [x] **6.2** Wyrzucić śmieci z repo, zmienić `name` w `package.json`.
-- [ ] **6.3** Przejrzeć `docs/` i zostawić to, co dotyczy EventBoarda.
+- [x] **6.3** Przejrzeć `docs/` i zostawić to, co dotyczy EventBoarda — 31 plików
+      z czasów WeddingBoarda (Clerk, Stripe, migracje, stare audyty, broszury) przeniesione
+      do `docs/archiwum-weddingboard/` z README wyjaśniającym, czego NIE opisują.
+      Nic nie skasowane — historia decyzji bywa potrzebna przy archeologii.
 - [x] **6.4** Lint do zera, czerwone suity naprawić albo usunąć.
 
 **Zrobione w 6.1–6.2 i 6.4:**
