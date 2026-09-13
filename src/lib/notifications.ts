@@ -37,7 +37,9 @@ export async function getTasksDueNextSevenDays(eventId: string): Promise<{ id: s
     orderBy: { dueDate: "asc" },
     select: { id: true, title: true, dueDate: true },
   });
-  return tasks;
+  return tasks.filter(
+    (t): t is { id: string; title: string; dueDate: Date } => t.dueDate !== null,
+  );
 }
 
 function formatTasksForSms(tasks: { title: string }[], prefix: string): string {

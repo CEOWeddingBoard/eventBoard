@@ -1,8 +1,10 @@
 import { JSDOM } from "jsdom"
-import DOMPurify from "dompurify"
+import DOMPurify, { type WindowLike } from "dompurify"
 
+// Okno JSDOM spełnia kontrakt WindowLike, ale jego typy to osobna definicja DOM
+// niż lib.dom — stąd rzutowanie zamiast bezpośredniego przypisania.
 const window = new JSDOM("").window
-const purify = DOMPurify(window as unknown as Window)
+const purify = DOMPurify(window as unknown as WindowLike)
 
 /**
  * Sanitize user input by stripping HTML tags and XSS vectors using DOMPurify.

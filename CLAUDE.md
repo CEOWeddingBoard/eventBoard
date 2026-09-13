@@ -1,228 +1,247 @@
-# EventBoard – CLAUDE.md
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+---
 
 ## Czym jest ta aplikacja
 
 **EventBoard** – wielodostępna platforma SaaS dla sal, restauracji i obiektów eventowych.
-Obiekt prowadzi obsługę przyjęć: kalendarz i sale, wydarzenia, **procesy obsługi**, warianty menu,
+Obiekt prowadzi obsługę przyjęć: kalendarz, wydarzenia, **procesy obsługi**, warianty menu,
 agenda dla kuchni i obsługi, zespół z uprawnieniami, zapytania ofertowe.
 
 Sercem produktu jest **proces**: konfigurowalne kroki z rolami („kto wypełnia”, „kto akceptuje”),
 z których **automatycznie składa się agenda**. Agenda nie ma osobnej konfiguracji — jedynym
 źródłem prawdy jest proces.
 
-Język interfejsu: **polski** (`pl`). Warstwa i18n obsługuje też `en`.
-
-### Zakres produktu (decyzja, wrzesień 2026)
-
-Produktem jest **wyłącznie EventBoard** (panel obiektu + panel administratora platformy).
-Wcześniejszy produkt weselny — panel pary młodej, marketplace dostawców, strona weselna,
-papeteria, RSVP, moodboard, sesje partnerskie, rozliczenia Stripe — **został usunięty z repo**.
-Nie dodawaj tych modułów z powrotem bez wyraźnej decyzji; jeśli trzeba je odzyskać, są w historii
-gita przed commitem czyszczącym.
+Język interfejsu, kodu i komentarzy: **polski** (`pl`). Warstwa i18n obsługuje też `en`.
 
 **Model dostępu:** brak publicznej rejestracji. Przestrzenie klientów zakłada administrator
 platformy (`/pl/admin`, konto `User.role = "ADMIN"`), on też generuje dane logowania.
+Płatności są ręczne (faktury poza systemem); status opłacenia ustawia admin.
+
+Wcześniejszy produkt weselny (panel pary młodej, marketplace, RSVP, Stripe) został wycofany z UI.
+**Uwaga:** jego modele nadal są w `schema.prisma`, a część kodu w `src/lib` i `src/components` to
+pozostałości — obecność modelu lub pliku nie znaczy, że funkcja żyje w EventBoard.
 
 ---
 
-## Stack technologiczny
-
-| Warstwa | Technologia |
-|---|---|
-| Framework | Next.js 15, App Router, Turbopack (dev) |
-| Język | TypeScript 5 |
-| UI | React 18, TailwindCSS 3, shadcn/ui (Radix UI) |
-| ORM | Prisma 5 |
-| Baza danych | PostgreSQL (prod), SQLite (`prisma/dev.db`) lokalnie |
-| Auth | **własna** — e-mail + hasło (bcrypt), podpisany token sesji w cookie (`src/lib/auth/*`). Clerk NIE jest używany do logowania |
-| Płatności | **ręczne** — faktury poza systemem; status opłacenia klienta ustawia admin w `/pl/admin` |
-| Email | Resend |
-| SMS | Twilio |
-| AI | OpenAI / DeepSeek / OpenRouter (wybór przez `AI_PROVIDER` env) |
-| i18n | next-intl 4 |
-| PDF | pdf-lib, @react-pdf/renderer |
-| Drag & Drop | @dnd-kit |
-| Wykresy | Recharts |
-| Tabele | TanStack React Table |
-| Przechowywanie plików | AWS S3 / Cloudflare R2 |
-| PWA | Serwist |
-| Deploy | Railway (`railway.json`, `railway.toml`) |
-| State / fetch | TanStack React Query 5, React Hook Form 7 |
-
----
-
-## Uruchomienie projektu
+## Komendy
 
 ```bash
-# development (Turbopack)
-npm run dev
-
-# development – czysty start (czyści cache)
-npm run dev:clean
-
-# produkcja
+npm run dev            # Turbopack, port 3000, distDir .next-dev
+npm run dev:clean      # czyści .next/.next-dev i startuje
+npm run dev:fresh      # Windows: scripts\fix-next-eperm.bat (naprawa blokad .next)
 npm run build && npm run start
+npm run lint           # next lint (eslint flat config)
 ```
 
-Baza danych:
+Baza:
+
 ```bash
-# seed
-npm run db:seed
-
-# reset + seed
-npm run db:reset
-
-# pełny reset (fresh)
-npm run db:reset:fresh
+npm run db:seed        # ts-node prisma/seed.ts
+npm run db:reset       # prisma migrate reset --force && seed
+npm run db:reset:fresh # node scripts/reset-db.js
+npx prisma migrate dev --name <nazwa>
 ```
 
-**Port domyślny:** 3000  
-**distDir w dev:** `.next-dev` (nie `.next`) – ważne przy cachowaniu.
+Testy:
+
+```bash
+npm test               # jest --config jest.config.simple.js --passWithNoTests
+npm run test:watch
+npm run test:ci
+npx jest --config jest.config.simple.js src/lib/__tests__/plan-progress.test.ts   # jeden plik
+npx jest --config jest.config.simple.js -t "fragment nazwy testu"                 # jeden test
+
+npm run test:e2e
+npx playwright test e2e/auth.spec.ts --project=chromium   # jeden plik / jedna przeglądarka
+```
+
+`jest.config.js` (przez `next/jest`) istnieje, ale **nie jest używany przez skrypty npm** — wszystkie
+odwołują się do `jest.config.simple.js`. Playwright sam podnosi `npm run dev` na :3000.
+
+---
+
+## Architektura — rzeczy, których nie widać z jednego pliku
+
+### Auth: własna sesja, nie Clerk
+
+`package.json` zawiera `@clerk/*`, ale **żaden plik w `src` nie importuje Clerka**. Logowanie to
+e-mail + hasło (bcrypt) i podpisany JWT (`jose`) w cookie:
+
+- `src/lib/auth/session-token.ts` — cookie `wb_session`, 7 dni, sekret z
+  `AUTH_SESSION_SECRET` → `JWT_SECRET` → `PARTNER_ACCESS_SECRET` → wartość deweloperska.
+- `src/lib/auth/session.ts` — odczyt/zapis cookie w server components i actions.
+- `src/lib/auth/utils.ts` → `getCurrentUser()` — podstawowy helper w actions.
+- `src/lib/auth/session-user.ts` → `getSessionUser()` — user + membership + metadata billingowe.
+
+Nazwy `clerk-helper.ts`, `ClerkBillingMetadata`, `User.clerkId`, `auth-mock.ts` to **osierocone
+nazewnictwo** po migracji — nie sugeruj się nimi.
+
+> **Pułapka:** `getCurrentUser()` w `NODE_ENV=development` (lub `NEXT_PUBLIC_DEV_MODE=true`)
+> zwraca `MOCK_DEV_USER` o `id: "mock-user-id"` **bez sprawdzania cookie**. Lokalnie jesteś
+> zawsze zalogowany jako mock, a seed zakłada takiego użytkownika. Testując realny przepływ
+> logowania i uprawnień, licz się z tym obejściem.
+
+### Organizacja bieżącego żądania
+
+`src/lib/auth/active-org.ts` — cookie `eb_active_org` („wejście w przestrzeń” przez admina
+platformy). Bez cookie brany jest **pierwszy (najstarszy) membership**.
+
+> **Pułapka:** konto serwisowe (`OrganizationMember.role = "SERVICE"`) należy do *każdej*
+> organizacji. Ustalanie organizacji „po pierwszym membership” daje dla niego zły wynik —
+> w nowym kodzie używaj `getActiveOrgId(userId)` / `getActiveMembership(userId)`.
+
+### Uprawnienia modułowe
+
+`src/lib/permissions/modules.ts` definiuje moduły (`dashboard`, `calendar`, `events`, `leads`,
+`finances`, `team`, `configuration`, `settings`) i poziomy `none | view | edit`.
+Macierz rola × moduł siedzi w `Organization.modulePermissionsJson`; poziom członka =
+maksimum z jego ról (`OrganizationMember.rolesJson`). Owner / `isAdmin` / `SERVICE` /
+`User.role = "ADMIN"` mają wszędzie `edit`.
+
+Egzekwowanie: `assertModuleView(moduleKey, locale)` w **`layout.tsx` segmentu modułu**
+(np. `src/app/[locale]/app/finances/layout.tsx`) — nowy moduł potrzebuje własnego layoutu ze
+strażnikiem. Ukrywanie akcji zapisu: `canEditModule(moduleKey)`.
+
+### Routing i dwa drzewa API
+
+`src/middleware.ts` łączy bramę sesji z `next-intl` (`localePrefix: "always"`). Konsekwencje:
+
+- **`src/app/[locale]/api/*`** — endpointy wołane z przeglądarki, adresy `/pl/api/...`.
+- **`src/app/api/*`** — endpointy maszynowe pod gołym `/api/...` (`/api/cron/*`, `/api/webhooks/*`,
+  `/api/admin/bootstrap`, `/api/health`, `/api/upload`). intlMiddleware przepisałby je na
+  `/pl/api/...` → 404, dlatego **muszą być jawnie dopisane do `isLocaleAgnosticPublicRoute`**.
+  Dodajesz nowy endpoint maszynowy — dopisz go tam.
+- `/pl/admin` **celowo nie jest** w `isProtectedRoute`: strona sama zwraca `notFound()` dla
+  nie-adminów, żeby przekierowanie na logowanie nie zdradziło, że panel istnieje. Nie „naprawiaj” tego.
+- `src/app/org/[slug]` (publiczny profil obiektu + formularz zapytania) też omija i18n.
+- Crony chronione `CRON_SECRET`.
+
+### Proces → agenda (główny przepływ danych)
+
+```
+OrganizationWorkflow --< WorkflowNode      definicja procesu
+                            fieldsJson         pola kroku [{key,label,type,targetAgendaKey,scheduleLine}]
+                            fieldMappingsJson  [{sourceKey -> targetAgendaKey}]
+                            fillRole / approveRole / assigneeRole / menuMode
+        |
+        v  src/lib/actions/process-runtime.actions.ts
+EventProcessState      currentNodeId, completedNodeIds, nodeDataJson {nodeId: {data, completedBy...}}
+        |  (mapowanie pól po ukończeniu kroku)
+        v
+EventAgendaData.dataJson   płaski obiekt kluczy `agenda.*`
+        |
+        v
+src/lib/agenda/agenda-docx.ts   ZASZYTY układ DOCX (ręcznie składany OOXML)
+```
+
+- `src/lib/workflow-agenda-fields.ts` — słownik: co dany `actionType` oddaje do agendy i w jakie
+  klucze agendy da się to zmapować. Dodając typ akcji, uzupełnij go tutaj, inaczej krok nie
+  zasili agendy.
+- **Agenda nie używa `AgendaDocumentTemplate`.** Szablony dokumentów
+  (`/app/settings/document-templates`) to oferty i umowy — osobna ścieżka (`src/lib/documents`,
+  `src/lib/contracts`, `docxtemplater`).
+- `OrganizationWorkflow.stagesJson` jest DEPRECATED — proces to węzły `WorkflowNode`.
+
+### Runtime DDL zamiast migracji
+
+`ensureUserAuthColumns()` (`src/lib/auth/schema-migration.ts`), `ensureAgendaEventColumns()`
+(`src/lib/agenda/agenda-schema-migration.ts`) i `ensureEventP1Columns()` (`src/lib/events/…`)
+wykonują idempotentne `ALTER TABLE … ADD COLUMN IF NOT EXISTS` przy pierwszym użyciu, żeby
+produkcja nie wywracała się na brakującej kolumnie. Actions wołają je przed zapytaniami.
+To obejście, nie wzorzec — **nowe kolumny dodawaj migracją Prisma**; do list DDL dopisuj tylko,
+gdy zmiana musi zadziałać na bazie bez świeżej migracji.
+
+### Server actions
+
+Cała logika zapisu to `"use server"` w `src/lib/actions/*.actions.ts`. Konwencja: akcja sama
+ustala użytkownika (`getCurrentUser`) i organizację (`getActiveOrgId`), sama sprawdza uprawnienia,
+kończy `revalidatePath(...)` i zwraca `{ ok: boolean; error?: string }`. Komponenty nie dotykają
+Prismy bezpośrednio.
+
+### Plany i limity
+
+`src/lib/plans.ts` — `START | PRO | ENTERPRISE` z limitami `maxAdmins`/`maxUsers`.
+`Organization.plan` ma w bazie default `"FREE"` i stare wartości (`BASIC`) — dlatego **zawsze**
+czytaj przez `normalizePlan()`, a limity przez `effectiveLimits()` (ręczne nadpisanie per
+przestrzeń wygrywa z planem). `SERVICE` nie liczy się do limitów.
+
+---
+
+## Struktura (tylko nieoczywiste miejsca)
+
+```
+src/app/[locale]/app/        panel obiektu — dashboard, calendar, events, finances, leads, team, settings
+src/app/[locale]/admin/      panel administratora platformy (404 dla nie-adminów)
+src/app/[locale]/(auth)/     logowanie; obok onboarding/, after-auth/, legal/
+src/app/[locale]/api/        API przeglądarkowe (prefiks locale)
+src/app/api/                 API maszynowe (bez locale) — cron, webhooks, bootstrap, health, upload
+src/app/org/[slug]/          publiczny profil obiektu + zapytanie ofertowe (poza i18n)
+src/lib/actions/             server actions — całość logiki zapisu
+src/lib/auth/                sesja, hasła, dostęp do eventu, aktywna organizacja
+src/lib/permissions/         macierz uprawnień i strażnik modułów
+src/lib/agenda/              generator DOCX agendy (zaszyty układ)
+src/locales/{pl,en}.json     tłumaczenia ładowane przez src/lib/locale-messages.ts → src/i18n.ts
+prisma/schema.prisma         ~85 modeli; EventBoard używa ich podzbioru
+```
 
 ---
 
 ## Zmienne środowiskowe
 
-Wzorzec: `.env.example` (komentarze po polsku).  
-Lokalne nadpisania: `.env.local`.
+Wzorzec: `.env.example` (częściowo nieaktualny — zawiera klucze Clerk, nie zawiera
+`AUTH_SESSION_SECRET`, `TWILIO_*`). Lokalne nadpisania: `.env.local`.
 
-Kluczowe zmienne:
-- `DATABASE_URL` – połączenie z PostgreSQL
-- `CLERK_*` – auth
-- `STRIPE_*` – płatności
-- `RESEND_API_KEY` – email
-- `TWILIO_*` – SMS
-- `OPENAI_API_KEY` / `DEEPSEEK_API_KEY` / `OPENROUTER_API_KEY` + `AI_PROVIDER`
-- `AWS_*` / `R2_*` – storage
-- `CRON_SECRET` – zabezpieczenie endpointów cron
-- `NEXT_PUBLIC_APP_URL` – publiczny URL aplikacji
+Realnie używane: `DATABASE_URL` · `AUTH_SESSION_SECRET` (lub `JWT_SECRET`) ·
+`NEXT_PUBLIC_APP_URL` · `CRON_SECRET` · `RESEND_API_KEY` / `RESEND_FROM` ·
+`TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` / `TWILIO_FROM_NUMBER` ·
+`AI_PROVIDER` + `OPENAI_API_KEY` / `DEEPSEEK_API_KEY` / `OPENROUTER_API_KEY`
+(`AI_PROVIDER=mock` działa bez klucza) · `AWS_*` · `ALLOWED_IPS` (whitelista IP w produkcji) ·
+`NEXT_PUBLIC_DEV_MODE` (zakazany w produkcji — `getCurrentUser` rzuca wyjątkiem).
 
----
+> **Pułapka:** schemat Prisma jest pod PostgreSQL, a `.env.local` potrafi wskazywać
+> `file:./dev.db`. Do pracy lokalnej potrzebny prawdziwy `DATABASE_URL` (np. z Railway).
 
-## Struktura katalogów (kluczowe miejsca)
-
-```
-src/
-  app/
-    [locale]/           # Strony publiczne i dashboard (Next.js App Router)
-      dashboard/        # Panel pary młodej
-      portal/           # Panel organizatora (sala)
-    api/                # API routes
-    org/                # Dodatkowe strony organizatora
-  components/           # Komponenty React (bardzo rozbudowane)
-  lib/                  # Logika biznesowa, integracje
-    prisma.ts           # Singleton Prisma client
-    auth.ts / auth-utils.ts
-    ai.ts
-    stripe-billing.ts / billing.ts
-    google-calendar.ts / google-calendar-sync.ts
-    pdf-invitation.ts
-    notifications.ts / sms.ts
-    seating-planner.ts
-    feature-flags.ts
-    event-modules.ts    # Konfiguracja modułów per-event
-  hooks/                # Custom React hooks
-  locales/
-    pl.json             # Tłumaczenia PL
-    en.json             # Tłumaczenia EN
-  types/                # TypeScript types
-prisma/
-  schema.prisma         # Schemat (30+ modeli, PostgreSQL)
-  migrations/           # Migracje (30+, od 2025-02-02)
-  seed.ts
-__tests__/              # Testy jednostkowe (Jest)
-e2e/                    # Testy E2E (Playwright)
-docs/                   # Dokumentacja markdown
-```
+Deploy: Railway (`railway.json`, `railway.toml`, `npm run build:railway`).
+`docker-compose.yml` podnosi PostgreSQL 15 lokalnie.
 
 ---
 
-## Kluczowe modele Prisma
+## Testy — stan faktyczny
 
-- `User` – konto; `role`: `ADMIN` (admin platformy / serviceUser) lub `STAFF`. Hasło jako skrót bcrypt,
-  `acceptedTermsVersion` / `acceptedTermsAt` – akceptacja regulaminu
-- `Organization` – przestrzeń klienta (obiekt); `plan` (START/PRO/ENTERPRISE), limity `maxAdmins`/`maxUsers`,
-  `customRolesJson` (własne role), `modulePermissionsJson` (uprawnienia rola × moduł),
-  `notifyDaysBefore`/`notifyEmail`/`notifySms`, `billingPaidUntil`, `brandColor`/`brandLogoUrl`, `archivedAt`
-- `OrganizationMember` – `role` (OWNER/MANAGER/STAFF/VIEWER/**SERVICE**), `isAdmin` (może nadawać uprawnienia),
-  `rolesJson` (wiele ról operacyjnych). `SERVICE` = admin platformy, nie liczy się do limitów
-- `Event` – wydarzenie obiektu; `approvalReminderAt` (dedup powiadomień o akceptacji)
-- `OrganizationWorkflow` / `WorkflowNode` – definicja procesu; węzeł ma `assigneeRole`, `fillRole`,
-  `approveRole`, `fieldsJson`, `fieldMappingsJson`, `menuMode`
-- `EventProcessState` – stan procesu eventu (`currentNodeId`, `completedNodeIds`, `nodeDataJson`)
-- `EventAgendaData` – płaskie `dataJson`, z którego składa się agenda (klucze `agenda.*`)
-- `MenuVariant` / `MenuVariantCourse` – warianty menu (cena/os., porcje, zatwierdzenie, skan menu)
-- `AgendaDocumentTemplate` – szablony **dokumentów** (oferty, umowy). **Agenda ich NIE używa** –
-  ma własny, zaszyty układ w `src/lib/agenda/agenda-docx.ts`
-- `OrgLead` – zapytania ofertowe · `OrgBlockedDate` – zablokowane terminy
-- `EventPayment` – ręczne śledzenie płatności za event
-- `Guest` / `Table` / `SeatingRule` – **zachowane, obecnie nieużywane** w UI; baza pod ewentualną listę
-  gości jako krok procesu i stoły
-- `GoogleCalendarConnection` – tokeny OAuth Google Calendar
+`jest.setup.tsx` **globalnie mockuje** `@/lib/prisma`, `next/navigation`, `next-intl`,
+`@tanstack/react-query`, `sonner`, część komponentów `ui` i `@dnd-kit`. Testy jednostkowe nie
+dotykają bazy — jeśli test wymaga prawdziwych danych, zrób go jako E2E albo świadomie odmockuj
+Prismę w danym pliku. Część istniejących testów dotyczy wycofanego produktu weselnego.
+
+E2E: `e2e/auth.spec.ts` + `e2e/api/`; przeglądarki Chromium, Firefox, WebKit, Pixel 5, iPhone 12.
 
 ---
 
-## Testy
+## Konwencje
 
-```bash
-# unit (Jest)
-npm test
-npm run test:watch
-npm run test:coverage
-npm run test:ci
-
-# E2E (Playwright)
-npm run test:e2e
-npm run test:e2e:ui
-npm run test:e2e:debug
-```
-
-E2E automatycznie uruchamia `npm run dev` jako serwer.  
-Przeglądarki E2E: Chromium, Firefox, WebKit, Mobile Chrome (Pixel 5), Mobile Safari (iPhone 12).
+- Logika biznesowa wyłącznie w `src/lib/`; komponenty w `src/components/` pogrupowane tematycznie;
+  hooki w `src/hooks/`.
+- shadcn/ui jako baza UI (`components.json`), Tailwind, alias `@/` → `src/`.
+- Tłumaczenia zawsze przez next-intl (`useTranslations` / `getTranslations`).
+- Komentarze tylko tam, gdzie WHY jest nieoczywiste — istniejące komentarze są po polsku
+  i tłumaczą decyzje, nie mechanikę; trzymaj ten styl.
+- `typescript.ignoreBuildErrors: true` i `eslint.ignoreDuringBuilds: true` w `next.config.mjs` —
+  **build przechodzi mimo realnych błędów typów**. Sprawdzaj `npx tsc --noEmit` osobno, nie ufaj
+  zielonemu buildowi.
+- `next.config.mjs` → `experimental.serverActions.allowedOrigins` — nowa domena wymaga wpisu tutaj.
+- Reguła repo (`.cursor/rules/git-push-after-changes.mdc`): po skończonej zmianie commit i push na
+  bieżący branch, chyba że użytkownik powie „tylko lokalnie”. Potwierdź przed pushem.
+- Reguła repo (`.cursorrules.txt`): nowa funkcja ma mieć testy, uruchamiane zaraz po napisaniu kodu.
 
 ---
 
-## Linting / Formatting
+## Znane rozbieżności
 
-```bash
-npm run lint        # ESLint (flat config)
-```
-
-Prettier: `.prettierrc` (konfiguracja w root).  
-`typescript.ignoreBuildErrors: true` i `eslint.ignoreDuringBuilds: true` w `next.config.mjs` – build nie blokuje na błędach TS/lint.
-
----
-
-## Routing i middleware
-
-- Middleware: `src/middleware.ts` – brama sesji (własnej) + routing locale.
-  **Uwaga:** `localePrefix: "always"` przepisuje gołe `/api/...` na `/pl/api/...` (404), dlatego
-  endpointy maszynowe (`/api/cron/*`, `/api/webhooks/*`, `/api/admin/bootstrap`) są jawnie
-  wyłączone z i18n w `isLocaleAgnosticPublicRoute`.
-- `/pl/admin` celowo NIE jest w `isProtectedRoute` – strona sama zwraca 404 dla nie-adminów,
-  żeby przekierowanie na logowanie nie zdradzało, że panel istnieje.
-- i18n setup: `src/i18n.ts`
-- Wszystkie strony publiczne i dashboard pod `src/app/[locale]/`
-- API: `src/app/api/` (CORS skonfigurowany dla `weddingboard.pl`)
-- Nagłówki bezpieczeństwa w `next.config.mjs`: X-Frame-Options: DENY, nosniff, Referrer-Policy, Permissions-Policy
-
----
-
-## Deploy
-
-- **Railway** – główny deployment (`railway.json`, `railway.toml`)
-- **Docker** – `docker-compose.yml` (app + PostgreSQL 15-alpine)
-- Build script na Railway: `npm run build:railway` (alias dla `next build`)
-
----
-
-## Konwencje kodowania
-
-- Komponenty w `src/components/` pogrupowane tematycznie
-- Logika biznesowa wyłącznie w `src/lib/`
-- Custom hooks w `src/hooks/`
-- Server Actions i API routes w `src/app/api/`
-- Tłumaczenia zawsze przez next-intl (`useTranslations` / `getTranslations`)
-- Nie dodawaj komentarzy do kodu – tylko gdy WHY jest nieoczywiste
-- Nie mockuj bazy danych w testach – używaj prawdziwego połączenia
-- shadcn/ui jako baza komponentów UI (config: `components.json`)
+- `src/lib/actions/event-client.actions.ts:71` generuje link dla klienta
+  `/${locale}/portal/${token}`, ale **trasa `[locale]/portal` nie istnieje** — link daje 404.
+- `README.md` opisuje stary produkt („Wedding AI Planner”, Clerk, mock auth) i jest nieaktualny.
+- `PLAN-NAPRAWY.md` — bieżący plan naprawy blokerów produkcyjnych (izolacja danych między
+  klientami, reset hasła, domknięcie typów, monitoring). Zajrzyj tam przed większą zmianą.

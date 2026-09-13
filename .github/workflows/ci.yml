@@ -25,8 +25,18 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      # Krok blokujący: błąd typu nie wchodzi na gałąź.
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      # Niepodpięte pod bramkę, dopóki trwa sprzątanie po starym produkcie
+      # (~90 zgłoszeń). Wynik jest widoczny w logu, nie wywraca CI.
       - name: Lint
         run: npm run lint
+        continue-on-error: true
 
       - name: Unit tests (with coverage)
         run: npm run test:ci

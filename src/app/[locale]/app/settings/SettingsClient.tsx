@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { CategoryConfigurator } from "@/components/eventboard/CategoryConfigurator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Building2, Save, ExternalLink, Copy, Check } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { updateOrganization, createEventCategory, updateEventCategory, deleteEventCategory, getEventCategories } from "@/lib/actions/organization.actions";
+import { updateOrganization } from "@/lib/actions/organization.actions";
 
 interface CategoryData { id?: string; name: string; icon: string; color: string; modules: string[]; isSystem: boolean; }
 
@@ -26,10 +25,9 @@ export interface OrgProfile {
   priceRange: string;
 }
 
-export function SettingsClient({ orgId, orgName: initialName, orgSlug, categories: initialCats, profile: initialProfile }: { orgId: string; orgName: string; orgSlug: string; categories: CategoryData[]; profile: OrgProfile }) {
+export function SettingsClient({ orgId, orgName: initialName, orgSlug, profile: initialProfile }: { orgId: string; orgName: string; orgSlug: string; profile: OrgProfile }) {
   const t = useTranslations("eventboard");
   const [name, setName] = useState(initialName);
-  const [categories, setCategories] = useState(initialCats);
   const [saving, setSaving] = useState(false);
   const [profile, setProfile] = useState<OrgProfile>(initialProfile);
   const [savingProfile, setSavingProfile] = useState(false);
@@ -38,11 +36,6 @@ export function SettingsClient({ orgId, orgName: initialName, orgSlug, categorie
     typeof window !== "undefined"
       ? `${window.location.origin}/org/${orgSlug}`
       : `/org/${orgSlug}`;
-
-  const reload = async () => {
-    const cats = await getEventCategories(orgId);
-    setCategories(cats.map((c) => ({ id: c.id, name: c.name, icon: c.icon ?? "Sparkles", color: c.color ?? "#64748b", modules: c.modulesJson ? JSON.parse(c.modulesJson as string) : [], isSystem: c.isSystem })));
-  };
 
   return (
     <div className="space-y-8">
@@ -179,17 +172,6 @@ export function SettingsClient({ orgId, orgName: initialName, orgSlug, categorie
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader><CardTitle className="text-base">{t("eventCategories")}</CardTitle><p className="text-sm text-slate-500">{t("categoriesDesc")}</p></CardHeader>
-        <CardContent>
-          <CategoryConfigurator
-            categories={categories}
-            onCreate={async (data) => { await createEventCategory(orgId, { name: data.name, icon: data.icon, color: data.color, modulesJson: JSON.stringify(data.modules) }); await reload(); }}
-            onUpdate={async (id, data) => { await updateEventCategory(id, { name: data.name, icon: data.icon, color: data.color, modulesJson: data.modules ? JSON.stringify(data.modules) : undefined }); await reload(); }}
-            onDelete={async (id) => { await deleteEventCategory(id); await reload(); }}
-          />
-        </CardContent>
-      </Card>
     </div>
   );
 }

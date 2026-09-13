@@ -29,7 +29,12 @@ const nextConfig = {
     "pdf-lib",
     "@serwist/next",
   ],
-  typescript: { ignoreBuildErrors: true },
+  // Błędy typów blokują build — to jedyna informacja zwrotna o tym, co jest
+  // zepsute, zanim dowie się o tym klient.
+  typescript: { ignoreBuildErrors: false },
+  // ESLint nadal nie blokuje: zostało ~90 zgłoszeń z czasów starego produktu
+  // (no-html-link-for-pages, no-explicit-any). Do wyczyszczenia osobno —
+  // patrz PLAN-NAPRAWY.md, zadanie 2.2.
   eslint: { ignoreDuringBuilds: true },
   async redirects() {
     return [

@@ -19,7 +19,6 @@ export type GuideStepDef = {
 /** Kanoniczna kolejność modułów w przewodniku i na checkliście pulpitu. */
 export const GUIDE_STEPS: GuideStepDef[] = [
   { id: "guests", href: "/dashboard/guests", phaseKey: "start" },
-  { id: "stationery", href: "/dashboard/stationery", phaseKey: "planning" },
   { id: "budget", href: "/dashboard/budget", phaseKey: "planning" },
   { id: "tasks", href: "/dashboard/tasks", phaseKey: "planning" },
   { id: "seating", href: "/dashboard/seating", phaseKey: "planning" },

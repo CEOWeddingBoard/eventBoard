@@ -20,7 +20,11 @@ interface SyncedEvent {
   htmlLink?: string;
 }
 
-export function GoogleCalendarSection({ locale, connected: initialConnected }: GoogleCalendarSectionProps) {
+export function GoogleCalendarSection({
+  locale,
+  connected: initialConnected,
+  canDisconnect = true,
+}: GoogleCalendarSectionProps) {
   const t = useTranslations("GoogleCalendar");
   const [connected, setConnected] = useState(initialConnected);
   const [events, setEvents] = useState<SyncedEvent[]>([]);

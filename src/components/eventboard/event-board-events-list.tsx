@@ -493,23 +493,27 @@ export function EventBoardEventsList({
             <DialogTitle>Nowy event</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleCreate} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">
-                Typ eventu
-              </label>
-              <select
-                className="w-full h-9 rounded-md border border-neutral-200 px-3 text-sm"
-                value={selectedTypeId}
-                onChange={(e) => handleTypeChange(e.target.value)}
-              >
-                <option value="">— wybierz typ —</option>
-                {eventTypes.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {/* Typy eventów nie są już konfigurowane w przestrzeni klienta —
+                przychodzą z biblioteki wzorców. Lista pusta = pole znika. */}
+            {eventTypes.length > 0 && (
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-1">
+                  Typ eventu
+                </label>
+                <select
+                  className="w-full h-9 rounded-md border border-neutral-200 px-3 text-sm"
+                  value={selectedTypeId}
+                  onChange={(e) => handleTypeChange(e.target.value)}
+                >
+                  <option value="">— wybierz typ —</option>
+                  {eventTypes.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-1">Nazwa imprezy</label>

@@ -277,6 +277,18 @@ type WorkflowWithNodes = {
   nodes: Array<Record<string, unknown> & { id: string; nextNodeId: string | null; conditionsJson: string | null }>;
 };
 
+/**
+ * Czy przestrzeń ma już proces o tej nazwie. Przypisanie wzorca jest kopią, więc
+ * bez tego sprawdzenia drugie kliknięcie daje klientowi dwa identyczne procesy.
+ */
+async function workflowNameTakenInSpace(targetOrgId: string, name: string): Promise<boolean> {
+  const existing = await prisma.organizationWorkflow.findFirst({
+    where: { organizationId: targetOrgId, name },
+    select: { id: true },
+  });
+  return !!existing;
+}
+
 /** Klonuje JEDEN workflow (z węzłami, remapem ID) do docelowej organizacji. */
 async function cloneOneWorkflow(w: WorkflowWithNodes, targetOrgId: string): Promise<void> {
   const created = await prisma.organizationWorkflow.create({
@@ -343,10 +355,13 @@ async function cloneWorkflows(sourceOrgId: string, targetOrgId: string): Promise
     where: { organizationId: sourceOrgId },
     include: { nodes: { orderBy: { sortOrder: "asc" } } },
   });
+  let cloned = 0;
   for (const w of workflows) {
+    if (await workflowNameTakenInSpace(targetOrgId, w.name)) continue;
     await cloneOneWorkflow(w as unknown as WorkflowWithNodes, targetOrgId);
+    cloned++;
   }
-  return workflows.length;
+  return cloned;
 }
 
 /** Lista przestrzeni jako źródło standardowych procesów (do kopiowania). */
@@ -414,6 +429,9 @@ export async function assignProcessToSpace(workflowId: string, targetOrgId: stri
     include: { nodes: { orderBy: { sortOrder: "asc" } } },
   });
   if (!w) return { ok: false, error: "Nie znaleziono procesu-wzorca." };
+  if (await workflowNameTakenInSpace(targetOrgId, w.name)) {
+    return { ok: false, error: `Proces „${w.name}" jest już w tej przestrzeni — nie tworzę drugiej kopii.` };
+  }
   try {
     await cloneOneWorkflow(w as unknown as WorkflowWithNodes, targetOrgId);
     revalidatePath("/admin");

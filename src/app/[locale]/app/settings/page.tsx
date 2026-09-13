@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { getUserOrganizations, getEventCategories, seedSystemCategories } from "@/lib/actions/organization.actions";
+import { getUserOrganizations } from "@/lib/actions/organization.actions";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { getActiveOrgId } from "@/lib/auth/active-org";
 import { getNotificationSettings, getTeamContext } from "@/lib/actions/team.actions";
@@ -14,17 +14,12 @@ export default async function SettingsPage() {
   const user = await getCurrentUser();
   const activeId = user ? await getActiveOrgId(user.id) : null;
   const org = orgs.find((o) => o.id === activeId) ?? orgs[0];
-  let cats = await getEventCategories(org.id);
-  if (cats.length === 0) { await seedSystemCategories(org.id); cats = await getEventCategories(org.id); }
 
   const [notif, team] = await Promise.all([getNotificationSettings(), getTeamContext().catch(() => null)]);
 
   return <>
     <div className="mb-6"><NotificationSettings initial={notif} canManage={team?.canManage ?? false} /></div>
-    <SettingsClient orgId={org.id} orgName={org.name} orgSlug={org.slug} categories={cats.map((c) => ({
-    id: c.id, name: c.name, icon: c.icon ?? "Sparkles", color: c.color ?? "#64748b",
-    modules: c.modulesJson ? JSON.parse(c.modulesJson as string) : [], isSystem: c.isSystem,
-  }))} profile={{
+    <SettingsClient orgId={org.id} orgName={org.name} orgSlug={org.slug} profile={{
     address: org.address ?? "",
     city: org.city ?? "",
     postalCode: org.postalCode ?? "",
