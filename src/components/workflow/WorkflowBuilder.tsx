@@ -21,6 +21,7 @@ import {
   sourceFieldsFor,
   type StepField,
 } from "@/lib/workflow-agenda-fields";
+import { AgendaPreview } from "@/components/workflow/AgendaPreview";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -988,8 +989,10 @@ export function WorkflowBuilder({
         </label>
       </div>
 
-      {/* Nodes */}
-      <div className="space-y-3">
+      {/* Kroki + podgląd agendy obok. Bez podglądu efekt konfiguracji widać
+          dopiero na prawdziwym evencie, czyli zwykle tydzień później. */}
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
+      <div className="space-y-3 min-w-0">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-semibold text-neutral-800">
             Kroki procesu
@@ -1047,6 +1050,11 @@ export function WorkflowBuilder({
           <Plus className="w-4 h-4 mr-2" />
           Dodaj krok
         </Button>
+      </div>
+
+      <div className="xl:sticky xl:top-4">
+        <AgendaPreview nodes={nodes} />
+      </div>
       </div>
 
       {/* Save */}

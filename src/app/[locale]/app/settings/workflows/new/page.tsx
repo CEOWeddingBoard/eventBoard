@@ -6,7 +6,7 @@ import { ChevronLeft } from "lucide-react";
 export default async function NewWorkflowPage() {
   const customRoles = await getOrgCustomRoles();
   return (
-    <div className="max-w-3xl mx-auto py-6 px-4 space-y-4">
+    <div className="max-w-5xl mx-auto py-6 px-4 space-y-4">
       <Link
         href="/app/settings/workflows"
         className="inline-flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-700 transition-colors"
