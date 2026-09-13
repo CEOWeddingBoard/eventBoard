@@ -198,18 +198,27 @@ telefonem od klienta w trakcie wesela — najgorszy możliwy moment.
 
 **Szacunek:** 0,5 dnia
 
-- [ ] **5.1 Podłącz Sentry**
+- [x] **5.1 Podłącz Sentry** — kod gotowy, zostaje ustawić DSN na Railway
 
   Plik: `src/lib/errors/error-logger.ts` — wysyłaj też do Sentry. Zmienna `SENTRY_DSN` na Railway.
 
-  **Gotowe, gdy:** celowo wywołany błąd pojawia się w Sentry w ciągu minuty.
+  **Zrobione:** `@sentry/nextjs` w zależnościach, inicjalizacja w
+  `src/instrumentation.ts` (tylko gdy jest `SENTRY_DSN`), `logError` wysyła
+  wyjątki dalej, `onRequestError` łapie 5xx z renderowania i tras API.
+  `sendDefaultPii: false` — dane o alergiach gości nie wychodzą na zewnątrz.
 
-- [ ] **5.2 Alert, który realnie dotrze**
+  **Do zrobienia przez Ciebie:** załóż projekt w Sentry i ustaw `SENTRY_DSN`
+  na Railway. Bez DSN monitoring jest wyłączony i aplikacja działa jak dotąd.
+
+- [x] **5.2 Alert, który realnie dotrze**
 
   Powiadomienie na e-mail lub SMS przy błędach 5xx. Sam dashboard nie wystarczy —
   nie będziesz go oglądał w sobotę.
 
-  **Gotowe, gdy:** testowy błąd 5xx powoduje powiadomienie.
+  **Zrobione:** `src/lib/errors/alerting.ts` — e-mail (Resend) i SMS (Twilio) przy
+  5xx, na adresy z `ALERT_EMAIL` / `ALERT_SMS_TO`. Ten sam błąd nie powtarza alertu
+  przez `ALERT_DEDUP_MINUTES` (domyślnie 30), żeby awaria w pętli nie zasypała
+  skrzynki. 6 testów w `src/lib/errors/__tests__/alerting.test.ts`.
 
 ---
 

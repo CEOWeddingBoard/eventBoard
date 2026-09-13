@@ -2,6 +2,8 @@ module.exports = {
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.tsx'],
   moduleNameMapper: {
+    // `server-only` rzuca wyjątkiem poza runtime'em Next — w testach nieszkodliwy no-op.
+    '^server-only$': '<rootDir>/__mocks__/server-only.js',
     '^@/(.*)$': '<rootDir>/src/$1',
   },
   transform: {

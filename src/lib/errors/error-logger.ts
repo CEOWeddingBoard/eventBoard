@@ -33,14 +33,39 @@ export function logError(error: Error | AppError, context?: ErrorContext) {
     statusCode: error instanceof AppError ? error.statusCode : undefined,
   };
 
-  // Console logging for development
-  if (process.env.NODE_ENV === 'development') {
-    console.error('[Error Logger]', errorData);
+  // W produkcji też logujemy — inaczej jedynym sladem awarii jest telefon klienta.
+  console.error('[Error Logger]', errorData);
+
+  // Sentry: wysyłamy tylko gdy jest DSN. Import dynamiczny, żeby brak konfiguracji
+  // nie wywracał żądania i żeby SDK nie ładował się bez potrzeby.
+  if (process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN) {
+    void import('@sentry/nextjs')
+      .then((Sentry) => {
+        Sentry.captureException(error, { extra: errorData as Record<string, unknown> });
+      })
+      .catch(() => {
+        /* brak SDK — zostaje log w konsoli */
+      });
   }
 
-  // TODO: Integrate with production error tracking service
-  // Example: Sentry.captureException(error, { extra: errorData });
-  
+  // Alert dla człowieka przy błędach serwerowych.
+  const status = error instanceof AppError ? error.statusCode ?? 500 : 500;
+  if (status >= 500 && typeof window === 'undefined') {
+    void import('@/lib/errors/alerting')
+      .then(({ sendServerErrorAlert }) =>
+        sendServerErrorAlert({
+          message: error.message,
+          statusCode: status,
+          component: errorData.context?.component,
+          path: errorData.context?.action,
+          stack: error.stack,
+        }),
+      )
+      .catch(() => {
+        /* alert jest dodatkiem, nie może przerwać obsługi błędu */
+      });
+  }
+
   return errorData;
 }
 
