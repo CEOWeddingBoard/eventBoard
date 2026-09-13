@@ -85,6 +85,7 @@ const isLocaleAgnosticPublicRoute = (pathname: string) =>
   // Endpointy maszynowe pod gołym /api — bez prefiksu locale, inaczej
   // intlMiddleware przepisałby je na /pl/api/... i zwracał 404.
   pathname === "/api/admin/bootstrap" ||
+  pathname.startsWith("/api/admin/space-export/") ||
   pathname.startsWith("/api/cron/") ||
   pathname.startsWith("/api/webhooks/");
 

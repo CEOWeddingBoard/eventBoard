@@ -15,6 +15,10 @@ import { getCurrentUser } from "@/lib/auth/utils";
 import { headers } from "next/headers";
 import { checkRateLimit } from "@/lib/api/rate-limit";
 import {
+  checkPersistentRateLimit,
+  clearPersistentRateLimit,
+} from "@/lib/api/rate-limit-db";
+import {
   createPasswordResetToken,
   readSubjectFromResetToken,
   verifyPasswordResetToken,
@@ -247,9 +251,13 @@ export async function loginAccount(input: {
 
   // Bez limitu formularz logowania jest zaproszeniem do zgadywania haseł.
   // Licznik na IP zatrzymuje jeden adres, licznik na e-mail — atak z wielu adresów.
+  // Licznik jest w bazie, bo w pamięci procesu nie przeżywa restartu ani drugiej
+  // instancji aplikacji.
   const ip = await clientIpForRateLimit();
-  for (const key of [`login:ip:${ip}`, `login:email:${email}`]) {
-    if (!checkRateLimit({ key, limit: 10, windowMs: 15 * 60_000 }).ok) {
+  const loginKeys = [`login:ip:${ip}`, `login:email:${email}`];
+  for (const key of loginKeys) {
+    const limit = await checkPersistentRateLimit({ key, limit: 10, windowMs: 15 * 60_000 });
+    if (!limit.ok) {
       return { ok: false, error: "Za dużo nieudanych prób. Spróbuj ponownie za kilkanaście minut." };
     }
   }
@@ -267,6 +275,9 @@ export async function loginAccount(input: {
       return { ok: false, error: "Nieprawidłowy e-mail lub hasło." };
     }
 
+    // Udane logowanie kasuje licznik — inaczej ktoś, kto pomylił hasło kilka
+    // razy, zostawałby zablokowany mimo poprawnego wejścia.
+    await Promise.all(loginKeys.map(clearPersistentRateLimit));
     await startSessionForUser(user);
     return { ok: true, user: publicUser(user) };
   } catch (error) {
@@ -553,7 +564,8 @@ export async function requestPasswordReset(input: {
 
   const ip = await clientIpForRateLimit();
   for (const key of [`pwreset:ip:${ip}`, `pwreset:email:${email}`]) {
-    if (!checkRateLimit({ key, limit: 5, windowMs: 15 * 60_000 }).ok) {
+    const limit = await checkPersistentRateLimit({ key, limit: 5, windowMs: 15 * 60_000 });
+    if (!limit.ok) {
       return { ok: false, error: "Za dużo prób. Spróbuj ponownie za kilkanaście minut." };
     }
   }

@@ -135,9 +135,21 @@ z czytelnym komunikatem, zamiast po cichu nic nie robić.
 
 ### Etap 5 — Twardość produkcyjna (P1)
 
-- [ ] **5.1 Limity prób trwałe** — licznik w bazie zamiast w pamięci procesu.
-- [ ] **5.2 Eksport danych przestrzeni** — ZIP/JSON na żądanie klienta.
-- [ ] **5.3 Usunięcie danych** — udokumentowana ścieżka i potwierdzenie.
+- [x] **5.1 Limity prób trwałe** — licznik w bazie zamiast w pamięci procesu.
+- [x] **5.2 Eksport danych przestrzeni** — ZIP/JSON na żądanie klienta.
+- [x] **5.3 Usunięcie danych** — `deleteSpace` w `admin.actions.ts` kasuje przestrzeń
+      wraz z powiązanymi danymi (kaskady w schemacie); biblioteki wzorców nie da się
+      usunąć. Przed usunięciem pobierz eksport z 5.2 — po skasowaniu nie ma odwrotu.
+
+**Zrobione w 5.1:** tabela `rate_limit_hits` + migracja. Licznik logowania i resetu
+hasła żyje w bazie, więc przeżywa restart i działa przy wielu instancjach; udane
+logowanie kasuje licznik. Awaria bazy **nie blokuje logowania** — licznik ma hamować
+zgadywanie haseł, a nie być kolejnym punktem awarii (6 testów).
+
+**Zrobione w 5.2:** `GET /api/admin/space-export/<orgId>` — pełny JSON przestrzeni
+(organizacja, zespół, eventy z harmonogramem, menu, agendą i płatnościami, procesy,
+sale, zapytania, szablony). Bez haseł i tokenów: to dane uwierzytelniające, nie dane
+klienta. Dla nie-adminów 404, nie 403 — tak jak panel admina.
 
 ### Etap 6 — Sprzątanie (P2)
 

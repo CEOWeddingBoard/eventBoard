@@ -192,6 +192,17 @@ model Organization {
 // { sections: [{match, courseType}], variantMarkers: [...], bulletChars: "*-•",
 //   ignoreContains: [...] } — definiuje, od jakich słów kluczowych powstają
 // sekcje menu przy wklejaniu tekstu.
+/// Trwałe liczniki prób logowania i resetu hasła. Licznik w pamięci procesu
+/// nie działa przy więcej niż jednej instancji aplikacji.
+model RateLimitHit {
+  key       String   @id
+  count     Int      @default(1)
+  expiresAt DateTime
+
+  @@index([expiresAt])
+  @@map("rate_limit_hits")
+}
+
 model MenuParserConfig {
   id             String       @id @default(cuid())
   organizationId String       @unique
