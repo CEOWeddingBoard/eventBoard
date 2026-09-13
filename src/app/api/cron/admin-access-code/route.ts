@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDailyAdminCode, logDailyAdminCode } from "@/lib/auth/admin-access-code";
+import { isValidCronSecret } from "@/lib/api/cron-auth";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -9,8 +10,7 @@ export const runtime = "nodejs";
  * Zabezpieczony CRON_SECRET (jak pozostałe crony). Zaplanuj codziennie.
  */
 export async function GET(req: NextRequest) {
-  const secret = req.headers.get("x-cron-secret") || req.nextUrl.searchParams.get("secret");
-  if (!process.env.CRON_SECRET || secret !== process.env.CRON_SECRET) {
+  if (!isValidCronSecret(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   logDailyAdminCode("cron");

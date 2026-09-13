@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { isValidCronSecret } from "@/lib/api/cron-auth";
 import { sendRsvpReminder, sendMilestoneNotification } from "@/lib/notifications/notification-service";
 
 const MILESTONES = [
@@ -21,10 +22,7 @@ interface CronSummary {
 }
 
 export async function POST(req: NextRequest) {
-  const cronSecret = process.env.CRON_SECRET?.trim();
-  const secret = req.nextUrl.searchParams.get("secret");
-
-  if (!cronSecret || secret !== cronSecret) {
+  if (!isValidCronSecret(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { isValidCronSecret } from "@/lib/api/cron-auth";
 import { sendTaskReminderSms } from "@/lib/notifications";
 
 /**
@@ -11,11 +12,9 @@ import { sendTaskReminderSms } from "@/lib/notifications";
  * type = daily | weekly
  */
 export async function GET(req: NextRequest) {
-  const secret = req.nextUrl.searchParams.get("secret");
   const type = req.nextUrl.searchParams.get("type") as "daily" | "weekly" | null;
 
-  const cronSecret = process.env.CRON_SECRET?.trim();
-  if (!cronSecret || secret !== cronSecret) {
+  if (!isValidCronSecret(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

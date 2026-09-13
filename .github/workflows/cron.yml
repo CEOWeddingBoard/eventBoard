@@ -1,0 +1,59 @@
+name: Powiadomienia (cron)
+
+# Endpointy /api/cron/* istniały od dawna, ale nic ich nie wywoływało — żadne
+# przypomnienie o terminie ani o kroku czekającym na akceptację nie docierało
+# do klienta. Harmonogram trzymamy tutaj, a nie u hostingodawcy: jest widoczny
+# w repozytorium i przenosi się razem z kodem.
+#
+# Wymagane sekrety repozytorium (Settings → Secrets and variables → Actions):
+#   APP_URL     — np. https://www.weddingboard.pl (bez ukośnika na końcu)
+#   CRON_SECRET — ta sama wartość co zmienna środowiskowa aplikacji
+
+on:
+  schedule:
+    # 06:00 UTC = 07:00 zimą / 08:00 latem w Polsce. GitHub Actions liczy
+    # wyłącznie w UTC, więc godzina lokalna przesuwa się z czasem letnim.
+    # Próg jest tu świadomy: lepiej wysłać o 07:00 niż obudzić kogoś SMS-em.
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+jobs:
+  powiadomienia:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sprawdź konfigurację
+        run: |
+          if [ -z "${{ secrets.APP_URL }}" ] || [ -z "${{ secrets.CRON_SECRET }}" ]; then
+            echo "Brak sekretu APP_URL lub CRON_SECRET — ustaw je w ustawieniach repozytorium."
+            exit 1
+          fi
+
+      # Sekret leci nagłówkiem, nie w adresie: query string trafia do logów
+      # dostępowych serwera i do historii przeglądarki.
+      - name: Terminy menu i listy gości
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --header "x-cron-secret: ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.APP_URL }}/api/cron/event-reminders"
+          echo
+
+      - name: Kroki czekające na akceptację
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --header "x-cron-secret: ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.APP_URL }}/api/cron/step-approval-reminders"
+          echo
+
+      - name: Przypomnienia o zadaniach
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --header "x-cron-secret: ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.APP_URL }}/api/cron/task-reminders?type=daily"
+          echo
+
+      - name: Kod dostępu administratora
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --header "x-cron-secret: ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.APP_URL }}/api/cron/admin-access-code"
+          echo

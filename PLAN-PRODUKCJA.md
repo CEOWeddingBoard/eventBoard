@@ -99,11 +99,26 @@ i ukończyć krok — tego nie da się zweryfikować bez bazy.
 
 ### Etap 2 — Uruchomić powiadomienia (P0)
 
-- [ ] **2.1 Harmonogram cronów** — GitHub Actions z `schedule` wołający endpointy
+- [x] **2.1 Harmonogram cronów** — GitHub Actions z `schedule` wołający endpointy
       z nagłówkiem `x-cron-secret` (działa niezależnie od hostingu i jest widoczny w repo).
-- [ ] **2.2 Okno czasowe i strefa** — crony liczą dni względem `new Date()`; ustalić porę
+- [x] **2.2 Okno czasowe i strefa** — crony liczą dni względem `new Date()`; ustalić porę
       wysyłki (rano), żeby SMS nie szedł w nocy.
 - [ ] **2.3 Log wysyłek** — żeby dało się odpowiedzieć „czy klient dostał przypomnienie".
+      Częściowo już jest: `Event.approvalReminderAt` zapisuje moment ostatniego
+      przypomnienia o akceptacji, a każde uruchomienie workflow zostaje w historii
+      GitHub Actions wraz z odpowiedzią endpointu. Pełny log wysyłek (komu, czym,
+      z jakim skutkiem) wymaga osobnej tabeli — do decyzji.
+
+**Zrobione w 2.1–2.2:** `.github/workflows/cron.yml` — codziennie 06:00 UTC
+(07:00 zimą / 08:00 latem), plus ręczne uruchomienie. Przy okazji ujednolicone
+uwierzytelnianie: `task-reminders` i `wedding-notifications` przyjmowały sekret
+**wyłącznie w query stringu**, który ląduje w logach dostępowych — teraz wszystkie
+pięć endpointów woli nagłówek `x-cron-secret`, a brak `CRON_SECRET` w środowisku
+zamyka je zamiast otwierać (7 testów).
+
+**Do zrobienia przez Ciebie:** ustaw sekrety `APP_URL` i `CRON_SECRET`
+w Settings → Secrets and variables → Actions. Bez nich workflow kończy się błędem
+z czytelnym komunikatem, zamiast po cichu nic nie robić.
 
 ### Etap 3 — Dokończyć krok „Tabela / arkusz" (P1)
 

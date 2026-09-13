@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { isValidCronSecret } from "@/lib/api/cron-auth";
 import { sendSms, isSmsConfigured } from "@/lib/sms";
 import { assigneeRoleLabel } from "@/lib/workflow-roles";
 
@@ -24,8 +25,7 @@ function parseRoles(json: string | null | undefined): string[] {
  * Zaplanuj codziennie. Zabezpieczony CRON_SECRET.
  */
 export async function GET(req: NextRequest) {
-  const secret = req.headers.get("x-cron-secret") || req.nextUrl.searchParams.get("secret");
-  if (!process.env.CRON_SECRET || secret !== process.env.CRON_SECRET) {
+  if (!isValidCronSecret(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
