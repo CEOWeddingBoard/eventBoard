@@ -87,11 +87,18 @@ nazewnictwo** po migracji — nie sugeruj się nimi.
 ### Organizacja bieżącego żądania
 
 `src/lib/auth/active-org.ts` — cookie `eb_active_org` („wejście w przestrzeń” przez admina
-platformy). Bez cookie brany jest **pierwszy (najstarszy) membership**.
+platformy). Jedna funkcja `resolveMembership` decyduje o przestrzeni żądania: ciasteczko jest
+źródłem prawdy, a fallback działa **tylko** gdy użytkownik należy dokładnie do jednej
+organizacji. Ciasteczko wskazujące obcą przestrzeń nie powoduje cichego fallbacku.
+
+- `getActiveOrgId(userId)` / `getActiveMembership(userId)` — `null`, gdy nie da się ustalić.
+- `requireOrgId(userId)` — rzuca `OrgContextError`; używaj w akcjach **zapisu**, bo zapis
+  „gdzieś” jest gorszy niż zapis nieudany.
 
 > **Pułapka:** konto serwisowe (`OrganizationMember.role = "SERVICE"`) należy do *każdej*
-> organizacji. Ustalanie organizacji „po pierwszym membership” daje dla niego zły wynik —
-> w nowym kodzie używaj `getActiveOrgId(userId)` / `getActiveMembership(userId)`.
+> organizacji. Dlatego „pierwsze membership” nigdy nie jest poprawną odpowiedzią —
+> `prisma.organizationMember.findFirst({ where: { userId } })` bez `organizationId` to błąd.
+> Pilnuje tego `src/lib/auth/__tests__/active-org.test.ts`.
 
 ### Uprawnienia modułowe
 
@@ -101,9 +108,16 @@ Macierz rola × moduł siedzi w `Organization.modulePermissionsJson`; poziom cz�
 maksimum z jego ról (`OrganizationMember.rolesJson`). Owner / `isAdmin` / `SERVICE` /
 `User.role = "ADMIN"` mają wszędzie `edit`.
 
-Egzekwowanie: `assertModuleView(moduleKey, locale)` w **`layout.tsx` segmentu modułu**
-(np. `src/app/[locale]/app/finances/layout.tsx`) — nowy moduł potrzebuje własnego layoutu ze
-strażnikiem. Ukrywanie akcji zapisu: `canEditModule(moduleKey)`.
+Egzekwowanie ma dwie warstwy i obie są konieczne:
+
+- **Podgląd:** `assertModuleView(moduleKey, locale)` w `layout.tsx` segmentu modułu
+  (każdy moduł ma własny; `/app/settings/*` też, osobno od `settings/configuration`).
+- **Zapis:** `assertModuleEdit(moduleKey)` na początku akcji serwerowej — rzuca
+  `ModulePermissionError`. Ukrycie przycisku niczego nie chroni, bo akcję można wywołać
+  bezpośrednio. Podpięte w ~40 akcjach zapisu. **Dodając akcję zapisu, dopisz bramkę.**
+  Wyjątek: `createOrgLead` jest świadomie otwarty — to publiczny formularz zapytania.
+- W UI: `canEditModule(moduleKey)` przekazywane jako `canEdit` do komponentu, który chowa
+  przyciski zapisu.
 
 ### Routing i dwa drzewa API
 
@@ -161,6 +175,19 @@ ustala użytkownika (`getCurrentUser`) i organizację (`getActiveOrgId`), sama s
 kończy `revalidatePath(...)` i zwraca `{ ok: boolean; error?: string }`. Komponenty nie dotykają
 Prismy bezpośrednio.
 
+### Przestrzeń klienta startuje pusta
+
+Nowa przestrzeń nie dostaje nic domyślnego — żadnych kategorii ani procesów. Co klient
+dostaje, ustala administrator na wdrożeniu, przypisując wzorce z **biblioteki procesów**
+(organizacja o slugu wzorcowym; `getTemplateLibrary`, `assignProcessToSpace`). Przypisanie
+tworzy **kopię**, a drugie przypisanie tego samego wzorca jest odrzucane, żeby klient nie
+zobaczył dwóch identycznych procesów.
+
+`EventCategory` („typy eventów") jest **wycofany z UI** — ekran `/app/settings/event-types`
+i sekcja kategorii w Ustawieniach nie istnieją, auto-seed pięciu kategorii systemowych
+został usunięty. Model i relacje zostają w bazie (odczyt jest null-safe); nie przywracaj
+konfiguracji kategorii bez wyraźnej decyzji.
+
 ### Plany i limity
 
 `src/lib/plans.ts` — `START | PRO | ENTERPRISE` z limitami `maxAdmins`/`maxUsers`.
@@ -211,10 +238,24 @@ Deploy: Railway (`railway.json`, `railway.toml`, `npm run build:railway`).
 
 ## Testy — stan faktyczny
 
-`jest.setup.tsx` **globalnie mockuje** `@/lib/prisma`, `next/navigation`, `next-intl`,
-`@tanstack/react-query`, `sonner`, część komponentów `ui` i `@dnd-kit`. Testy jednostkowe nie
-dotykają bazy — jeśli test wymaga prawdziwych danych, zrób go jako E2E albo świadomie odmockuj
-Prismę w danym pliku. Część istniejących testów dotyczy wycofanego produktu weselnego.
+`jest.setup.tsx` **globalnie mockuje** `@/lib/prisma`, `@/lib/permissions/guard`,
+`@/lib/validations/sanitize`, `next/navigation`, `next-intl`, `@tanstack/react-query`, `sonner`,
+część komponentów `ui` i `@dnd-kit`. Testy jednostkowe nie dotykają bazy — jeśli test wymaga
+prawdziwych danych, zrób go jako E2E albo świadomie odmockuj Prismę w danym pliku.
+
+Dwa mocki wymagają wyjaśnienia:
+
+- **bramka uprawnień** jest domyślnie przepuszczająca, żeby nie być przedmiotem każdego testu;
+  test samej bramki robi `jest.unmock("@/lib/permissions/guard")`,
+- **`sanitize.ts`** uruchamia jsdom, a jsdom w środowisku jsdom wywracał Jestowi całe suity
+  na zależności ESM.
+
+Moduł serwerowy (jose, OOXML, Node crypto) testuj w środowisku `node` — pierwszą linią pliku
+`/** @jest-environment node */`. `jest.setup.tsx` dokłada polyfille `TextEncoder`, WebCrypto
+i `structuredClone`, bo jsdom ich nie ma.
+
+Osiem suit z czasów produktu weselnego (guest/seating/task/event actions, seating-ai,
+welcome-email, integration) ma nieaktualne asercje i jest czerwonych — to nie regresja.
 
 E2E: `e2e/auth.spec.ts` + `e2e/api/`; przeglądarki Chromium, Firefox, WebKit, Pixel 5, iPhone 12.
 
@@ -228,13 +269,24 @@ E2E: `e2e/auth.spec.ts` + `e2e/api/`; przeglądarki Chromium, Firefox, WebKit, P
 - Tłumaczenia zawsze przez next-intl (`useTranslations` / `getTranslations`).
 - Komentarze tylko tam, gdzie WHY jest nieoczywiste — istniejące komentarze są po polsku
   i tłumaczą decyzje, nie mechanikę; trzymaj ten styl.
-- `typescript.ignoreBuildErrors: true` i `eslint.ignoreDuringBuilds: true` w `next.config.mjs` —
-  **build przechodzi mimo realnych błędów typów**. Sprawdzaj `npx tsc --noEmit` osobno, nie ufaj
-  zielonemu buildowi.
+- **Błąd typu blokuje build** (`typescript.ignoreBuildErrors: false`). Żeby to było możliwe,
+  `noUnusedLocals`/`noUnusedParameters` w `tsconfig.json` są `false` — nieużywane zmienne
+  raportuje ESLint. `eslint.ignoreDuringBuilds` nadal `true`: zostało ~90 zgłoszeń z czasów
+  starego produktu, w CI lint działa z `continue-on-error`.
 - `next.config.mjs` → `experimental.serverActions.allowedOrigins` — nowa domena wymaga wpisu tutaj.
 - Reguła repo (`.cursor/rules/git-push-after-changes.mdc`): po skończonej zmianie commit i push na
   bieżący branch, chyba że użytkownik powie „tylko lokalnie”. Potwierdź przed pushem.
 - Reguła repo (`.cursorrules.txt`): nowa funkcja ma mieć testy, uruchamiane zaraz po napisaniu kodu.
+
+---
+
+## Monitoring
+
+`src/instrumentation.ts` — `register()` wypisuje dzienny kod dostępu admina i inicjalizuje
+Sentry, ale **tylko gdy jest `SENTRY_DSN`**; `onRequestError` łapie 5xx z renderowania i tras API.
+`src/lib/errors/alerting.ts` wysyła e-mail (Resend) i SMS (Twilio) na `ALERT_EMAIL` / `ALERT_SMS_TO`
+przy błędach 5xx, z tłumieniem powtórek tego samego błędu. `sendDefaultPii: false` — dane
+o alergiach gości nie wychodzą do zewnętrznego dostawcy.
 
 ---
 
