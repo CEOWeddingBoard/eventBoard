@@ -14,6 +14,10 @@ function formatTime(d: Date): string {
 }
 
 type Slot = { id: string; fieldKey?: string; placeholder?: string; llmPrompt?: string };
+// Props bloku zależą od jego typu i pochodzą z kreatora dokumentów — dopóki
+// kreator nie ma opisanego kontraktu, sensowniej jest to zostawić luźne niż
+// udawać typ, który i tak trzeba by wszędzie rzutować.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- patrz wyżej
 type Block = { id: string; type: string; props: any; slots: Slot[] };
 type Page = { blocks: Block[] };
 

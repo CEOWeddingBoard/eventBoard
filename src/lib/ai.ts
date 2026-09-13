@@ -42,7 +42,7 @@ export interface GenerateAIImageOptions {
 const ENV_HINT = "Ustaw OPENROUTER_API_KEY oraz AI_IMAGE_PROVIDER=openrouter w Railway / .env.local";
 
 /** OpenRouter do obrazów: jawnie openrouter LUB auto gdy jest OPENROUTER_API_KEY. */
-function useOpenRouterForImages(): boolean {
+function shouldUseOpenRouterForImages(): boolean {
   const explicit = (process.env.AI_IMAGE_PROVIDER || "").trim().toLowerCase();
   if (explicit === "openrouter") return true;
   if (explicit && explicit !== "none" && explicit !== "off") return false;
@@ -131,7 +131,7 @@ export async function generateAIImageFromText(
   prompt: string,
   options?: GenerateAIImageOptions
 ): Promise<AIResponse> {
-  if (!useOpenRouterForImages()) {
+  if (!shouldUseOpenRouterForImages()) {
     throw new Error(`Generowanie obrazów wymaga OpenRouter. ${ENV_HINT}`);
   }
   const apiKey = process.env.OPENROUTER_API_KEY?.trim();
@@ -184,7 +184,7 @@ async function generateAIResponseInternal(
   imageBase64DataUrl: string | undefined,
   options?: { jsonMode?: boolean }
 ): Promise<AIResponse> {
-  const useImageProvider = Boolean(imageBase64DataUrl && useOpenRouterForImages());
+  const useImageProvider = Boolean(imageBase64DataUrl && shouldUseOpenRouterForImages());
 
   if (useImageProvider) {
     const apiKey = process.env.OPENROUTER_API_KEY?.trim();

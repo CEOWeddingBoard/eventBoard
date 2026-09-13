@@ -1,3 +1,4 @@
+import Link from "next/link";
 export function LandingFooter() {
   return (
     <footer className="border-t border-stone-200 bg-white py-10">
@@ -19,8 +20,8 @@ export function LandingFooter() {
           <a href="#jak-to-dziala" className="transition-colors hover:text-stone-900">Jak to działa</a>
           <a href="#pricing" className="transition-colors hover:text-stone-900">Cennik</a>
           <a href="#kontakt" className="transition-colors hover:text-stone-900">Kontakt</a>
-          <a href="/pl/legal/regulamin" className="transition-colors hover:text-stone-900">Regulamin</a>
-          <a href="/pl/legal/prywatnosc" className="transition-colors hover:text-stone-900">Prywatność</a>
+          <Link href="/pl/legal/regulamin" className="transition-colors hover:text-stone-900">Regulamin</Link>
+          <Link href="/pl/legal/prywatnosc" className="transition-colors hover:text-stone-900">Prywatność</Link>
         </nav>
       </div>
     </footer>

@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import type { Prisma } from "@prisma/client";
 import { assertModuleEdit } from "@/lib/permissions/guard";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth/utils";
@@ -16,7 +17,7 @@ export async function listAgendaTemplates(categoryId?: string) {
   const organizationId = await getUserOrgId();
   if (!organizationId) return [];
 
-  const where: any = { organizationId };
+  const where: Prisma.AgendaTemplateWhereInput = { organizationId };
   if (categoryId) {
     where.categoryId = categoryId;
   }
@@ -27,7 +28,7 @@ export async function listAgendaTemplates(categoryId?: string) {
   });
 
   return templates.map((t) => {
-    let sections: any[] = [];
+    let sections: unknown[] = [];
     try {
       sections = JSON.parse(t.sectionsJson);
     } catch {}
@@ -110,7 +111,7 @@ export async function updateAgendaTemplate(
   });
   if (!template) throw new Error("Not found");
 
-  const updateData: any = {};
+  const updateData: Prisma.AgendaTemplateUncheckedUpdateInput = {};
   if (input.name !== undefined) updateData.name = input.name.trim();
   if (input.description !== undefined) updateData.description = input.description?.trim() || null;
   if (input.categoryId !== undefined) updateData.categoryId = input.categoryId;
@@ -158,7 +159,7 @@ export async function generateAgendaWithLLM(
   });
   if (!template) throw new Error("Not found");
 
-  let sections: any[] = [];
+  let sections: unknown[] = [];
   try {
     sections = JSON.parse(template.sectionsJson);
   } catch {
@@ -167,8 +168,10 @@ export async function generateAgendaWithLLM(
 
   // TODO: Integrate with LLM API (OpenAI/Claude/etc)
   // For now, return placeholder data
-  const generatedSections = sections.map((section: any) => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- sekcje szablonu to luźny JSON z kreatora; kontrakt do opisania osobno
+  const generatedSections = (sections as any[]).map((section: any) => ({
     ...section,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- sekcje szablonu to luźny JSON z kreatora; kontrakt do opisania osobno
     fields: section.fields.map((field: any) => ({
       ...field,
       value: `[LLM Generated: ${field.label} for ${eventData.name}]`,

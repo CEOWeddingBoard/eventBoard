@@ -11,6 +11,7 @@ jest.mock('@/lib/prisma', () => ({
     event: {
       create: jest.fn(),
       findUnique: jest.fn(),
+      findFirst: jest.fn(),
       findMany: jest.fn(),
     },
     guest: {
@@ -25,6 +26,14 @@ jest.mock('@/lib/prisma', () => ({
     $transaction: jest.fn(),
   },
 }));
+
+// Plan stołów sprawdza dostęp do wydarzenia — to osobna odpowiedzialność.
+jest.mock('@/lib/auth/event-access', () => ({
+  canAccessEvent: jest.fn(async () => true),
+}));
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { canAccessEvent } = require('@/lib/auth/event-access');
 
 jest.mock('@/lib/auth/utils', () => ({
   getCurrentUser: jest.fn(),
@@ -133,7 +142,7 @@ describe('Wedding Board Integration Tests', () => {
         rules: [],
       };
 
-      mockPrisma.event.findUnique.mockResolvedValue(mockEventWithGuests);
+      mockPrisma.event.findFirst.mockResolvedValue(mockEventWithGuests);
       mockPrisma.guest.updateMany.mockResolvedValue({ count: 3 });
       mockPrisma.$transaction.mockResolvedValue([]);
 
@@ -153,6 +162,8 @@ describe('Wedding Board Integration Tests', () => {
 
     it('should handle authentication errors throughout the flow', async () => {
       mockGetCurrentUser.mockResolvedValue(null);
+      // Brak sesji = brak dostępu do wydarzenia.
+      (canAccessEvent as jest.Mock).mockResolvedValueOnce(false);
 
       await expect(createEvent({ name: 'Test Wedding', date: new Date() })).rejects.toThrow(
         /zalogowany|Musisz być zalogowany/

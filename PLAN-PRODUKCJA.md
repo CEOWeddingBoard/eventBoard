@@ -153,10 +153,30 @@ klienta. Dla nie-adminów 404, nie 403 — tak jak panel admina.
 
 ### Etap 6 — Sprzątanie (P2)
 
-- [ ] **6.1** Usunąć `@serwist/*` i `@clerk/*` albo podpiąć PWA świadomie.
-- [ ] **6.2** Wyrzucić śmieci z repo, zmienić `name` w `package.json`.
+- [x] **6.1** Usunąć `@serwist/*` i `@clerk/*` albo podpiąć PWA świadomie.
+- [x] **6.2** Wyrzucić śmieci z repo, zmienić `name` w `package.json`.
 - [ ] **6.3** Przejrzeć `docs/` i zostawić to, co dotyczy EventBoarda.
-- [ ] **6.4** Lint do zera, czerwone suity naprawić albo usunąć.
+- [x] **6.4** Lint do zera, czerwone suity naprawić albo usunąć.
+
+**Zrobione w 6.1–6.2 i 6.4:**
+
+- Usunięte zależności bez jednego importu: `@clerk/*`, `@serwist/*` (PWA działa
+  przez ręczny `public/sw.js`), `stripe`, `svix`, `web-push`, `xlsx`.
+  `npm audit fix`: **27 podatności → 2**. Zostały dwie w `postcss` bundlowanym
+  w Next 15 — do naprawy wyłącznie przez major upgrade do Next 16, osobna decyzja.
+- **Lint: 52 → 0.** Przy okazji wyszło, że `eslint-config-next` zgłasza ten sam
+  błąd kilkanaście razy — „90 błędów" z pierwszej analizy to było 52 unikalne.
+  Naprawione realnie: polskie cudzysłowy zamykające, `<a>` → `<Link>`, typy zamiast
+  `any` (m.in. `Prisma.*UncheckedUpdateInput`), martwy `nextCache`, funkcja
+  `useOpenRouterForImages` myląco nazwana jak hook. Trzy reguły React Compilera
+  na poprawnych wzorcach (strażnik hydracji, `forwardRef` + `cloneElement`, data
+  bieżąca w odznace) dostały wyciszenie **z powodem w komentarzu**, nie przebudowę.
+- **Testy: 45/45 zielonych, 315 przechodzących.** Osiem suit po starym produkcie
+  padało na nieaktualnych asercjach i brakach w mockach, nie na błędach w kodzie:
+  akcje czytają event przez `findFirst`, dostęp sprawdza `canAccessEvent`, a pusty
+  lista gości to dziś jawna odmowa. Porównania całego rekordu zamienione na
+  `expect.objectContaining` — pełne porównanie wywracało test przy każdym nowym polu.
+- **Lint i typy są teraz bramką** w `next.config.mjs` i w CI.
 
 ---
 

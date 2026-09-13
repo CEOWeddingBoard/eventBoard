@@ -6,16 +6,21 @@ const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
 const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
 const TWILIO_FROM_NUMBER = process.env.TWILIO_FROM_NUMBER;
 
-let twilioClient: any = null;
+type TwilioClient = {
+  messages: { create: (opts: { body: string; from: string; to: string }) => Promise<{ sid: string }> };
+};
+
+let twilioClient: TwilioClient | null = null;
 
 function getTwilioClient() {
   if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN) {
     return null;
   }
   if (!twilioClient) {
-    // Lazy import to keep edge/runtime lighter
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const twilio = require("twilio");
+    // Ładowane leniwie: twilio ciągnie `crypto` i `stream`, więc statyczny
+    // import wciągnąłby je do każdego bundla, który dotyka tego modułu.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports -- lazy load, patrz wyżej
+    const twilio = require("twilio") as (sid: string, token: string) => TwilioClient;
     twilioClient = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
   }
   return twilioClient;

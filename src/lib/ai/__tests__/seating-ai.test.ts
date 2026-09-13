@@ -79,13 +79,10 @@ describe('generateSeatingPlanWithAI', () => {
 
     const result = await generateSeatingPlanWithAI(emptyInput);
 
-    expect(result.success).toBe(true);
-    expect(result.plan).toBeDefined();
-
-    // All tables should be empty
-    mockTables.forEach(table => {
-      expect(result.plan[table.id]).toEqual([]);
-    });
+    // Bez gości nie ma czego usadzać — zwracamy czytelną odmowę zamiast
+    // udawać udany, pusty plan.
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("Brak gości");
   });
 
   it('should handle rules correctly', async () => {

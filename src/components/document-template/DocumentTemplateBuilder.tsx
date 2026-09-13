@@ -33,6 +33,7 @@ type Slot = {
   fieldKey?: string;
   placeholder?: string;
   llmPrompt?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- struktura kreatora dokumentow nie ma jeszcze opisanego kontraktu; zaostrzenie wymaga osobnej przebudowy
   style?: any;
 };
 
@@ -55,6 +56,7 @@ const DATA_FIELDS: DataField[] = [
 type Block = {
   id: string;
   type: BlockType;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- struktura kreatora dokumentow nie ma jeszcze opisanego kontraktu; zaostrzenie wymaga osobnej przebudowy
   props: any;
   slots: Slot[];
 };
@@ -157,6 +159,7 @@ export default function DocumentTemplateBuilder({
   locale = "pl",
 }: {
   templateId?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- struktura kreatora dokumentow nie ma jeszcze opisanego kontraktu; zaostrzenie wymaga osobnej przebudowy
   initialData?: any;
   locale?: string;
 }) {

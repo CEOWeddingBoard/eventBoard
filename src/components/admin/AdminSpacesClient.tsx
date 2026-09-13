@@ -84,6 +84,9 @@ function BillingBadge({ paidUntil }: { paidUntil: string | null }) {
   let text = "Płatność: brak";
   if (paidUntil) {
     const d = new Date(paidUntil);
+    // Odznaka „opłacone do / zaległość od" z natury porównuje się do teraz.
+    // Stan zamrożony w useState starzałby się przy długo otwartej karcie.
+    // eslint-disable-next-line react-hooks/purity -- data bieżąca jest tu treścią, nie efektem ubocznym
     const overdue = d.getTime() < Date.now();
     cls = overdue ? "bg-rose-100 text-rose-700" : "bg-emerald-100 text-emerald-700";
     text = `${overdue ? "Zaległość od" : "Opłacone do"} ${d.toLocaleDateString("pl-PL")}`;
@@ -357,7 +360,7 @@ export function AdminSpacesClient({
             </h2>
             <p className="mt-1 text-sm text-neutral-500">
               Buduj tu ogólne procesy-wzorce u siebie, a potem przypisuj je do przestrzeni klienta
-              (przycisk „Przypisz proces" przy każdej przestrzeni).
+              (przycisk „Przypisz proces” przy każdej przestrzeni).
             </p>
           </div>
           <Button onClick={handleOpenLibrary} disabled={openingLib} className="bg-[#0f172a] text-white hover:bg-[#1e293b]">
@@ -368,7 +371,7 @@ export function AdminSpacesClient({
         <div className="mt-4">
           {templates.length === 0 ? (
             <p className="rounded-lg border border-dashed border-neutral-200 bg-neutral-50 px-4 py-6 text-center text-sm text-neutral-400">
-              Brak wzorców. Kliknij „Otwórz bibliotekę", zbuduj proces w kreatorze, a pojawi się tutaj.
+              Brak wzorców. Kliknij „Otwórz bibliotekę”, zbuduj proces w kreatorze, a pojawi się tutaj.
             </p>
           ) : (
             <ul className="grid gap-2 sm:grid-cols-2">
@@ -661,7 +664,7 @@ export function AdminSpacesClient({
                     <p className="text-xs font-semibold text-neutral-700">Przypisz proces-wzorzec z biblioteki</p>
                     {templates.length === 0 ? (
                       <p className="mt-2 text-[11px] text-neutral-500">
-                        Biblioteka jest pusta — najpierw zbuduj proces w „Otwórz bibliotekę".
+                        Biblioteka jest pusta — najpierw zbuduj proces w „Otwórz bibliotekę”.
                       </p>
                     ) : (
                       <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -677,7 +680,7 @@ export function AdminSpacesClient({
                         </select>
                         <Button size="sm" onClick={() => handleAssign(s.id)} disabled={!assignPick[s.id] || assigning === s.id}>
                           {assigning === s.id ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : <ArrowRightLeft className="mr-1 h-3.5 w-3.5" />}
-                          Przypisz do „{s.name}"
+                          Przypisz do „{s.name}”
                         </Button>
                       </div>
                     )}
@@ -698,7 +701,7 @@ export function AdminSpacesClient({
       </section>
 
       <p className="text-center text-[11px] text-neutral-400">
-        „Wejdź w przestrzeń" (przełączanie organizacji jako serviceUser) dodajemy w kolejnym kroku.
+        „Wejdź w przestrzeń” (przełączanie organizacji jako serviceUser) dodajemy w kolejnym kroku.
       </p>
     </div>
   );

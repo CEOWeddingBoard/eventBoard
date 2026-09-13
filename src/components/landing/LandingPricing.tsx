@@ -229,7 +229,7 @@ export function LandingPricing({
 
         <p className="mx-auto mt-10 max-w-2xl text-center text-sm text-stone-600">
           Salą jest osobno rezerwowalna przestrzeń z własnym kalendarzem — taka, w której
-          może odbywać się przyjęcie niezależne od pozostałych. „Osoby w zespole" to konta
+          może odbywać się przyjęcie niezależne od pozostałych. „Osoby w zespole” to konta
           pracowników z dostępem do systemu (właściciel, manager, kuchnia, obsługa).
           Rozliczenie roczne z rabatem dwóch miesięcy.
         </p>

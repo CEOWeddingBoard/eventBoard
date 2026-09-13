@@ -3,6 +3,7 @@
 import { getCurrentUser } from "@/lib/auth/utils";
 import { getActiveOrgId, requireOrgId } from "@/lib/auth/active-org";
 import { prisma } from "@/lib/prisma"
+import type { Prisma } from "@prisma/client"
 import { assertModuleEdit } from "@/lib/permissions/guard";
 import { revalidatePath } from "next/cache"
 import { validate } from "@/lib/validations/validation-utils"
@@ -23,9 +24,6 @@ function accessibleEventsWhere(userId: string) {
   };
 }
 
-// Disable unstable_cache in development to avoid conflicts with headers()
-const isDev = process.env.NODE_ENV === 'development'
-const nextCache = isDev ? <T extends (...args: any[]) => any>(fn: T) => fn : require("next/cache").unstable_cache
 
 /**
  * Pobiera wszystkie wydarzenia dla zalogowanego użytkownika.
@@ -697,7 +695,7 @@ export async function updateEvent(eventId: string, data: {
   await assertModuleEdit("events");
   const validated = validate(createEventSimpleSchema.partial(), data, { action: "update_event" });
 
-  const updateData: any = {};
+  const updateData: Prisma.EventUncheckedUpdateInput = {};
 
   const normalizeSlug = (value: string | undefined | null): string | null => {
     if (!value) return null;

@@ -7,7 +7,7 @@ import {
 
 describe("welcome-email", () => {
   it("builds PL subject and CTA to welcome page", () => {
-    expect(getWelcomeEmailSubject("pl")).toContain("Planerze Weselnym");
+    expect(getWelcomeEmailSubject("pl")).toContain("Wedding Board");
     expect(getWelcomeCtaUrl("https://app.example.com", "pl")).toBe(
       "https://app.example.com/pl/welcome"
     );

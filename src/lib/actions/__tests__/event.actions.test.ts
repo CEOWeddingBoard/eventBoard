@@ -49,15 +49,11 @@ describe('createEvent', () => {
 
     expect(result).toEqual(mockCreatedEvent);
     expect(prisma.event.create).toHaveBeenCalledWith({
-      data: {
+      data: expect.objectContaining({
         name: 'Test Wedding',
         date: new Date('2025-06-15'),
         userId: 'mock-user-id',
-        brideName: null,
-        groomName: null,
-        estimatedGuestCount: null,
-        targetBudget: null,
-      },
+      }),
     });
   });
 

@@ -19,6 +19,7 @@ jest.mock('@/lib/prisma', () => ({
     },
     event: {
       findUnique: jest.fn(),
+      findFirst: jest.fn(),
     },
     guest: {
       update: jest.fn(),
@@ -40,6 +41,14 @@ jest.mock('next/cache', () => ({
 jest.mock('@/lib/auth/utils', () => ({
   getCurrentUser: jest.fn(),
 }));
+
+// Dostęp do wydarzenia sprawdzają testy uprawnień — tutaj chodzi o sam plan.
+jest.mock('@/lib/auth/event-access', () => ({
+  canAccessEvent: jest.fn(async () => true),
+}));
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { canAccessEvent } = require('@/lib/auth/event-access');
 
 describe("Seating Server Actions", () => {
   afterEach(() => {
@@ -165,7 +174,7 @@ describe("Seating Server Actions", () => {
 
     it("should generate AI seating plan successfully", async () => {
       mockGetCurrentUser.mockResolvedValue(mockUser);
-      (prisma.event.findUnique as jest.Mock).mockResolvedValue(mockEvent);
+      (prisma.event.findFirst as jest.Mock).mockResolvedValue(mockEvent);
       (prisma.guest.updateMany as jest.Mock).mockResolvedValue({ count: 2 });
 
       // Import the function to test
@@ -181,6 +190,7 @@ describe("Seating Server Actions", () => {
 
     it("should fail if user is not authenticated", async () => {
       mockGetCurrentUser.mockResolvedValue(null);
+      (canAccessEvent as jest.Mock).mockResolvedValueOnce(false);
 
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { generateSeatingPlanAI } = require('../seating.actions');
@@ -192,7 +202,7 @@ describe("Seating Server Actions", () => {
 
     it("should handle database errors", async () => {
       mockGetCurrentUser.mockResolvedValue(mockUser);
-      (prisma.event.findUnique as jest.Mock).mockRejectedValue(
+      (prisma.event.findFirst as jest.Mock).mockRejectedValue(
         new Error('Database connection failed')
       );
 

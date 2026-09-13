@@ -45,6 +45,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       const child = children as React.ReactElement<
         React.ButtonHTMLAttributes<HTMLButtonElement> & { ref?: React.Ref<HTMLButtonElement> }
       >
+      // Standardowy wzorzec `asChild`: forwardRef przekazuje ref do dziecka.
+      // eslint-disable-next-line react-hooks/refs -- ref pochodzi z forwardRef, nie jest tu odczytywany
       return React.cloneElement(child, {
         ...props,
         className: cn(compClassName, child.props?.className),

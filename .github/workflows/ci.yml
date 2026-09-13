@@ -32,11 +32,9 @@ jobs:
       - name: Typecheck
         run: npx tsc --noEmit
 
-      # Niepodpięte pod bramkę, dopóki trwa sprzątanie po starym produkcie
-      # (~90 zgłoszeń). Wynik jest widoczny w logu, nie wywraca CI.
+      # Krok blokujący — lint jest wyczyszczony do zera i ma tak zostać.
       - name: Lint
         run: npm run lint
-        continue-on-error: true
 
       - name: Unit tests (with coverage)
         run: npm run test:ci

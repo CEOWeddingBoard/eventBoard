@@ -16,7 +16,16 @@ export async function GET() {
       return NextResponse.json({ error: `Google API error: ${err}` }, { status: 502 });
     }
     const data = await res.json();
-    const calendars = (data.items ?? []).map((c: any) => ({
+    type GoogleCalendar = {
+      id?: string;
+      summary?: string;
+      description?: string;
+      primary?: boolean;
+      backgroundColor?: string;
+      accessRole?: string;
+      timeZone?: string;
+    };
+    const calendars = ((data.items ?? []) as GoogleCalendar[]).map((c) => ({
       id: c.id,
       summary: c.summary ?? c.id,
       primary: c.primary ?? false,

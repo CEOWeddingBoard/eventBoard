@@ -9,10 +9,13 @@ import { GuestRsvpStatus } from "@prisma/client"
 jest.mock('@/lib/prisma', () => ({
   prisma: {
     guest: {
+      findUnique: jest.fn(async () => null),
       create: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
     },
+    venueReservation: { findFirst: jest.fn(async () => null) },
+    venueClientGuest: { delete: jest.fn() },
   },
 }));
 

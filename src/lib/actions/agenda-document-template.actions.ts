@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import type { Prisma } from "@prisma/client";
 import { getActiveMembership } from "@/lib/auth/active-org";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { ensureEventP1Columns } from "@/lib/events/event-schema-migration";
@@ -49,7 +50,9 @@ export async function getAgendaDocumentTemplate(id: string) {
 export async function createAgendaDocumentTemplate(data: {
   name: string;
   description?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- struktura kreatora dokumentow nie ma jeszcze opisanego kontraktu; zaostrzenie wymaga osobnej przebudowy
   pages: any[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- struktura kreatora dokumentow nie ma jeszcze opisanego kontraktu; zaostrzenie wymaga osobnej przebudowy
   settings?: any;
 }) {
   await ensureEventP1Columns();
@@ -78,8 +81,8 @@ export async function updateAgendaDocumentTemplate(
   data: {
     name?: string;
     description?: string;
-    pages?: any[];
-    settings?: any;
+    pages?: unknown[];
+    settings?: Record<string, unknown>;
   }
 ) {
   await ensureEventP1Columns();
@@ -89,7 +92,7 @@ export async function updateAgendaDocumentTemplate(
   const membership = await getActiveMembership(user.id);
   if (!membership) throw new Error("No organization");
 
-  const updateData: any = {};
+  const updateData: Prisma.AgendaDocumentTemplateUncheckedUpdateInput = {};
   if (data.name !== undefined) updateData.name = data.name;
   if (data.description !== undefined) updateData.description = data.description;
   if (data.pages !== undefined) updateData.pagesJson = JSON.stringify(data.pages);

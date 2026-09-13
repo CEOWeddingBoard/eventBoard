@@ -115,7 +115,7 @@ export function CalendarSubscribeSection({
           <div className="flex items-start gap-2">
             <Monitor className="h-4 w-4 mt-0.5 shrink-0" />
             <div>
-              <strong>Inne aplikacje:</strong> Każda aplikacja kalendarza obsługująca format iCal (standard ICS) może subskrybować ten link. Poszukaj opcji "Dodaj przez URL" lub "Subskrybuj kalendarz".
+              <strong>Inne aplikacje:</strong> Każda aplikacja kalendarza obsługująca format iCal (standard ICS) może subskrybować ten link. Poszukaj opcji „Dodaj przez URL” lub „Subskrybuj kalendarz”.
             </div>
           </div>
         </div>

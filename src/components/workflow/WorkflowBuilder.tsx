@@ -410,7 +410,7 @@ function NodeEditor({
                   }}
                   className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="">— jak „Wykonuje" —</option>
+                  <option value="">— jak „Wykonuje” —</option>
                   {roleOptions.map((r) => (
                     <option key={r.value} value={r.value}>{r.label}</option>
                   ))}
@@ -545,7 +545,7 @@ function NodeEditor({
             <p className="text-xs text-neutral-500">
               Pola, które wypełnia osoba odpowiedzialna za krok (klient w portalu
               albo zespół w panelu). Po zatwierdzeniu wartość trafia do agendy pod
-              wskazane miejsce. Pole typu „Godzina" oznaczone jako pozycja
+              wskazane miejsce. Pole typu „Godzina” oznaczone jako pozycja
               harmonogramu tworzy linię w harmonogramie agendy.
             </p>
             {(node.fields ?? []).map((f, i) => (

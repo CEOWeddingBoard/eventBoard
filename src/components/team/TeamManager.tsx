@@ -184,7 +184,7 @@ export function TeamManager({ initial }: { initial: TeamContext }) {
             </table>
           </div>
           <p className="mt-2 text-[11px] text-neutral-400">
-            Uprawnienia liczą się po rolach: konto z kilkoma rolami dostaje najwyższy poziom z nich. „Pulpit" jest zawsze widoczny.
+            Uprawnienia liczą się po rolach: konto z kilkoma rolami dostaje najwyższy poziom z nich. „Pulpit” jest zawsze widoczny.
           </p>
         </section>
       )}

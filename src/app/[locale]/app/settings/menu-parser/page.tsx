@@ -16,7 +16,7 @@ export default async function MenuParserSettingsPage() {
         </h1>
         <p className="mt-0.5 text-sm text-neutral-500">
           Definiujesz, jak system rozpoznaje wklejone menu — od jakich słów kluczowych powstają
-          sekcje i typy dań. Import robisz potem w evencie („Warianty menu → Wklej menu z tekstu").
+          sekcje i typy dań. Import robisz potem w evencie („Warianty menu → Wklej menu z tekstu”).
         </p>
       </div>
 

@@ -132,7 +132,7 @@ export function MenuParserRulesEditor({ initial }: { initial: ParserRules }) {
         <h2 className="text-sm font-semibold text-neutral-800">Sprawdź reguły na przykładzie</h2>
         <p className="mt-1 text-xs text-neutral-500">
           Wklej fragment menu — od razu zobaczysz, jak zostanie rozpoznane. To tylko podgląd,
-          nic nie zapisuje. Prawdziwy import robisz w evencie („Warianty menu → Wklej menu z tekstu").
+          nic nie zapisuje. Prawdziwy import robisz w evencie („Warianty menu → Wklej menu z tekstu”).
         </p>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <div>

@@ -223,16 +223,38 @@ jest.mock('@/lib/prisma', () => ({
     },
     guest: {
       findMany: jest.fn(),
+      findUnique: jest.fn(),
+      findFirst: jest.fn(),
       create: jest.fn(),
       createMany: jest.fn(),
+      update: jest.fn(),
+      updateMany: jest.fn(),
+      delete: jest.fn(),
+      deleteMany: jest.fn(),
+      count: jest.fn(async () => 0),
+    },
+    venueReservation: {
+      findFirst: jest.fn(),
+      findUnique: jest.fn(),
+      update: jest.fn(),
+    },
+    venueClientGuest: {
+      delete: jest.fn(),
+      findMany: jest.fn(async () => []),
     },
     vendor: {
       findMany: jest.fn(),
       create: jest.fn(),
     },
     table: {
-      findMany: jest.fn(),
+      findMany: jest.fn(async () => []),
+      findUnique: jest.fn(),
       create: jest.fn(),
+      update: jest.fn(),
+      updateMany: jest.fn(),
+    },
+    seatingRule: {
+      findMany: jest.fn(async () => []),
     },
     household: {
       findFirst: jest.fn(),

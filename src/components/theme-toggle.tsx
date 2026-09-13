@@ -9,6 +9,9 @@ export function ThemeToggle() {
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
+  // Strażnik hydracji: przed zamontowaniem nie znamy motywu z systemu, więc
+  // pierwszy render musi być neutralny. To jedyny sposób bez migotania.
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- strażnik hydracji, patrz wyżej
   useEffect(() => { setMounted(true) }, [])
 
   if (!mounted) {

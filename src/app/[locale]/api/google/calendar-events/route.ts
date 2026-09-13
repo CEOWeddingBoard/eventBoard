@@ -27,7 +27,17 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: `Google API error: ${err}` }, { status: 502 });
     }
     const data = await res.json();
-    const events = (data.items ?? []).map((e: any) => ({
+    type GoogleEvent = {
+      id?: string;
+      summary?: string;
+      description?: string;
+      location?: string;
+      htmlLink?: string;
+      extendedProperties?: { private?: Record<string, string>; shared?: Record<string, string> };
+      start?: { dateTime?: string; date?: string };
+      end?: { dateTime?: string; date?: string };
+    };
+    const events = ((data.items ?? []) as GoogleEvent[]).map((e) => ({
       googleEventId: e.id,
       summary: e.summary ?? "",
       description: e.description ?? "",

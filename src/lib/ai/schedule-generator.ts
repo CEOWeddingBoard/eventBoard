@@ -12,7 +12,17 @@ interface GeneratedScheduleItem {
   endTime: string;
 }
 
-function buildScheduleContext(event: any, menuVariants: any[]): string {
+type ScheduleEvent = {
+  name: string;
+  date: Date | string;
+  eventType: string;
+  estimatedGuestCount?: number | null;
+  occasionLabel?: string | null;
+  style?: string | null;
+};
+type ScheduleMenuVariant = { label?: string | null };
+
+function buildScheduleContext(event: ScheduleEvent, menuVariants: ScheduleMenuVariant[]): string {
   const eventTypeLabels: Record<string, string> = {
     WEDDING: "ślub i wesele",
     COMMUNION: "komunia",
@@ -29,8 +39,11 @@ Styl: ${event.style ?? "nieokreślony"}.
 `;
 
   if (menuVariants.length > 0) {
-    ctx += `\nWarianty menu: ${menuVariants.map((v: any) => v.label).join(", ")}.`;
-    const totalCourses = menuVariants.reduce((sum: number, v: any) => sum + v.courses.length, 0);
+    ctx += `\nWarianty menu: ${menuVariants.map((v) => v.label).join(", ")}.`;
+    const totalCourses = menuVariants.reduce(
+      (sum: number, v) => sum + ((v as { courses?: unknown[] }).courses?.length ?? 0),
+      0,
+    );
     ctx += ` Łącznie ${totalCourses} dań.`;
   }
 

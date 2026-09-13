@@ -14,16 +14,21 @@ export default async function EditDocumentTemplatePage({
   const user = await getCurrentUser();
   if (!user) redirect(`/${locale}/auth`);
 
+  // Tylko pobranie w try — JSX w bloku try i tak nie złapałby błędów renderowania,
+  // bo React renderuje komponent później (od tego są error boundaries).
+  let template: Awaited<ReturnType<typeof getAgendaDocumentTemplate>> | null = null;
   try {
-    const template = await getAgendaDocumentTemplate(id);
-    return (
-      <DocumentTemplateBuilder
-        templateId={template.id}
-        initialData={template}
-        locale={locale}
-      />
-    );
+    template = await getAgendaDocumentTemplate(id);
   } catch {
-    notFound();
+    template = null;
   }
+  if (!template) notFound();
+
+  return (
+    <DocumentTemplateBuilder
+      templateId={template.id}
+      initialData={template}
+      locale={locale}
+    />
+  );
 }

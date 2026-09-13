@@ -29,6 +29,12 @@ jest.mock("@/lib/auth/utils", () => ({
   getCurrentUser: jest.fn(),
 }));
 
+// Akcja sprawdza dostęp do wydarzenia — to osobna odpowiedzialność, testowana
+// w testach uprawnień; tutaj interesuje nas samo wywołanie generatora.
+jest.mock("@/lib/auth/event-access", () => ({
+  canAccessEvent: jest.fn(async () => true),
+}));
+
 jest.mock("@/lib/api/auth-helper", () => ({
   verifyEventAccess: jest.fn(),
 }));
@@ -95,7 +101,7 @@ describe("Task Server Actions", () => {
       guestScale: "medium",
     };
 
-    const result = await generateTasksAI(eventId, questionnaire as any);
+    const result = await generateTasksAI(eventId, questionnaire as Parameters<typeof generateTasksAI>[1]);
 
     expect(runGenerateTasks).toHaveBeenCalledWith(eventId, questionnaire);
     expect(result).toEqual({ success: true, count: 5 });

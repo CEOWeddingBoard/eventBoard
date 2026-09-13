@@ -1,3 +1,4 @@
+import Link from "next/link";
 export default function NotFound() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
@@ -13,9 +14,9 @@ export default function NotFound() {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          <a href="/" style={{ padding: '0.75rem', backgroundColor: '#000', color: '#fff', borderRadius: '0.5rem', textDecoration: 'none', display: 'inline-block', textAlign: 'center' }}>
+          <Link href="/" style={{ padding: '0.75rem', backgroundColor: '#000', color: '#fff', borderRadius: '0.5rem', textDecoration: 'none', display: 'inline-block', textAlign: 'center' }}>
             Go Home
-          </a>
+          </Link>
         </div>
       </div>
     </div>
