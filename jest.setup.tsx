@@ -1,5 +1,22 @@
 import '@testing-library/jest-dom';
 import React from 'react';
+import { TextEncoder, TextDecoder } from 'util';
+import { webcrypto } from 'crypto';
+
+// jsdom nie ma TextEncoder ani WebCrypto, a podpisywanie tokenów (jose) ich wymaga.
+if (typeof global.TextEncoder === 'undefined') {
+  (global as any).TextEncoder = TextEncoder;
+}
+if (typeof global.TextDecoder === 'undefined') {
+  (global as any).TextDecoder = TextDecoder;
+}
+if (typeof global.crypto === 'undefined' || !(global.crypto as any).subtle) {
+  Object.defineProperty(global, 'crypto', { value: webcrypto, configurable: true });
+}
+if (typeof (global as any).structuredClone === 'undefined') {
+  (global as any).structuredClone = (value: unknown) =>
+    value === undefined ? undefined : JSON.parse(JSON.stringify(value));
+}
 
 // Polyfill for Request/Response (needed for Next.js API routes tests)
 if (typeof global.Request === 'undefined') {

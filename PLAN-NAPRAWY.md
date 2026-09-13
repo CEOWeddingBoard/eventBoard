@@ -160,14 +160,17 @@ zablokowany w sobotę wieczorem czeka do poniedziałku — i to zapamięta o pro
 
 **Szacunek:** 0,5 dnia
 
-- [ ] **4.1 Token resetu z krótkim czasem życia**
+- [x] **4.1 Token resetu z krótkim czasem życia**
 
   Jednorazowy, podpisany, ważny 1 godzinę. Wzorzec podpisywania: `src/lib/auth/session-token.ts`.
   Akcje w `src/lib/actions/auth.actions.ts`: `requestPasswordReset`, `resetPasswordWithToken`.
 
-  **Gotowe, gdy:** token wygasa po godzinie i nie da się użyć go dwa razy.
+  **Zrobione:** `src/lib/auth/password-reset-token.ts`. Jednorazowość bez nowej
+  kolumny: klucz podpisu zawiera bieżący skrót hasła, więc udana zmiana hasła
+  unieważnia ten token i wszystkie wcześniejsze. 6 testów w
+  `src/lib/auth/__tests__/password-reset-token.test.ts`.
 
-- [ ] **4.2 Ekrany resetu**
+- [x] **4.2 Ekrany resetu**
 
   ```
   src/app/[locale]/(auth)/auth/reset/page.tsx          — prośba o link
@@ -177,11 +180,14 @@ zablokowany w sobotę wieczorem czeka do poniedziałku — i to zapamięta o pro
 
   **Gotowe, gdy:** klient odzyskuje dostęp bez kontaktu z Tobą.
 
-- [ ] **4.3 Ogranicz liczbę prób (logowanie + reset)**
+- [x] **4.3 Ogranicz liczbę prób (logowanie + reset)**
 
   Dziś nie ma żadnego limitu — to zaproszenie do zgadywania haseł.
 
-  **Gotowe, gdy:** po kilku nieudanych próbach z tego samego adresu kolejne są odrzucane.
+  **Zrobione:** logowanie 10 prób / 15 min, osobno na IP i na e-mail (sam licznik
+  na IP nie zatrzymuje ataku z wielu adresów na jedno konto). Prośba o reset:
+  5 / 15 min, ustawienie hasła z tokenu: 10 / 15 min. 7 testów w
+  `src/lib/api/__tests__/rate-limit.test.ts`.
 
 ---
 

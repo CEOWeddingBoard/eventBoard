@@ -12,7 +12,7 @@ interface CustomSignInProps {
   afterSignInUrl: string;
 }
 
-export function CustomSignIn({ locale: _locale, signUpUrl, afterSignInUrl }: CustomSignInProps) {
+export function CustomSignIn({ locale, signUpUrl, afterSignInUrl }: CustomSignInProps) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -67,6 +67,12 @@ export function CustomSignIn({ locale: _locale, signUpUrl, afterSignInUrl }: Cus
           {loading ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : "Zaloguj się"}
         </button>
       </form>
+
+      <p className="text-center text-sm">
+        <Link href={`/${locale}/auth/reset`} className="text-neutral-500 hover:text-neutral-900 hover:underline">
+          Nie pamiętam hasła
+        </Link>
+      </p>
 
       <p className="text-center text-sm text-neutral-500">
         Nie masz konta?{" "}<Link href={signUpUrl} className="font-semibold text-neutral-900 hover:underline">Zarejestruj się</Link>

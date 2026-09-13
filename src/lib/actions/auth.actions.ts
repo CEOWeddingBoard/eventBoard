@@ -12,6 +12,18 @@ import {
   getSessionPayloadFromCookies,
 } from "@/lib/auth/session";
 import { getCurrentUser } from "@/lib/auth/utils";
+import { headers } from "next/headers";
+import { checkRateLimit } from "@/lib/api/rate-limit";
+import {
+  createPasswordResetToken,
+  readSubjectFromResetToken,
+  verifyPasswordResetToken,
+  PASSWORD_RESET_TTL_SEC,
+} from "@/lib/auth/password-reset-token";
+import {
+  getPasswordResetEmailHtml,
+  getPasswordResetEmailText,
+} from "@/lib/email/password-reset-email";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -231,6 +243,15 @@ export async function loginAccount(input: {
 
   if (!EMAIL_RE.test(email) || !password) {
     return { ok: false, error: "Podaj e-mail i hasło." };
+  }
+
+  // Bez limitu formularz logowania jest zaproszeniem do zgadywania haseł.
+  // Licznik na IP zatrzymuje jeden adres, licznik na e-mail — atak z wielu adresów.
+  const ip = await clientIpForRateLimit();
+  for (const key of [`login:ip:${ip}`, `login:email:${email}`]) {
+    if (!checkRateLimit({ key, limit: 10, windowMs: 15 * 60_000 }).ok) {
+      return { ok: false, error: "Za dużo nieudanych prób. Spróbuj ponownie za kilkanaście minut." };
+    }
   }
 
   try {
@@ -495,6 +516,126 @@ export async function changeOwnPassword(input: {
     return { ok: true };
   } catch (error) {
     console.error("[auth:changeOwnPassword]", error);
+    return { ok: false, error: "Nie udało się zmienić hasła." };
+  }
+}
+
+// ── Samodzielny reset hasła ─────────────────────────────────────────────
+
+/** IP klienta dla limitów prób — server action nie dostaje Request. */
+async function clientIpForRateLimit(): Promise<string> {
+  try {
+    const h = await headers();
+    const xff = h.get("x-forwarded-for");
+    const first = xff?.split(",")[0]?.trim();
+    if (first) return first;
+    return h.get("x-real-ip") ?? "unknown";
+  } catch {
+    return "unknown";
+  }
+}
+
+/**
+ * Wysyła link do zmiany hasła.
+ *
+ * Odpowiedź jest zawsze taka sama — inaczej formularz stałby się wyszukiwarką
+ * kont istniejących w systemie.
+ */
+export async function requestPasswordReset(input: {
+  email: string;
+  locale?: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const email = normalizeEmail(input.email ?? "");
+  const locale = input.locale === "en" ? "en" : "pl";
+  const generic = { ok: true as const };
+
+  if (!EMAIL_RE.test(email)) return { ok: false, error: "Podaj poprawny adres e-mail." };
+
+  const ip = await clientIpForRateLimit();
+  for (const key of [`pwreset:ip:${ip}`, `pwreset:email:${email}`]) {
+    if (!checkRateLimit({ key, limit: 5, windowMs: 15 * 60_000 }).ok) {
+      return { ok: false, error: "Za dużo prób. Spróbuj ponownie za kilkanaście minut." };
+    }
+  }
+
+  try {
+    await ensureUserAuthColumns();
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user || !user.isActive) return generic;
+
+    const token = await createPasswordResetToken(user);
+    const base = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/$/, "");
+    const resetUrl = `${base}/${locale}/auth/reset/${token}`;
+    const expiresInMinutes = Math.round(PASSWORD_RESET_TTL_SEC / 60);
+
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      console.warn("[auth:requestPasswordReset] Brak RESEND_API_KEY — link:", resetUrl);
+      return generic;
+    }
+
+    const { Resend } = await import("resend");
+    const resend = new Resend(apiKey);
+    await resend.emails.send({
+      from: process.env.RESEND_FROM || "EventBoard <onboarding@resend.dev>",
+      to: user.email,
+      subject: "Ustaw nowe hasło — EventBoard",
+      html: getPasswordResetEmailHtml({ resetUrl, expiresInMinutes }),
+      text: getPasswordResetEmailText({ resetUrl, expiresInMinutes }),
+    });
+    return generic;
+  } catch (error) {
+    console.error("[auth:requestPasswordReset]", error);
+    // Też nie zdradzamy, czy konto istnieje.
+    return generic;
+  }
+}
+
+/** Czy token nadal można wykorzystać (do wyświetlenia formularza). */
+export async function isPasswordResetTokenValid(token: string): Promise<boolean> {
+  const sub = readSubjectFromResetToken(token);
+  if (!sub) return false;
+  try {
+    const user = await prisma.user.findUnique({ where: { id: sub } });
+    if (!user || !user.isActive) return false;
+    return !!(await verifyPasswordResetToken(token, user.password));
+  } catch {
+    return false;
+  }
+}
+
+export async function resetPasswordWithToken(input: {
+  token: string;
+  newPassword: string;
+}): Promise<AuthActionResult> {
+  if (!isPasswordValid(input.newPassword ?? "")) {
+    return { ok: false, error: "Hasło musi mieć co najmniej 8 znaków." };
+  }
+
+  const ip = await clientIpForRateLimit();
+  if (!checkRateLimit({ key: `pwreset-confirm:ip:${ip}`, limit: 10, windowMs: 15 * 60_000 }).ok) {
+    return { ok: false, error: "Za dużo prób. Spróbuj ponownie za kilkanaście minut." };
+  }
+
+  const sub = readSubjectFromResetToken(input.token ?? "");
+  if (!sub) return { ok: false, error: "Link jest nieprawidłowy lub wygasł." };
+
+  try {
+    await ensureUserAuthColumns();
+    const user = await prisma.user.findUnique({ where: { id: sub } });
+    if (!user || !user.isActive) return { ok: false, error: "Link jest nieprawidłowy lub wygasł." };
+
+    const payload = await verifyPasswordResetToken(input.token, user.password);
+    if (!payload) return { ok: false, error: "Link jest nieprawidłowy lub wygasł." };
+
+    // Zmiana skrótu hasła unieważnia ten i każdy inny wydany wcześniej token.
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { password: await hashPassword(input.newPassword) },
+    });
+    return { ok: true, user: publicUser(user) };
+  } catch (error) {
+    console.error("[auth:resetPasswordWithToken]", error);
     return { ok: false, error: "Nie udało się zmienić hasła." };
   }
 }
