@@ -41,6 +41,8 @@ import {
   ClipboardList,
   UtensilsCrossed,
   ArrowRight,
+  Table2,
+  ClipboardPaste,
 } from "lucide-react";
 
 const NODE_TYPES: { value: WorkflowNodeData["nodeType"]; label: string }[] = [
@@ -64,6 +66,8 @@ const ACTION_TYPES: {
   { value: "DOCUMENT", label: "Dokument", icon: FileText, color: "text-violet-500" },
   { value: "AGENDA", label: "Agenda", icon: Calendar, color: "text-indigo-500" },
   { value: "SEND_MESSAGE", label: "Wiadomość", icon: MessageSquare, color: "text-sky-500" },
+  { value: "TABLE", label: "Tabela / arkusz", icon: Table2, color: "text-teal-600" },
+  { value: "MENU_IMPORT", label: "Wklej menu", icon: ClipboardPaste, color: "text-amber-600" },
 ];
 
 const ASSIGNEE_ROLES = ASSIGNEE_ROLE_OPTIONS;
@@ -291,7 +295,10 @@ function NodeEditor({
             }`}
           >
             {t === "basic" && "Podstawowe"}
-            {t === "fields" && `Pola (${(node.fields ?? []).length})`}
+            {t === "fields" &&
+              (node.actionType === "TABLE"
+                ? `Kolumny (${(node.fields ?? []).length})`
+                : `Pola (${(node.fields ?? []).length})`)}
             {t === "mappings" && `Mapowanie pól (${node.fieldMappings.length})`}
             {t === "conditions" && `Warunki (${node.conditions.length})`}
           </button>

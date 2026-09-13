@@ -360,3 +360,68 @@ describe("kto może zamknąć krok", () => {
     await expect(completeProcessNode(EVENT, "n1", {}, "ORGANIZER")).rejects.toThrow(/Forbidden/);
   });
 });
+
+describe("krok tabelaryczny", () => {
+  const KOLUMNY = JSON.stringify([
+    { key: "imie", label: "Imię", type: "text", targetAgendaKey: "" },
+    { key: "winietka", label: "Winietka", type: "text", targetAgendaKey: "agenda.dekoracje" },
+    { key: "alergie", label: "Alergie", type: "text", targetAgendaKey: "agenda.uczulenia" },
+  ]);
+
+  it("wiersze tabeli trafiają do agendy kolumna po kolumnie", async () => {
+    ustawProces([node({ id: "n1", name: "Lista gości", actionType: "TABLE", fieldsJson: KOLUMNY })]);
+
+    await completeProcessNode(
+      EVENT,
+      "n1",
+      {
+        __rows: [
+          { imie: "Anna", winietka: "Anna Kowalska", alergie: "orzechy" },
+          { imie: "Jan", winietka: "Jan Kowalski", alergie: "" },
+        ],
+      },
+      "CLIENT",
+      TOKEN,
+    );
+
+    expect(agenda()["agenda.dekoracje"]).toBe("Anna Kowalska\nJan Kowalski");
+    expect(agenda()["agenda.uczulenia"]).toBe("orzechy");
+  });
+
+  it("puste wiersze nie zaśmiecają agendy", async () => {
+    ustawProces([node({ id: "n1", name: "Lista gości", actionType: "TABLE", fieldsJson: KOLUMNY })]);
+
+    await completeProcessNode(
+      EVENT,
+      "n1",
+      { __rows: [{ imie: "", winietka: "", alergie: "" }] },
+      "CLIENT",
+      TOKEN,
+    );
+
+    expect(Object.keys(agenda())).not.toContain("agenda.dekoracje");
+  });
+
+  it("brak wierszy nie wywraca kroku", async () => {
+    ustawProces([node({ id: "n1", name: "Lista gości", actionType: "TABLE", fieldsJson: KOLUMNY })]);
+
+    const wynik = await completeProcessNode(EVENT, "n1", {}, "CLIENT", TOKEN);
+
+    expect(wynik.done).toBe(true);
+  });
+});
+
+describe("krok wklejenia menu", () => {
+  it("podsumowanie trafia do agendy tak samo jak przy wyborze klienta", async () => {
+    ustawProces([node({ id: "n1", name: "Wklej menu", actionType: "MENU_IMPORT" })]);
+
+    await completeProcessNode(
+      EVENT,
+      "n1",
+      { menuSummary: "Wariant Złoty — 80 os." },
+      "ORGANIZER",
+    );
+
+    expect(agenda()["agenda.menu"]).toBe("Wariant Złoty — 80 os.");
+  });
+});

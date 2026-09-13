@@ -122,15 +122,15 @@ z czytelnym komunikatem, zamiast po cichu nic nie robić.
 
 ### Etap 3 — Dokończyć krok „Tabela / arkusz" (P1)
 
-- [ ] **3.1 Edytor** — typ akcji „Tabela", zakładka „Pola" jako definicja kolumn.
-- [ ] **3.2 Wypełnianie** — tabela z dodawaniem wierszy, **wklejaniem z Excela**,
+- [x] **3.1 Edytor** — typ akcji „Tabela", zakładka „Pola" jako definicja kolumn.
+- [x] **3.2 Wypełnianie** — tabela z dodawaniem wierszy, **wklejaniem z Excela**,
       pobraniem szablonu CSV i wgraniem pliku. Wspólny komponent dla klienta i obsługi.
-- [ ] **3.3 Podgląd agendy** — kolumny ze wskazanym miejscem w agendzie widoczne w panelu.
-- [ ] **3.4 Testy** — wiersze → agenda, puste wiersze pomijane, wklejanie z Excela.
+- [x] **3.3 Podgląd agendy** — kolumny ze wskazanym miejscem w agendzie widoczne w panelu.
+- [x] **3.4 Testy** — wiersze → agenda, puste wiersze pomijane, wklejanie z Excela.
 
 ### Etap 4 — Krok „Wklej menu" (P1)
 
-- [ ] **4.1** Typ akcji `MENU_IMPORT` otwierający istniejący `MenuImportDialog`
+- [x] **4.1** Typ akcji `MENU_IMPORT` otwierający istniejący `MenuImportDialog`
       (reguły z `/app/settings/menu-parser` już działają, `portions` jest w bazie).
 
 ### Etap 5 — Twardość produkcyjna (P1)

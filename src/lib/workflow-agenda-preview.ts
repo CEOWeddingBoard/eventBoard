@@ -1,4 +1,4 @@
-import { AGENDA_TARGETS } from "@/lib/workflow-agenda-fields";
+import { AGENDA_TARGETS, isTableStep } from "@/lib/workflow-agenda-fields";
 import type { WorkflowNodeData } from "@/lib/actions/workflow-builder.actions";
 
 /**
@@ -41,16 +41,24 @@ export function policzPodgladAgendy(nodes: WorkflowNodeData[]): PodgladAgendy {
     const nazwaKroku = node.name?.trim() || `Krok ${i + 1}`;
     let wklad = 0;
 
+    const tabela = isTableStep(node.actionType);
+
     for (const pole of node.fields ?? []) {
-      // Pole-czas w harmonogramie nie tworzy osobnej pozycji agendy — tak samo
-      // jak w runtime, inaczej ta sama godzina dublowałaby się w dokumencie.
-      if (pole.scheduleLine && pole.type === "time") {
+      // W kroku tabelarycznym `fields` to KOLUMNY — kolumna z godzinami nie
+      // tworzy jednej pozycji harmonogramu, tylko listę wartości pod swoim
+      // kluczem. Runtime robi to samo (`tableAgendaEntries`).
+      if (!tabela && pole.scheduleLine && pole.type === "time") {
         harmonogram.push(nazwaKroku);
         wklad++;
         continue;
       }
       if (!pole.targetAgendaKey) continue;
-      dopisz(pole.targetAgendaKey, { krok: nazwaKroku, pole: pole.label?.trim() || pole.key });
+      dopisz(pole.targetAgendaKey, {
+        krok: nazwaKroku,
+        pole: tabela
+          ? `kolumna „${pole.label?.trim() || pole.key}”`
+          : pole.label?.trim() || pole.key,
+      });
       wklad++;
     }
 
@@ -60,9 +68,13 @@ export function policzPodgladAgendy(nodes: WorkflowNodeData[]): PodgladAgendy {
       wklad++;
     }
 
-    // Runtime odkłada wybór menu zawsze, także bez skonfigurowanego mapowania.
+    // Runtime odkłada menu zawsze, także bez skonfigurowanego mapowania.
     if (node.actionType === "MENU_SELECTION") {
       dopisz("agenda.menu", { krok: nazwaKroku, pole: "wybór klienta" });
+      wklad++;
+    }
+    if (node.actionType === "MENU_IMPORT") {
+      dopisz("agenda.menu", { krok: nazwaKroku, pole: "wklejone menu" });
       wklad++;
     }
 

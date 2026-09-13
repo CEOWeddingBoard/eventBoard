@@ -425,11 +425,11 @@ export async function completeProcessNode(
     }
   }
 
-  // Wybór menu to rzecz podstawowa — odkładamy go do agendy ZAWSZE, niezależnie
+  // Menu to rzecz podstawowa — odkładamy je do agendy ZAWSZE, niezależnie
   // od tego, czy ktoś skonfigurował mapowanie na tym węźle. Bez tego procesy
   // zbudowane bez mapowania menu (np. przez wcześniejszy builder) gubiły menu
   // w dokumencie.
-  if (currentNode.actionType === "MENU_SELECTION") {
+  if (currentNode.actionType === "MENU_SELECTION" || currentNode.actionType === "MENU_IMPORT") {
     const menuText =
       (typeof data.menuSummary === "string" && data.menuSummary.trim()) ||
       (typeof data.selectedVariantLabel === "string" && data.selectedVariantLabel.trim()) ||

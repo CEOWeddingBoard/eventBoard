@@ -12,7 +12,14 @@ import { assigneeRoleLabel } from "@/lib/workflow-roles";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import type { StepField } from "@/lib/workflow-agenda-fields";
+import {
+  TABLE_ROWS_KEY,
+  isTableStep,
+  type StepField,
+  type TableRow,
+} from "@/lib/workflow-agenda-fields";
+import { StepTable } from "@/components/workflow/StepTable";
+import { MenuImportDialog } from "@/components/menu/MenuImportDialog";
 import {
   CheckCircle2,
   Circle,
@@ -93,11 +100,16 @@ function NodeActionPanel({
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState("");
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
+  const [rows, setRows] = useState<TableRow[]>([]);
+  const [menuImported, setMenuImported] = useState(false);
+  const [menuSummary, setMenuSummary] = useState("");
 
   const fields = node.fields ?? [];
-  const missingRequired = fields.some(
-    (f) => f.required && !(fieldValues[f.key] ?? "").trim()
-  );
+  const isTable = isTableStep(node.actionType);
+  const filledRows = rows.filter((r) => Object.values(r).some((v) => String(v ?? "").trim()));
+  const missingRequired = isTable
+    ? filledRows.length === 0
+    : fields.some((f) => f.required && !(fieldValues[f.key] ?? "").trim());
 
   async function complete(extraData: Record<string, unknown> = {}) {
     setBusy(true);
@@ -165,6 +177,61 @@ function NodeActionPanel({
         ))}
       </div>
     ) : null;
+
+  // Krok „Wklej menu": reguły rozpoznawania sekcji są ustawieniem obiektu
+  // (/app/settings/menu-parser), a sam import tworzy warianty menu tego eventu.
+  if (node.actionType === "MENU_IMPORT") {
+    return (
+      <div className="mt-3 space-y-3">
+        <p className="text-xs text-neutral-500">
+          Wklej menu z oferty — system rozpozna sekcje i dania według reguł obiektu,
+          a Ty uzupełnisz liczby porcji przy wariantach.
+        </p>
+        <MenuImportDialog eventId={eventId} onImported={() => setMenuImported(true)} />
+        <div>
+          <label className="text-xs text-neutral-500 mb-1 block">Podsumowanie do agendy</label>
+          <Textarea
+            value={menuSummary}
+            onChange={(e) => setMenuSummary(e.target.value)}
+            rows={2}
+            className="text-sm"
+            placeholder="np. Wariant Złoty — 80 os., Wariant Srebrny — 40 os."
+          />
+        </div>
+        <Button
+          onClick={() => complete({ menuSummary: menuSummary.trim() })}
+          disabled={busy || (!menuImported && !menuSummary.trim())}
+          size="sm"
+          className="bg-emerald-600 hover:bg-emerald-700 text-white"
+        >
+          <CheckSquare className="w-4 h-4 mr-1.5" />
+          Zapisz i przejdź dalej
+        </Button>
+      </div>
+    );
+  }
+
+  // Krok tabelaryczny: obsługa wypełnia arkusz tak samo jak klient w portalu.
+  if (isTable) {
+    return (
+      <div className="mt-3 space-y-3">
+        <StepTable columns={fields} rows={rows} onChange={setRows} />
+        <div>
+          <label className="text-xs text-neutral-500 mb-1 block">Notatka (opcjonalna)</label>
+          <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} className="text-sm" placeholder="Uwagi do kroku…" />
+        </div>
+        <Button
+          onClick={() => complete({ [TABLE_ROWS_KEY]: filledRows, rowCount: String(filledRows.length) })}
+          disabled={busy || missingRequired}
+          size="sm"
+          className="bg-emerald-600 hover:bg-emerald-700 text-white"
+        >
+          <CheckSquare className="w-4 h-4 mr-1.5" />
+          Zapisz i przejdź dalej ({filledRows.length})
+        </Button>
+      </div>
+    );
+  }
 
   // Kroki z polami (wypełnia zespół w panelu): pokaż pola + jeden przycisk zapisu.
   // Dla akcji klienta (MENU_SELECTION itp.) niżej są dedykowane widoki.

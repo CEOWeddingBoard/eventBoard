@@ -9,7 +9,13 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import type { StepField } from "@/lib/workflow-agenda-fields";
+import {
+  TABLE_ROWS_KEY,
+  isTableStep,
+  type StepField,
+  type TableRow,
+} from "@/lib/workflow-agenda-fields";
+import { StepTable } from "@/components/workflow/StepTable";
 import {
   CheckCircle2,
   Circle,
@@ -405,23 +411,50 @@ function GenericClientStep({
   onDone: () => void;
 }) {
   const fields = node.fields ?? [];
+  const isTable = isTableStep(node.actionType);
   const [answer, setAnswer] = useState("");
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
+  const [rows, setRows] = useState<TableRow[]>([]);
   const [busy, setBusy] = useState(false);
 
-  const missingRequired = fields.some(
-    (f) => f.required && !(fieldValues[f.key] ?? "").trim()
-  );
+  const filledRows = rows.filter((r) => Object.values(r).some((v) => String(v ?? "").trim()));
+
+  const missingRequired = isTable
+    ? filledRows.length === 0 ||
+      fields.some(
+        (f) => f.required && filledRows.some((r) => !String(r[f.key] ?? "").trim()),
+      )
+    : fields.some((f) => f.required && !(fieldValues[f.key] ?? "").trim());
 
   async function submit() {
     setBusy(true);
     try {
-      const payload = fields.length > 0 ? { ...fieldValues } : { answer };
+      const payload = isTable
+        ? { [TABLE_ROWS_KEY]: filledRows, rowCount: String(filledRows.length) }
+        : fields.length > 0
+          ? { ...fieldValues }
+          : { answer };
       await completeProcessNode(eventId, node.id, payload, "CLIENT", token);
       onDone();
     } finally {
       setBusy(false);
     }
+  }
+
+  if (isTable) {
+    return (
+      <div className="space-y-3">
+        <StepTable columns={fields} rows={rows} onChange={setRows} />
+        <Button
+          onClick={submit}
+          disabled={busy || missingRequired}
+          className="bg-blue-600 hover:bg-blue-700 text-white w-full"
+        >
+          <ArrowRight className="w-4 h-4 mr-2" />
+          {busy ? "Wysyłanie…" : `Wyślij (${filledRows.length})`}
+        </Button>
+      </div>
+    );
   }
 
   // Krok z konfigurowalnymi polami (godzina, alergeny, napoje…) — wypełnia
