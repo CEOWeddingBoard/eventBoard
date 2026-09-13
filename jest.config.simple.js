@@ -27,6 +27,6 @@ module.exports = {
   roots: ['<rootDir>/src', '<rootDir>/__tests__'],
   moduleDirectories: ['node_modules', '<rootDir>/src'],
   transformIgnorePatterns: [
-    'node_modules/(?!(date-fns|@prisma|next-intl|use-intl|jose)/)',
+    'node_modules/(?!(date-fns|@prisma|next-intl|use-intl|jose|@exodus)/)',
   ],
 };

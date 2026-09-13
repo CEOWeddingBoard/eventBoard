@@ -5,6 +5,9 @@
  * bezpośrednio. Te testy pilnują, że „Podgląd" naprawdę nie zapisze.
  */
 
+// Globalny setup podmienia bramkę na przepuszczającą — tutaj testujemy prawdziwą.
+jest.unmock("@/lib/permissions/guard");
+
 const access: Record<string, string> = {};
 
 jest.mock("@/lib/actions/team.actions", () => ({

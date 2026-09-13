@@ -192,6 +192,26 @@ jest.mock('next/cache', () => ({
   unstable_cache: jest.fn((fn: Function) => fn),
 }));
 
+// Uprawnienia modułowe: w testach logiki biznesowej bramka ma przepuszczać.
+// Test samej bramki (src/lib/permissions/__tests__/guard.test.ts) robi jest.unmock.
+jest.mock('@/lib/permissions/guard', () => {
+  class ModulePermissionError extends Error {}
+  return {
+    assertModuleView: jest.fn(async () => ({})),
+    assertModuleEdit: jest.fn(async () => undefined),
+    canEditModule: jest.fn(async () => true),
+    ModulePermissionError,
+  };
+});
+
+// sanitize.ts uruchamia jsdom — wewnątrz środowiska jsdom Jest się na tym wykłada,
+// a to zależność poboczna testowanych akcji, nie ich przedmiot.
+jest.mock('@/lib/validations/sanitize', () => ({
+  sanitizeString: (input: string) => String(input ?? '').trim(),
+  sanitizeStrings: <T,>(obj: T) => obj,
+  domPurify: { sanitize: (input: string) => input },
+}));
+
 // Mock Prisma Client
 jest.mock('@/lib/prisma', () => ({
   prisma: {
@@ -249,6 +269,36 @@ jest.mock('@/lib/prisma', () => ({
     weddingPlanVersion: {
       findUnique: jest.fn(),
       create: jest.fn(),
+    },
+    organizationMember: {
+      findFirst: jest.fn(),
+      findMany: jest.fn(async () => []),
+      findUnique: jest.fn(),
+      count: jest.fn(async () => 0),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    },
+    organization: {
+      findFirst: jest.fn(),
+      findUnique: jest.fn(),
+      findMany: jest.fn(async () => []),
+      create: jest.fn(),
+      update: jest.fn(),
+    },
+    eventAgendaData: {
+      findUnique: jest.fn(),
+      upsert: jest.fn(),
+    },
+    eventProcessState: {
+      findUnique: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+    },
+    orgNotification: {
+      create: jest.fn(),
+      findMany: jest.fn(async () => []),
+      updateMany: jest.fn(),
     },
     $transaction: jest.fn(),
   },
