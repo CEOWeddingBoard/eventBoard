@@ -116,34 +116,6 @@ jest.mock('next/navigation', () => ({
   }),
 }));
 
-// Mock @clerk/nextjs/server - zgodnie z użyciem w route.ts
-jest.mock('@clerk/nextjs/server', () => ({
-  getAuth: jest.fn().mockReturnValue({ userId: 'test-user-id' }),
-  auth: jest.fn().mockReturnValue({ userId: 'test-user-id' }),
-  currentUser: jest.fn().mockResolvedValue({
-    id: 'test-user-id',
-    emailAddresses: [{ emailAddress: 'test@example.com' }],
-  }),
-}));
-
-// Mock @clerk/nextjs dla komponentów
-jest.mock('@clerk/nextjs', () => ({
-  useUser: () => ({
-    isSignedIn: true,
-    user: {
-      id: 'user_123',
-      fullName: 'Test User',
-      emailAddresses: [{ emailAddress: 'test@example.com' }],
-    },
-  }),
-  UserButton: () => <div>Mock UserButton</div>,
-  SignedIn: ({ children }: { children: React.ReactNode }) => children,
-  SignedOut: ({ children }: { children: React.ReactNode }) => children,
-  SignInButton: ({ children }: { children: React.ReactNode }) => children,
-  SignUpButton: ({ children }: { children: React.ReactNode }) => children,
-}));
-
-// Mock next-themes
 jest.mock('next-themes', () => ({
   useTheme: () => ({
     setTheme: jest.fn(),

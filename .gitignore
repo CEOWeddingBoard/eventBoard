@@ -20,3 +20,13 @@ public/uploads
 # IDE / OS
 .aider*
 *.iml
+
+# Artefakty i notatki robocze (nie należą do repo, zostają lokalnie)
+build-output*.txt
+error.txt
+*.jfif
+test-invitation.pdf
+zdj.png
+weedingPlaner
+Wedding AI Planner.pdf
+test-app/
