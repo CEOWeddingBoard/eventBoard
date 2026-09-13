@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { requireOrgId } from "@/lib/auth/active-org";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth/utils";
 
@@ -129,14 +130,10 @@ export async function updateDashboardShortcuts(shortcuts: Array<{ label: string;
   const user = await getCurrentUser();
   if (!user) throw new Error("Unauthorized");
 
-  const membership = await prisma.organizationMember.findFirst({
-    where: { userId: user.id },
-    orderBy: { createdAt: "asc" },
-  });
-  if (!membership) throw new Error("Brak dostępu");
+  const organizationId = await requireOrgId(user.id);
 
   await prisma.organization.update({
-    where: { id: membership.organizationId },
+    where: { id: organizationId },
     data: { dashboardShortcutsJson: JSON.stringify(shortcuts) },
   });
 

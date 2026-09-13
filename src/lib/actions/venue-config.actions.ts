@@ -3,15 +3,12 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth/utils";
+import { getActiveOrgId } from "@/lib/auth/active-org";
 
 async function getUserOrgId(): Promise<string | null> {
   const user = await getCurrentUser();
   if (!user) return null;
-  const membership = await prisma.organizationMember.findFirst({
-    where: { userId: user.id },
-    orderBy: { createdAt: "asc" },
-  });
-  return membership?.organizationId ?? null;
+  return getActiveOrgId(user.id);
 }
 
 export async function listOrganizationVenues() {

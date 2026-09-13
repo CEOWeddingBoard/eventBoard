@@ -112,7 +112,7 @@ Klient B", tworzysz event — a on zapisuje się u Klienta A.
 
   **Gotowe, gdy:** masz potwierdzony przypadek (zrzut ekranu z eventem w złej przestrzeni).
 
-- [ ] **3.2 Jedno źródło prawdy o aktywnej organizacji**
+- [x] **3.2 Jedno źródło prawdy o aktywnej organizacji**
 
   Plik: `src/lib/auth/active-org.ts` — dodaj `requireOrgId()`, które czyta ciasteczko
   aktywnej przestrzeni i **rzuca wyjątkiem**, gdy nie da się jej ustalić. Cichy fallback
@@ -120,7 +120,7 @@ Klient B", tworzysz event — a on zapisuje się u Klienta A.
 
   **Gotowe, gdy:** `requireOrgId()` istnieje i nigdy nie zwraca organizacji spoza aktywnej przestrzeni.
 
-- [ ] **3.3 Przepnij wszystkie akcje na `requireOrgId()`**
+- [x] **3.3 Przepnij wszystkie akcje na `requireOrgId()`**
 
   Pliki:
   ```
@@ -139,12 +139,17 @@ Klient B", tworzysz event — a on zapisuje się u Klienta A.
   **Gotowe, gdy:** `grep -rn "organizationMember.findFirst" src/lib/actions` nie znajduje
   wywołania bez ograniczenia do aktywnej organizacji.
 
-- [ ] **3.4 Test, który pilnuje tego na zawsze**
+- [x] **3.4 Test, który pilnuje tego na zawsze** — unit gotowy, E2E czeka na środowisko
 
   Plik: `e2e/tenant-isolation.spec.ts` — dwie przestrzenie, wejście w drugą, utworzenie
   eventu, asercja na przestrzeń docelową.
 
-  **Gotowe, gdy:** test przechodzi i wywala się po przywróceniu starego `findFirst`.
+  **Zrobione:** `src/lib/auth/__tests__/active-org.test.ts` — 5 testów reguł wyboru
+  przestrzeni, przechodzą w `npm test` i wywalają się po przywróceniu starego
+  `findFirst` (wprost sprawdzają, że konto w kilku przestrzeniach nie dostaje
+  najstarszego członkostwa). `e2e/tenant-isolation.spec.ts` odtwarza scenariusz
+  z 3.1 w przeglądarce — pomija się bez `E2E_ADMIN_EMAIL`/`E2E_ADMIN_PASSWORD`,
+  bo wymaga prawdziwej bazy z dwiema przestrzeniami.
 
 ---
 

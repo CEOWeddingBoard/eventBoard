@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { getActiveOrgId, requireOrgId } from "@/lib/auth/active-org";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth/utils";
 
@@ -137,15 +138,11 @@ export async function listOrganizationEventsForMenu() {
   const user = await getCurrentUser();
   if (!user) return [];
 
-  const membership = await prisma.organizationMember.findFirst({
-    where: { userId: user.id },
-    select: { organizationId: true },
-    orderBy: { createdAt: "asc" },
-  });
-  if (!membership) return [];
+  const organizationId = await getActiveOrgId(user.id);
+  if (!organizationId) return [];
 
   return prisma.event.findMany({
-    where: { organizationId: membership.organizationId },
+    where: { organizationId: organizationId },
     select: { id: true, name: true, date: true },
     orderBy: { date: "asc" },
   });
@@ -156,15 +153,11 @@ export async function listOrganizationMenuVariants() {
   const user = await getCurrentUser();
   if (!user) return [];
 
-  const membership = await prisma.organizationMember.findFirst({
-    where: { userId: user.id },
-    select: { organizationId: true },
-    orderBy: { createdAt: "asc" },
-  });
-  if (!membership) return [];
+  const organizationId = await getActiveOrgId(user.id);
+  if (!organizationId) return [];
 
   return prisma.menuVariant.findMany({
-    where: { event: { organizationId: membership.organizationId } },
+    where: { event: { organizationId: organizationId } },
     include: {
       courses: { orderBy: { sortOrder: "asc" } },
       event: { select: { id: true, name: true } },
@@ -184,12 +177,7 @@ export async function createMenuVariantsForEvents(input: {
   const user = await getCurrentUser();
   if (!user) throw new Error("Unauthorized");
 
-  const membership = await prisma.organizationMember.findFirst({
-    where: { userId: user.id },
-    select: { organizationId: true },
-    orderBy: { createdAt: "asc" },
-  });
-  if (!membership) throw new Error("Forbidden");
+  const organizationId = await requireOrgId(user.id);
 
   const created = await Promise.all(
     input.eventIds.map(async (eventId) => {

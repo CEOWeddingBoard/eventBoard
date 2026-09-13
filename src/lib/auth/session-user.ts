@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getSessionPayloadFromCookies } from "@/lib/auth/session";
+import { getActiveMembership } from "@/lib/auth/active-org";
 import { getUserBillingMetadata } from "@/lib/user-metadata";
 import type { ClerkBillingMetadata } from "@/lib/billing";
 
@@ -21,11 +22,13 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   const user = await prisma.user.findUnique({ where: { id: session.sub } });
   if (!user || !user.isActive) return null;
 
-  const membership = await prisma.organizationMember.findFirst({
-    where: { userId: user.id },
-    include: { organization: { select: { id: true, name: true } } },
-    orderBy: { createdAt: "asc" },
-  });
+  const active = await getActiveMembership(user.id);
+  const membership = active
+    ? await prisma.organizationMember.findUnique({
+        where: { id: active.id },
+        include: { organization: { select: { id: true, name: true } } },
+      })
+    : null;
 
   const metadata = await getUserBillingMetadata(user.id);
 

@@ -1,6 +1,7 @@
 "use server"
 
 import { getCurrentUser } from "@/lib/auth/utils";
+import { getActiveOrgId, requireOrgId } from "@/lib/auth/active-org";
 import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 import { validate } from "@/lib/validations/validation-utils"
@@ -584,12 +585,7 @@ export async function createEvent(data: {
   let organizationId: string | null = null;
   if (userId) {
     try {
-      const membership = await prisma.organizationMember.findFirst({
-        where: { userId },
-        select: { organizationId: true },
-        orderBy: { createdAt: "asc" },
-      });
-      organizationId = membership?.organizationId ?? null;
+      organizationId = await getActiveOrgId(userId);
     } catch {
       organizationId = null;
     }
@@ -822,15 +818,10 @@ export async function duplicateEvent(eventId: string) {
   const user = await getCurrentUser();
   if (!user) throw new Error("Unauthorized");
 
-  const membership = await prisma.organizationMember.findFirst({
-    where: { userId: user.id },
-    orderBy: { createdAt: "asc" },
-  });
-
-  if (!membership) throw new Error("Forbidden");
+  const organizationId = await requireOrgId(user.id);
 
   const source = await prisma.event.findFirst({
-    where: { id: eventId, organizationId: membership.organizationId },
+    where: { id: eventId, organizationId: organizationId },
     include: {
       dayScheduleItems: { orderBy: { sortOrder: "asc" } },
       menuVariants: {

@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { getActiveOrgId } from "@/lib/auth/active-org";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { generateWeddingBoardToken } from "@/lib/wedding-board-utils";
@@ -128,14 +129,11 @@ export async function generateWeddingBoardLink(
   const user = await getCurrentUser();
   if (!user) return { ok: false, error: "Brak uprawnień" };
 
-  const membership = await prisma.organizationMember.findFirst({
-    where: { userId: user.id },
-    orderBy: { createdAt: "asc" },
-  });
-  if (!membership) return { ok: false, error: "Brak organizacji" };
+  const organizationId = await getActiveOrgId(user.id);
+  if (!organizationId) return { ok: false, error: "Brak organizacji" };
 
   const event = await prisma.event.findFirst({
-    where: { id: eventId, organizationId: membership.organizationId },
+    where: { id: eventId, organizationId: organizationId },
     select: { id: true, isWedding: true, weddingBoardToken: true },
   });
   if (!event) return { ok: false, error: "Event nie istnieje" };
@@ -162,14 +160,11 @@ export async function resetWeddingBoardLink(
   const user = await getCurrentUser();
   if (!user) return { ok: false, error: "Brak uprawnień" };
 
-  const membership = await prisma.organizationMember.findFirst({
-    where: { userId: user.id },
-    orderBy: { createdAt: "asc" },
-  });
-  if (!membership) return { ok: false, error: "Brak organizacji" };
+  const organizationId = await getActiveOrgId(user.id);
+  if (!organizationId) return { ok: false, error: "Brak organizacji" };
 
   const event = await prisma.event.findFirst({
-    where: { id: eventId, organizationId: membership.organizationId },
+    where: { id: eventId, organizationId: organizationId },
     select: { id: true },
   });
   if (!event) return { ok: false, error: "Event nie istnieje" };

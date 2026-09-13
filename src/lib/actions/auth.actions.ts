@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { getActiveMembership } from "@/lib/auth/active-org";
 import { revalidatePath } from "next/cache";
 import { hashPassword, verifyPassword, isPasswordValid } from "@/lib/auth/password";
 import { ensureUserAuthColumns } from "@/lib/auth/schema-migration";
@@ -273,11 +274,13 @@ export async function getCurrentSessionUser(): Promise<{
   const user = await prisma.user.findUnique({ where: { id: current.id } });
   if (!user || !user.isActive) return null;
 
-  const membership = await prisma.organizationMember.findFirst({
-    where: { userId: user.id },
-    include: { organization: { select: { id: true, name: true } } },
-    orderBy: { createdAt: "asc" },
-  });
+  const active = await getActiveMembership(user.id);
+  const membership = active
+    ? await prisma.organizationMember.findUnique({
+        where: { id: active.id },
+        include: { organization: { select: { id: true, name: true } } },
+      })
+    : null;
 
   return {
     id: user.id,
@@ -301,10 +304,11 @@ export async function getUserOrganization(): Promise<{
   const current = await getCurrentUser();
   if (!current) return null;
 
-  const membership = await prisma.organizationMember.findFirst({
-    where: { userId: current.id },
+  const active = await getActiveMembership(current.id);
+  if (!active) return null;
+  const membership = await prisma.organizationMember.findUnique({
+    where: { id: active.id },
     include: { organization: true },
-    orderBy: { createdAt: "asc" },
   });
   return membership?.organization ?? null;
 }
@@ -316,9 +320,7 @@ async function canManageMembers(): Promise<boolean> {
   if (!user || !user.isActive) return false;
   if (user.role === "ADMIN") return true;
 
-  const membership = await prisma.organizationMember.findFirst({
-    where: { userId: user.id },
-  });
+  const membership = await getActiveMembership(user.id);
   return !!membership && (membership.role === "OWNER" || membership.role === "MANAGER");
 }
 

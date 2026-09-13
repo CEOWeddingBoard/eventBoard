@@ -2,6 +2,7 @@
 
 import { createHash, randomBytes } from "crypto";
 import { prisma } from "@/lib/prisma";
+import { getActiveOrgId } from "@/lib/auth/active-org";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { ensureAgendaEventColumns } from "@/lib/agenda/agenda-schema-migration";
@@ -27,14 +28,11 @@ async function canManageEvent(eventId: string): Promise<boolean> {
   const user = await getCurrentUser();
   if (!user) return false;
 
-  const membership = await prisma.organizationMember.findFirst({
-    where: { userId: user.id },
-    orderBy: { createdAt: "asc" },
-  });
-  if (!membership) return false;
+  const organizationId = await getActiveOrgId(user.id);
+  if (!organizationId) return false;
 
   const event = await prisma.event.findFirst({
-    where: { id: eventId, organizationId: membership.organizationId },
+    where: { id: eventId, organizationId: organizationId },
     select: { id: true },
   });
   return !!event;
