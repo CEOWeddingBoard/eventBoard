@@ -363,13 +363,6 @@ export function OrganizationConfigurationClient({
               <ExternalLink className="h-3.5 w-3.5" />
               Otwórz edytor procesów
             </Link>
-            <Link
-              href="/app/settings/menu-parser"
-              className="inline-flex items-center gap-1.5 rounded-md border border-neutral-300 px-3 py-2 text-xs font-medium text-neutral-700 hover:bg-neutral-50 transition-colors"
-            >
-              <ExternalLink className="h-3.5 w-3.5" />
-              Reguły importu menu
-            </Link>
           </div>
         </div>
       </section>

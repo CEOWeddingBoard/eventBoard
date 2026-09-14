@@ -30,7 +30,6 @@ const CELE: { label: string; path: string }[] = [
   { label: "Zespół", path: "/app/team" },
   { label: "Konfiguracja", path: "/app/settings/configuration" },
   { label: "Procesy obsługi", path: "/app/settings/workflows" },
-  { label: "Szablony dokumentów", path: "/app/settings/document-templates" },
   { label: "Menu i katalog", path: "/app/settings/menu" },
   { label: "Reguły importu menu", path: "/app/settings/menu-parser" },
   { label: "Obiekty i sale", path: "/app/settings/venues" },

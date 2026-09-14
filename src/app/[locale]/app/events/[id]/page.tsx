@@ -14,7 +14,6 @@ import { WeddingBoardLinkPanel } from "@/components/eventboard/WeddingBoardLinkP
 import { EventOperationsPanel } from "@/components/eventboard/event-operations-panel";
 import { ProcessCenterPanel } from "@/components/workflow/ProcessCenterPanel";
 import { getEventProcessState } from "@/lib/actions/process-runtime.actions";
-import { EventDocumentPanel } from "@/components/eventboard/event-document-panel";
 import { EventChat } from "@/components/eventboard/event-chat";
 import { EventWidgetBoard } from "@/components/eventboard/EventWidgetBoard";
 import { getEventWidgets } from "@/lib/actions/event-widget.actions";
@@ -189,10 +188,6 @@ export default async function EventBoardEventPage({
           viewerRoles={viewerRoles}
           canOverride={canOverride}
         />
-      )}
-
-      {canManage && (
-        <EventDocumentPanel locale={locale} eventId={event.id} />
       )}
 
       {canManage && (

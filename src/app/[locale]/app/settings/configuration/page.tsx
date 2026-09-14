@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Building2, FileText, UtensilsCrossed } from "lucide-react";
+import { Building2, ClipboardPaste, UtensilsCrossed } from "lucide-react";
 import { listOrganizationConfiguration, listOrganizationEventsWithWorkflow, ensureDefaultWorkflow } from "@/lib/actions/organization-config.actions";
 import { OrganizationConfigurationClient } from "./organization-configuration-client";
 
@@ -22,10 +22,11 @@ const steps = [
     icon: UtensilsCrossed,
   },
   {
-    href: "document-templates",
-    title: "3. Szablony dokumentów (oferty, umowy)",
-    description: "Pusta kartka A4 z polami zmapowanymi z danymi eventu. Agenda ma własny, gotowy układ.",
-    icon: FileText,
+    href: "menu-parser",
+    title: "3. Reguły importu menu",
+    description:
+      "Słowa kluczowe, po których system rozpoznaje sekcje i typy dań we wklejonym menu. Ustawiasz raz dla całego obiektu.",
+    icon: ClipboardPaste,
   },
 ];
 
