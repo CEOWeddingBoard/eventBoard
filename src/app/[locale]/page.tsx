@@ -1,4 +1,3 @@
-import { getCurrentUser } from "@/lib/auth/utils";
 import { inter } from "@/components/landing/landing-fonts";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { LandingHero } from "@/components/landing/LandingHero";
@@ -12,26 +11,20 @@ import { LandingFooter } from "@/components/landing/LandingFooter";
 
 export default async function LandingPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  let loggedIn = false;
-  try {
-    const user = await getCurrentUser();
-    loggedIn = !!user?.id;
-  } catch {
-    loggedIn = false;
-  }
+  // Strona sprzedażowa nie sprawdza sesji: nie ma na niej nic, co zależałoby od
+  // zalogowania. Wejście do przestrzeni daje wyłącznie adres od administratora.
   const u = (p: string) => `/${locale}${p}`;
-  const dashboardUrl = loggedIn ? u("/app/dashboard") : u("/auth");
 
   return (
     <div className={`landing-clean ${inter.className} min-h-screen bg-[#faf9f7] text-stone-600 antialiased`}>
-      <LandingHeader homeUrl={u("/")} dashboardUrl={dashboardUrl} loggedIn={loggedIn} />
+      <LandingHeader homeUrl={u("/")} />
       <main>
         <LandingHero />
         <LandingBeforeAfter />
         <LandingHowItWorks />
         <LandingFeatures />
         <LandingRoi />
-        <LandingPricing dashboardUrl={dashboardUrl} loggedIn={loggedIn} />
+        <LandingPricing />
         <LandingCta />
       </main>
       <LandingFooter />

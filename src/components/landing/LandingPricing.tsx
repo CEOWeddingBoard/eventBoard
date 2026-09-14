@@ -79,11 +79,7 @@ const plans: Plan[] = [
 ];
 
 export function LandingPricing({
-  dashboardUrl,
-  loggedIn,
 }: {
-  dashboardUrl: string;
-  loggedIn: boolean;
 }) {
   const [annual, setAnnual] = useState(true);
 
@@ -214,14 +210,14 @@ export function LandingPricing({
               </ul>
 
               <Link
-                href={loggedIn ? dashboardUrl : "#kontakt"}
+                href="#kontakt"
                 className={`mt-8 block w-full rounded-full py-2.5 text-center text-sm transition-all ${
                   plan.popular
                     ? "bg-amber-400 font-bold text-[#0f172a] shadow-lg shadow-amber-500/20 hover:-translate-y-0.5 hover:bg-amber-300"
                     : "border-2 border-[#0f172a] font-semibold text-[#0f172a] hover:-translate-y-0.5 hover:bg-[#0f172a] hover:text-white"
                 }`}
               >
-                {loggedIn ? "Przejdź do panelu" : "Umów spotkanie demo"}
+                {"Umów spotkanie demo"}
               </Link>
             </div>
           ))}

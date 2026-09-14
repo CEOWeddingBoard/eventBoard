@@ -3,12 +3,8 @@ import { CalendarDays } from "lucide-react";
 
 export function LandingHeader({
   homeUrl,
-  dashboardUrl,
-  loggedIn,
 }: {
   homeUrl: string;
-  dashboardUrl: string;
-  loggedIn: boolean;
 }) {
   return (
     <header className="sticky top-0 z-50 border-b border-stone-200/70 bg-[#faf9f7]/80 backdrop-blur-xl">
@@ -27,12 +23,10 @@ export function LandingHeader({
           <a href="#kalkulator" className="transition-colors hover:text-stone-900">Ile oszczędzisz</a>
           <a href="#pricing" className="transition-colors hover:text-stone-900">Cennik</a>
         </nav>
+        {/* Świadomie BEZ linku do panelu. Strona sprzedażowa nie może być
+            drogą do aplikacji — dostęp do przestrzeni daje wyłącznie adres
+            przekazany przez administratora przy wdrożeniu. */}
         <div className="flex items-center gap-3">
-          {loggedIn && (
-            <Link href={dashboardUrl} className="hidden text-sm font-medium text-stone-600 hover:text-stone-900 sm:inline">
-              Dashboard
-            </Link>
-          )}
           <a
             href="#kontakt"
             className="rounded-full bg-[#0f172a] px-5 py-2 text-sm font-semibold text-white shadow-md shadow-slate-900/10 transition-all hover:-translate-y-0.5 hover:bg-[#1e293b] hover:shadow-lg"

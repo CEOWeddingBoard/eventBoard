@@ -6,7 +6,6 @@ import {
   FileText,
   GitBranch,
   LayoutGrid,
-  TrendingUp,
   Users,
   Utensils,
   Wallet,
@@ -14,20 +13,24 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
+// Makieta ma pokazywać produkt, który istnieje. Wcześniej reklamowała listę
+// gości, stoliki i moduł dokumentów z wycofanego produktu weselnego — czyli
+// obiecywała klientowi funkcje, których po zalogowaniu by nie znalazł.
 const sideNav: { icon: LucideIcon; label: string; active?: boolean }[] = [
   { icon: LayoutGrid, label: "Pulpit", active: true },
-  { icon: Users, label: "Goście" },
-  { icon: Utensils, label: "Menu" },
-  { icon: CalendarDays, label: "Harmonogram" },
-  { icon: Wallet, label: "Płatności" },
-  { icon: FileText, label: "Dokumenty" },
+  { icon: CalendarDays, label: "Kalendarz" },
+  { icon: FileText, label: "Eventy" },
+  { icon: Users, label: "Zapytania" },
+  { icon: Wallet, label: "Finanse" },
+  { icon: Utensils, label: "Konfiguracja" },
 ];
 
+// Bez zmyślonych wskaźników wzrostu — to były liczby udające wynik produktu.
 const stats = [
-  { label: "Goście", value: "128", delta: "+12" },
-  { label: "Potwierdzone", value: "96", delta: "75%" },
-  { label: "Stoliki", value: "24/26", delta: "2 oczekują" },
-  { label: "Menu B", value: "62", delta: "najpopularniejsze" },
+  { label: "Przyjęcia", value: "18", delta: "w tym sezonie" },
+  { label: "Krok procesu", value: "3 z 7", delta: "Wesele Anny i Tomasza" },
+  { label: "Zapytania", value: "5", delta: "2 nowe" },
+  { label: "Liczba gości", value: "128", delta: "z kroku procesu" },
 ];
 
 const daySchedule: { time: string; title: string; status: string; tone: "emerald" | "amber" | "stone" }[] = [
@@ -50,10 +53,12 @@ const processRows = [
   { label: "Akceptacja harmonogramu", role: "Manager", dot: "bg-stone-300" },
 ];
 
-const guestRows = [
-  { initials: "AK", name: "Anna Kowalska", note: "Wegetarianka" },
-  { initials: "MN", name: "Marek Nowak", note: "Bez glutenu" },
-  { initials: "ZW", name: "Zofia Wiśniewska", note: "Menu A" },
+// Agenda składa się automatycznie z kroków procesu — to jest sedno produktu,
+// więc to pokazujemy zamiast listy gości, której w aplikacji nie ma.
+const agendaRows = [
+  { label: "Menu", value: "Wariant B — 96 os." },
+  { label: "Uczulenia", value: "orzechy, gluten" },
+  { label: "Uwagi dla kuchni", value: "tort bez laktozy" },
 ];
 
 export function LandingHero() {
@@ -128,7 +133,7 @@ export function LandingHero() {
               <span className="h-2.5 w-2.5 rounded-full bg-[#f5d08f]" />
               <span className="h-2.5 w-2.5 rounded-full bg-[#a8d8b9]" />
               <span className="mx-auto hidden rounded-md bg-stone-100 px-10 py-1 text-xs text-stone-600 sm:block">
-                app.eventboard.pl/dashboard
+                eventboard.pl
               </span>
             </div>
 
@@ -170,8 +175,7 @@ export function LandingHero() {
                     <div key={s.label} className="rounded-xl border border-stone-100 bg-stone-50/60 p-3">
                       <p className="text-[11px] font-medium uppercase tracking-wide text-stone-600">{s.label}</p>
                       <p className="mt-1 text-base font-bold text-stone-900 sm:text-lg">{s.value}</p>
-                      <p className="mt-0.5 flex items-center gap-1 text-[11px] font-medium text-emerald-600">
-                        <TrendingUp className="h-3 w-3" />
+                      <p className="mt-0.5 text-[11px] font-medium text-stone-500">
                         {s.delta}
                       </p>
                     </div>
@@ -222,15 +226,16 @@ export function LandingHero() {
                     </div>
 
                     <div className="flex-1 rounded-xl border border-stone-100 bg-white p-4">
-                      <p className="text-[11px] font-semibold uppercase tracking-wide text-stone-600">Lista gości</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-stone-600">
+                        Agenda dla kuchni
+                      </p>
                       <div className="mt-3 space-y-2">
-                        {guestRows.map((g) => (
-                          <div key={g.name} className="flex items-center gap-2">
-                            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#0f172a] text-[9px] font-bold text-amber-100">
-                              {g.initials}
+                        {agendaRows.map((a) => (
+                          <div key={a.label} className="flex items-center gap-2">
+                            <span className="w-24 shrink-0 truncate text-[10px] uppercase tracking-wide text-stone-500">
+                              {a.label}
                             </span>
-                            <span className="flex-1 truncate text-xs font-medium text-stone-700">{g.name}</span>
-                            <span className="truncate text-[10px] text-stone-600">{g.note}</span>
+                            <span className="flex-1 truncate text-xs font-medium text-stone-700">{a.value}</span>
                           </div>
                         ))}
                       </div>
