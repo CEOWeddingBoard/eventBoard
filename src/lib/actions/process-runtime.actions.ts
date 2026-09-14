@@ -3,7 +3,8 @@
 import { createHash } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth/utils";
-import { getActiveOrgId } from "@/lib/auth/active-org";
+import { getActiveOrgId, getActiveMembership } from "@/lib/auth/active-org";
+import { hasRequiredRole } from "@/lib/workflow-roles";
 import { revalidatePath } from "next/cache";
 import {
   SCHEDULE_AGENDA_KEY,
@@ -335,6 +336,7 @@ async function assertCanCompleteNode(
   eventId: string,
   role: "CLIENT" | "ORGANIZER",
   clientToken?: string,
+  step?: { fillRole: string | null; assigneeRole: string },
 ): Promise<void> {
   if (role === "CLIENT") {
     if (!clientToken) throw new Error("Brak tokenu dostępu do tego przyjęcia.");
@@ -362,6 +364,61 @@ async function assertCanCompleteNode(
     select: { id: true },
   });
   if (!event) throw new Error("Forbidden");
+
+  // Rola kroku. Panel pokazuje tu kłódkę, ale kłódka w przeglądarce niczego
+  // nie chroni — akcję serwerową można wywołać wprost. Bez tego kelner zamykał
+  // krok kucharza.
+  if (!step) return;
+  const membership = await getActiveMembership(user.id);
+  const canOverride =
+    (membership as { isAdmin?: boolean } | null)?.isAdmin === true ||
+    membership?.role === "OWNER" ||
+    membership?.role === "SERVICE";
+  if (canOverride) return;
+
+  const required = step.fillRole || step.assigneeRole;
+  if (!required || required === "CLIENT" || required === "BOTH") return;
+
+  let viewerRoles: string[] = [];
+  try {
+    const parsed = JSON.parse((membership as { rolesJson?: string } | null)?.rolesJson ?? "[]");
+    if (Array.isArray(parsed)) viewerRoles = parsed.filter((r): r is string => typeof r === "string");
+  } catch {
+    viewerRoles = [];
+  }
+
+  if (!hasRequiredRole(required, viewerRoles)) {
+    throw new Error(`Ten krok wykonuje: ${required}. Nie masz tej roli.`);
+  }
+}
+
+/**
+ * Pola oznaczone jako wymagane muszą mieć wartość. Interfejs blokuje przycisk,
+ * ale pusta wartość przepuszczona przez serwer idzie prosto do agendy dla kuchni.
+ */
+function assertRequiredFields(
+  fields: StepField[],
+  data: Record<string, unknown>,
+  actionType: string,
+): void {
+  const wymagane = fields.filter((f) => f.required);
+  if (wymagane.length === 0) return;
+
+  if (isTableStep(actionType)) {
+    const rows = parseTableRows(data[TABLE_ROWS_KEY]).filter(isRowFilled);
+    if (rows.length === 0) throw new Error("Uzupełnij tabelę — nie ma ani jednego wiersza.");
+    for (const kolumna of wymagane) {
+      const brak = rows.some((r) => String(r[kolumna.key] ?? "").trim() === "");
+      if (brak) throw new Error(`Kolumna „${kolumna.label || kolumna.key}" jest wymagana w każdym wierszu.`);
+    }
+    return;
+  }
+
+  for (const pole of wymagane) {
+    if (String(data[pole.key] ?? "").trim() === "") {
+      throw new Error(`Pole „${pole.label || pole.key}" jest wymagane.`);
+    }
+  }
 }
 
 export async function completeProcessNode(
@@ -393,14 +450,22 @@ export async function completeProcessNode(
   const currentNode = workflow.nodes.find((n) => n.id === nodeId);
   if (!currentNode) throw new Error("Node not found in workflow");
 
-  // Apply field mappings (legacy sourceKey→target) + step fields (nowe pola kroku)
-  await applyFieldMappings(eventId, JSON.parse(currentNode.fieldMappingsJson), data);
   let stepFields: StepField[] = [];
   try {
     stepFields = JSON.parse((currentNode as { fieldsJson?: string | null }).fieldsJson ?? "[]");
   } catch {
     stepFields = [];
   }
+
+  // Rola kroku i pola wymagane — sprawdzane ZANIM cokolwiek trafi do agendy.
+  await assertCanCompleteNode(eventId, completedByRole, clientToken, {
+    fillRole: (currentNode as { fillRole?: string | null }).fillRole ?? null,
+    assigneeRole: currentNode.assigneeRole,
+  });
+  assertRequiredFields(stepFields, data, currentNode.actionType);
+
+  // Apply field mappings (legacy sourceKey→target) + step fields (nowe pola kroku)
+  await applyFieldMappings(eventId, JSON.parse(currentNode.fieldMappingsJson), data);
   await applyStepFields(eventId, currentNode.id, currentNode.name, stepFields, data);
 
   // Krok tabelaryczny: `fieldsJson` opisuje kolumny, a wiersze przyszły pod

@@ -33,6 +33,32 @@ export type MenuVariantOption = {
   courses?: { typeLabel: string; name: string }[];
 };
 
+/** Uwagi klienta — dostępne na każdym kroku, niezależnie od jego typu. */
+function PoleUwag({
+  value,
+  onChange,
+  label = "Uwagi (opcjonalne)",
+  placeholder = "Coś, o czym powinniśmy wiedzieć…",
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  label?: string;
+  placeholder?: string;
+}) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-neutral-700 mb-1">{label}</label>
+      <Textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        rows={2}
+        placeholder={placeholder}
+        className="text-sm font-normal"
+      />
+    </div>
+  );
+}
+
 function StepIndicator({ nodes }: { nodes: ProcessNodeView[] }) {
   // Pokazujemy parze wyłącznie jej kroki — wewnętrzne akceptacje zespołu
   // tylko by ją zdezorientowały. Lista pionowa: ukończone, bieżący, kolejne.
@@ -233,6 +259,7 @@ function MenuSelectionStep({
   initialSelection: { variantId: string; guests: number }[];
   onDone: () => void;
 }) {
+  const [note, setNote] = useState("");
   const [selections, setSelections] = useState<{ variantId: string; guests: number }[]>(
     initialSelection.length > 0
       ? initialSelection
@@ -268,6 +295,7 @@ function MenuSelectionStep({
             ? (variants.find((v) => v.id === chosen[0].variantId)?.label ?? "")
             : "",
           menuSummary: variantLabels,
+          note,
         },
         "CLIENT",
         token
@@ -334,6 +362,12 @@ function MenuSelectionStep({
       {total > 0 && (
         <p className="text-xs text-neutral-500">Łącznie: {total} osób</p>
       )}
+      <PoleUwag
+        value={note}
+        onChange={setNote}
+        label="Uwagi do menu (opcjonalne)"
+        placeholder="np. stół dziecięcy, alergia na orzechy u dwóch osób…"
+      />
       <Button
         onClick={submit}
         disabled={busy || total === 0}
@@ -413,6 +447,7 @@ function GenericClientStep({
   const fields = node.fields ?? [];
   const isTable = isTableStep(node.actionType);
   const [answer, setAnswer] = useState("");
+  const [note, setNote] = useState("");
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
   const [rows, setRows] = useState<TableRow[]>([]);
   const [busy, setBusy] = useState(false);
@@ -430,10 +465,10 @@ function GenericClientStep({
     setBusy(true);
     try {
       const payload = isTable
-        ? { [TABLE_ROWS_KEY]: filledRows, rowCount: String(filledRows.length) }
+        ? { [TABLE_ROWS_KEY]: filledRows, rowCount: String(filledRows.length), note }
         : fields.length > 0
-          ? { ...fieldValues }
-          : { answer };
+          ? { ...fieldValues, note }
+          : { answer, note };
       await completeProcessNode(eventId, node.id, payload, "CLIENT", token);
       onDone();
     } finally {
@@ -445,6 +480,7 @@ function GenericClientStep({
     return (
       <div className="space-y-3">
         <StepTable columns={fields} rows={rows} onChange={setRows} />
+        <PoleUwag value={note} onChange={setNote} />
         <Button
           onClick={submit}
           disabled={busy || missingRequired}
@@ -494,6 +530,7 @@ function GenericClientStep({
             )}
           </label>
         ))}
+        <PoleUwag value={note} onChange={setNote} />
         <Button
           onClick={submit}
           disabled={busy || missingRequired}

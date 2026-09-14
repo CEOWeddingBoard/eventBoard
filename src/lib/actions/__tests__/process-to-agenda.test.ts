@@ -31,9 +31,15 @@ const store: {
   eventDostepny: boolean;
 } = { agenda: {}, state: null, nodes: [], historia: [], powiadomienia: [], eventDostepny: true };
 
-const sesja: { user: { id: string } | null; orgId: string | null } = {
+const sesja: {
+  user: { id: string } | null;
+  orgId: string | null;
+  /** Rola członkostwa: OWNER/SERVICE albo isAdmin dają prawo nadpisania kroku. */
+  membership: { role: string; isAdmin: boolean; rolesJson: string } | null;
+} = {
   user: { id: "manager-1" },
   orgId: "org-1",
+  membership: { role: "OWNER", isAdmin: false, rolesJson: "[]" },
 };
 
 jest.mock("@/lib/auth/utils", () => ({
@@ -42,6 +48,7 @@ jest.mock("@/lib/auth/utils", () => ({
 
 jest.mock("@/lib/auth/active-org", () => ({
   getActiveOrgId: jest.fn(async () => sesja.orgId),
+  getActiveMembership: jest.fn(async () => sesja.membership),
 }));
 
 jest.mock("next/cache", () => ({ revalidatePath: jest.fn() }));
@@ -127,6 +134,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   sesja.user = { id: "manager-1" };
   sesja.orgId = "org-1";
+  sesja.membership = { role: "OWNER", isAdmin: false, rolesJson: "[]" };
 });
 
 const TOKEN = "token-klienta-abcdef0123456789";
@@ -423,5 +431,99 @@ describe("krok wklejenia menu", () => {
     );
 
     expect(agenda()["agenda.menu"]).toBe("Wariant Złoty — 80 os.");
+  });
+});
+
+describe("kto może wypełnić krok", () => {
+  it("osoba bez roli kroku nie zamknie go, mimo zalogowania w tej przestrzeni", async () => {
+    ustawProces([node({ id: "n1", name: "Ustalenie menu", assigneeRole: "CHEF" })]);
+    sesja.membership = { role: "STAFF", isAdmin: false, rolesJson: JSON.stringify(["WAITER"]) };
+
+    await expect(completeProcessNode(EVENT, "n1", {}, "ORGANIZER")).rejects.toThrow(/nie masz tej roli/i);
+  });
+
+  it("osoba z rolą kroku zamknie go", async () => {
+    ustawProces([node({ id: "n1", name: "Ustalenie menu", assigneeRole: "CHEF" })]);
+    sesja.membership = { role: "STAFF", isAdmin: false, rolesJson: JSON.stringify(["CHEF"]) };
+
+    await expect(completeProcessNode(EVENT, "n1", {}, "ORGANIZER")).resolves.toBeDefined();
+  });
+
+  it("rola własna dopasowuje się po nazwie, nie tylko po kodzie", async () => {
+    ustawProces([node({ id: "n1", name: "Dekoracje", assigneeRole: "Florysta" })]);
+    sesja.membership = { role: "STAFF", isAdmin: false, rolesJson: JSON.stringify(["Florysta"]) };
+
+    await expect(completeProcessNode(EVENT, "n1", {}, "ORGANIZER")).resolves.toBeDefined();
+  });
+
+  it("właściciel nadpisuje rolę kroku", async () => {
+    ustawProces([node({ id: "n1", name: "Ustalenie menu", assigneeRole: "CHEF" })]);
+    sesja.membership = { role: "OWNER", isAdmin: false, rolesJson: "[]" };
+
+    await expect(completeProcessNode(EVENT, "n1", {}, "ORGANIZER")).resolves.toBeDefined();
+  });
+
+  it("fillRole ma pierwszeństwo przed assigneeRole", async () => {
+    ustawProces([node({ id: "n1", name: "Krok", assigneeRole: "MANAGER", fillRole: "CHEF" })]);
+    sesja.membership = { role: "STAFF", isAdmin: false, rolesJson: JSON.stringify(["MANAGER"]) };
+
+    await expect(completeProcessNode(EVENT, "n1", {}, "ORGANIZER")).rejects.toThrow(/nie masz tej roli/i);
+  });
+});
+
+describe("pola wymagane pilnuje serwer", () => {
+  const POLA = JSON.stringify([
+    { key: "godzina", label: "Godzina kolacji", type: "time", targetAgendaKey: "agenda.harmonogram", required: true },
+  ]);
+
+  it("pusta wartość wymaganego pola przerywa krok", async () => {
+    ustawProces([node({ id: "n1", name: "Kolacja", fieldsJson: POLA })]);
+
+    await expect(completeProcessNode(EVENT, "n1", { godzina: "   " }, "ORGANIZER")).rejects.toThrow(
+      /Godzina kolacji.*wymagane/i,
+    );
+  });
+
+  it("wypełnione pole przechodzi", async () => {
+    ustawProces([node({ id: "n1", name: "Kolacja", fieldsJson: POLA })]);
+
+    await expect(
+      completeProcessNode(EVENT, "n1", { godzina: "20:00" }, "ORGANIZER"),
+    ).resolves.toBeDefined();
+  });
+
+  it("tabela bez wierszy nie przejdzie, gdy kolumna jest wymagana", async () => {
+    ustawProces([
+      node({
+        id: "n1",
+        name: "Lista gości",
+        actionType: "TABLE",
+        fieldsJson: JSON.stringify([
+          { key: "imie", label: "Imię", type: "text", targetAgendaKey: "", required: true },
+        ]),
+      }),
+    ]);
+
+    await expect(completeProcessNode(EVENT, "n1", { __rows: [] }, "ORGANIZER")).rejects.toThrow(
+      /nie ma ani jednego wiersza/i,
+    );
+  });
+
+  it("brak wartości w wymaganej kolumnie przerywa krok", async () => {
+    ustawProces([
+      node({
+        id: "n1",
+        name: "Lista gości",
+        actionType: "TABLE",
+        fieldsJson: JSON.stringify([
+          { key: "imie", label: "Imię", type: "text", targetAgendaKey: "", required: true },
+          { key: "stol", label: "Stół", type: "text", targetAgendaKey: "" },
+        ]),
+      }),
+    ]);
+
+    await expect(
+      completeProcessNode(EVENT, "n1", { __rows: [{ imie: "", stol: "3" }] }, "ORGANIZER"),
+    ).rejects.toThrow(/Imię.*wymagana w każdym wierszu/i);
   });
 });

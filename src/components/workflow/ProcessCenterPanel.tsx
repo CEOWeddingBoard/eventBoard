@@ -8,7 +8,7 @@ import {
   type ProcessNodeView,
 } from "@/lib/actions/process-runtime.actions";
 import { listWorkflowsWithNodes } from "@/lib/actions/workflow-builder.actions";
-import { assigneeRoleLabel } from "@/lib/workflow-roles";
+import { assigneeRoleLabel, approveRolesLabel, parseApproveRoles } from "@/lib/workflow-roles";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -540,15 +540,25 @@ export function ProcessCenterPanel({
                   >
                     {node.name}
                   </span>
+                  {/* Kto wypełnia i kto akceptuje — wprost na osi kroków, żeby nie
+                      trzeba było wchodzić w edytor procesu, by to sprawdzić. */}
                   <div className="flex items-center gap-1">
                     <ActionIcon actionType={node.actionType} className="w-3 h-3 text-neutral-400" />
                     <AssigneeIcon role={node.assigneeRole} />
-                    <span className="text-[10px] text-neutral-400">{assigneeLabel(node.assigneeRole)}</span>
+                    <span className="text-[10px] text-neutral-400">
+                      {assigneeLabel(node.fillRole || node.assigneeRole)}
+                    </span>
+                    {parseApproveRoles(node.approveRole).length > 0 && (
+                      <span className="text-[10px] text-neutral-400">
+                        · akceptuje: {approveRolesLabel(node.approveRole)}
+                      </span>
+                    )}
                   </div>
                   {node.status === "completed" && node.completedAt && (
                     <span className="text-[10px] text-emerald-600 flex items-center gap-0.5">
                       <Clock className="w-2.5 h-2.5" />
                       {new Date(node.completedAt).toLocaleDateString("pl-PL")}
+                      {node.completedRole && ` · ${assigneeLabel(node.completedRole)}`}
                     </span>
                   )}
                   {node.nodeType === "DECISION" && (

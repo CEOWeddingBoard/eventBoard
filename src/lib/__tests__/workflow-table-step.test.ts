@@ -16,6 +16,12 @@ import {
   type StepField,
 } from "@/lib/workflow-agenda-fields";
 import { policzPodgladAgendy } from "@/lib/workflow-agenda-preview";
+import {
+  approveRolesLabel,
+  formatApproveRoles,
+  hasRequiredRole,
+  parseApproveRoles,
+} from "@/lib/workflow-roles";
 import type { WorkflowNodeData } from "@/lib/actions/workflow-builder.actions";
 
 const KOLUMNY: StepField[] = [
@@ -145,5 +151,54 @@ describe("podgląd agendy dla kroku tabelarycznego", () => {
     expect(wynik.wypelnione.get("agenda.menu")).toEqual([
       { krok: "Wklej menu", pole: "wklejone menu" },
     ]);
+  });
+});
+
+describe("role akceptujące", () => {
+  it("stary zapis jednej roli nadal działa", () => {
+    expect(parseApproveRoles("MANAGER")).toEqual(["MANAGER"]);
+  });
+
+  it("kilka ról zapisuje się jako lista i wraca w całości", () => {
+    const zapis = formatApproveRoles(["MANAGER", "CHEF"]);
+    expect(parseApproveRoles(zapis)).toEqual(["MANAGER", "CHEF"]);
+  });
+
+  it("jedna rola zapisuje się bez listy — zgodność wstecz", () => {
+    expect(formatApproveRoles(["MANAGER"])).toBe("MANAGER");
+  });
+
+  it("brak ról to brak akceptacji", () => {
+    expect(formatApproveRoles([])).toBeNull();
+    expect(parseApproveRoles(null)).toEqual([]);
+    expect(parseApproveRoles("")).toEqual([]);
+  });
+
+  it("etykieta łączy role po przecinku i tłumaczy kody", () => {
+    expect(approveRolesLabel(formatApproveRoles(["MANAGER", "CHEF"]))).toBe("Manager, Kucharz");
+  });
+
+  it("uszkodzony JSON nie wywraca odczytu", () => {
+    expect(parseApproveRoles("[nie-json")).toEqual([]);
+  });
+});
+
+describe("dopasowanie roli wykonawcy", () => {
+  it("dopasowuje po kodzie i po etykiecie", () => {
+    expect(hasRequiredRole("CHEF", ["CHEF"])).toBe(true);
+    expect(hasRequiredRole("CHEF", ["Kucharz"])).toBe(true);
+    expect(hasRequiredRole("Kucharz", ["CHEF"])).toBe(true);
+  });
+
+  it("rola własna dopasowuje się po nazwie, bez względu na wielkość liter", () => {
+    expect(hasRequiredRole("Florysta", ["florysta"])).toBe(true);
+  });
+
+  it("brak wymaganej roli to odmowa", () => {
+    expect(hasRequiredRole("CHEF", ["WAITER"])).toBe(false);
+  });
+
+  it("krok bez wskazanej roli wykonuje każdy", () => {
+    expect(hasRequiredRole(null, [])).toBe(true);
   });
 });

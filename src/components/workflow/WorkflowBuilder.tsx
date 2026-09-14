@@ -10,7 +10,13 @@ import {
   type NodeCondition,
   type WorkflowWithNodes,
 } from "@/lib/actions/workflow-builder.actions";
-import { ASSIGNEE_ROLE_OPTIONS, PRESET_ROLE_VALUES } from "@/lib/workflow-roles";
+import {
+  ASSIGNEE_ROLE_OPTIONS,
+  PRESET_ROLE_VALUES,
+  approveRolesLabel,
+  formatApproveRoles,
+  parseApproveRoles,
+} from "@/lib/workflow-roles";
 import {
   AGENDA_TARGETS,
   AGENDA_TARGET_GROUPS,
@@ -429,28 +435,37 @@ function NodeEditor({
                 <label className="text-xs font-medium text-neutral-600 mb-1 block">
                   Kto akceptuje
                 </label>
-                <select
-                  value={presetValues.includes(node.approveRole ?? "") ? (node.approveRole ?? "") : (node.approveRole ? "CUSTOM" : "")}
-                  onChange={(e) => {
-                    if (e.target.value === "CUSTOM") updateField("approveRole", "");
-                    else updateField("approveRole", e.target.value || undefined);
-                  }}
-                  className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">— bez osobnej akceptacji —</option>
-                  {roleOptions.map((r) => (
-                    <option key={r.value} value={r.value}>{r.label}</option>
-                  ))}
-                </select>
-                {node.approveRole !== undefined && node.approveRole !== "" && !presetValues.includes(node.approveRole) && (
-                  <input
-                    type="text"
-                    value={node.approveRole}
-                    onChange={(e) => updateField("approveRole", e.target.value)}
-                    placeholder="np. Manager…"
-                    className="mt-1.5 w-full rounded-md border border-blue-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                )}
+                {/* Krok bywa zatwierdzany przez więcej niż jedną osobę — np. menu
+                    przez Managera i Szefa kuchni. Stąd lista, nie pojedynczy wybór. */}
+                <div className="rounded-md border border-neutral-300 bg-white px-3 py-2 space-y-1 max-h-40 overflow-y-auto">
+                  {roleOptions
+                    .filter((r) => r.value !== "CUSTOM")
+                    .map((r) => {
+                      const wybrane = parseApproveRoles(node.approveRole);
+                      const zaznaczona = wybrane.includes(r.value);
+                      return (
+                        <label key={r.value} className="flex items-center gap-2 text-sm cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={zaznaczona}
+                            onChange={() => {
+                              const next = zaznaczona
+                                ? wybrane.filter((v) => v !== r.value)
+                                : [...wybrane, r.value];
+                              updateField("approveRole", formatApproveRoles(next) ?? undefined);
+                            }}
+                            className="rounded"
+                          />
+                          <span>{r.label}</span>
+                        </label>
+                      );
+                    })}
+                </div>
+                <p className="mt-1 text-[11px] text-neutral-400">
+                  {parseApproveRoles(node.approveRole).length === 0
+                    ? "Bez osobnej akceptacji."
+                    : `Akceptuje: ${approveRolesLabel(node.approveRole)}`}
+                </p>
               </div>
             </div>
 
