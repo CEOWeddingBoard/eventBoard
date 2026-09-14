@@ -161,6 +161,9 @@ model Organization {
   notifySms              Boolean  @default(false)
   // Notatka admina platformy o kliencie (wewnętrzna) + archiwizacja przestrzeni.
   adminNote              String?
+  /// Osoba kontaktowa po stronie klienta — kto faktycznie odbiera telefon.
+  contactPerson          String?
+  contactPhone           String?
   archivedAt             DateTime?
   // Lekki branding per klient — kolor przewodni i logo (URL).
   brandColor             String?
@@ -178,6 +181,7 @@ model Organization {
   templates               OrgTemplate[]
   notifications           OrgNotification[]
   googleCalendars         GoogleCalendarConnection[]
+  adminNotes              OrgAdminNote[]
   leads                   OrgLead[]
   agendaTemplates         AgendaTemplate[]
   agendaDocumentTemplates AgendaDocumentTemplate[]
@@ -204,6 +208,25 @@ model RateLimitHit {
 
   @@index([expiresAt])
   @@map("rate_limit_hits")
+}
+
+/// Notatki admina platformy o kliencie — dziennik, nie jedno pole tekstowe.
+/// Z nich wiadomo, czego klienci naprawdę potrzebują i w którą stronę rozwijać
+/// produkt; pojedyncza notatka nadpisywana za każdym razem tę wiedzę gubiła.
+model OrgAdminNote {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  /// Kto dopisał — konto admina platformy.
+  authorId       String?
+  authorName     String?
+  /// Rodzaj wpisu: UWAGA | POMYSL | PROBLEM | USTALENIE
+  kind           String       @default("UWAGA")
+  content        String
+  createdAt      DateTime     @default(now())
+
+  @@index([organizationId, createdAt])
+  @@map("org_admin_notes")
 }
 
 model MenuParserConfig {

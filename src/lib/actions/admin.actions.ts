@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { ACTIVE_ORG_COOKIE } from "@/lib/auth/active-org";
 import { normalizePlan, effectiveLimits, type PlanKey } from "@/lib/plans";
+import { RODZAJE_NOTATEK } from "@/lib/admin-notes";
 
 /** Tylko konto platformy (serviceUser) — Ty. */
 async function assertPlatformAdmin() {
@@ -87,6 +88,9 @@ export type EventSpace = {
   archived: boolean;
   brandColor: string | null;
   brandLogoUrl: string | null;
+  contactPerson: string | null;
+  contactPhone: string | null;
+  contactEmail: string | null;
   /** Postęp wdrożenia — widoczny od razu na liście klientów. */
   wdrozenie: EtapWdrozenia[];
 };
@@ -131,6 +135,7 @@ export async function listEventSpaces(): Promise<EventSpace[]> {
       id: true, name: true, slug: true, createdAt: true, ownerId: true, plan: true,
       maxAdmins: true, maxUsers: true, maxGoogleCalendars: true, customRolesJson: true, billingPaidUntil: true, billingNote: true,
       adminNote: true, archivedAt: true, brandColor: true, brandLogoUrl: true,
+      contactPerson: true, contactPhone: true, email: true,
       _count: { select: { events: true } },
     },
   })).filter((o) => o.slug !== TEMPLATE_SLUG);
@@ -178,6 +183,9 @@ export async function listEventSpaces(): Promise<EventSpace[]> {
       archived: !!o.archivedAt,
       brandColor: o.brandColor ?? null,
       brandLogoUrl: o.brandLogoUrl ?? null,
+      contactPerson: o.contactPerson ?? null,
+      contactPhone: o.contactPhone ?? null,
+      contactEmail: o.email ?? null,
       wdrozenie: wdrozenia.get(o.id) ?? [],
     };
   });
@@ -757,4 +765,103 @@ export async function resetSpaceOwnerPassword(orgId: string): Promise<{ ok: bool
   await prisma.user.update({ where: { id: org.ownerId }, data: { password: await hashPassword(password) } });
   revalidatePath("/admin");
   return { ok: true, email: owner.email, password };
+}
+
+// ── Dane kontaktowe i dziennik notatek o kliencie ────────────────────────
+
+export type NotatkaKlienta = {
+  id: string;
+  kind: string;
+  content: string;
+  autor: string | null;
+  createdAt: string;
+};
+
+/** Dane kontaktowe klienta — poza e-mailem właściciela. */
+export async function setSpaceContact(
+  orgId: string,
+  input: { contactPerson: string | null; contactPhone: string | null; email: string | null },
+): Promise<{ ok: boolean; error?: string }> {
+  await assertPlatformAdmin();
+  const email = input.email?.trim() || null;
+  if (email && !EMAIL_RE.test(email)) return { ok: false, error: "Podaj poprawny e-mail." };
+
+  await prisma.organization.update({
+    where: { id: orgId },
+    data: {
+      contactPerson: input.contactPerson?.trim() || null,
+      contactPhone: input.contactPhone?.trim() || null,
+      email,
+    },
+  });
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
+export async function listSpaceNotes(orgId: string): Promise<NotatkaKlienta[]> {
+  await assertPlatformAdmin();
+  const rows = await prisma.orgAdminNote.findMany({
+    where: { organizationId: orgId },
+    orderBy: { createdAt: "desc" },
+    take: 100,
+  });
+  return rows.map((r) => ({
+    id: r.id,
+    kind: r.kind,
+    content: r.content,
+    autor: r.authorName,
+    createdAt: r.createdAt.toISOString(),
+  }));
+}
+
+/**
+ * Dopisanie notatki o kliencie.
+ *
+ * To jest źródło wiedzy o tym, w którą stronę rozwijać produkt: czego klienci
+ * proszą, na czym się potykają, co obiecaliśmy. Dlatego notatki są DOPISYWANE,
+ * a nie nadpisywane — historia jest tu treścią, nie balastem.
+ */
+export async function addSpaceNote(
+  orgId: string,
+  input: { kind: string; content: string },
+): Promise<{ ok: boolean; notatka?: NotatkaKlienta; error?: string }> {
+  const admin = await assertPlatformAdmin();
+  const content = input.content?.trim();
+  if (!content) return { ok: false, error: "Notatka nie może być pusta." };
+  if (content.length > 2000) return { ok: false, error: "Notatka może mieć najwyżej 2000 znaków." };
+
+  const kind = RODZAJE_NOTATEK.some((r) => r.value === input.kind) ? input.kind : "UWAGA";
+  const autor = await prisma.user.findUnique({
+    where: { id: admin.id },
+    select: { name: true, email: true },
+  });
+
+  const row = await prisma.orgAdminNote.create({
+    data: {
+      organizationId: orgId,
+      authorId: admin.id,
+      authorName: autor?.name ?? autor?.email ?? null,
+      kind,
+      content,
+    },
+  });
+
+  revalidatePath("/admin");
+  return {
+    ok: true,
+    notatka: {
+      id: row.id,
+      kind: row.kind,
+      content: row.content,
+      autor: row.authorName,
+      createdAt: row.createdAt.toISOString(),
+    },
+  };
+}
+
+export async function removeSpaceNote(id: string): Promise<{ ok: boolean; error?: string }> {
+  await assertPlatformAdmin();
+  await prisma.orgAdminNote.deleteMany({ where: { id } });
+  revalidatePath("/admin");
+  return { ok: true };
 }

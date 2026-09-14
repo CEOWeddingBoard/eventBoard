@@ -25,9 +25,11 @@ import {
   type EventSpace,
   type CreateSpaceResult,
   type TemplateLibrary,
+  setSpaceContact,
 } from "@/lib/actions/admin.actions";
 import { LogIn, UserPlus, ShieldCheck, Library, Workflow, ArrowRightLeft, Archive, Trash2 } from "lucide-react";
 import { PLANS, PLAN_KEYS, type PlanKey } from "@/lib/plans";
+import { SpaceNotes } from "@/components/admin/SpaceNotes";
 
 const OP_ROLES = [
   { value: "MANAGER", label: "Manager" },
@@ -177,6 +179,9 @@ export function AdminSpacesClient({
             maxUsers: PLANS[form.plan].maxUsers,
             maxGoogleCalendars: PLANS[form.plan].maxGoogleCalendars,
             wdrozenie: [],
+            contactPerson: null,
+            contactPhone: null,
+            contactEmail: res.credentials!.email,
             eventCount: 0,
             loginUrl: res.space!.loginUrl,
             customRoles: [],
@@ -331,6 +336,24 @@ export function AdminSpacesClient({
       toast.success(archived ? "Zarchiwizowano" : "Przywrócono");
     } else toast.error(res.error ?? "Nie udało się");
   }
+  async function handleContact(
+    orgId: string,
+    dane: { contactPerson: string | null; contactPhone: string | null; email: string | null },
+  ) {
+    const res = await setSpaceContact(orgId, dane);
+    if (res.ok) {
+      setSpaces((prev) =>
+        prev.map((s) =>
+          s.id === orgId
+            ? { ...s, contactPerson: dane.contactPerson || null, contactPhone: dane.contactPhone || null, contactEmail: dane.email || null }
+            : s,
+        ),
+      );
+    } else {
+      toast.error(res.error ?? "Nie udało się zapisać kontaktu");
+    }
+  }
+
   async function handleNote(orgId: string, note: string) {
     const res = await setSpaceNote(orgId, note);
     if (res.ok) setSpaces((prev) => prev.map((s) => (s.id === orgId ? { ...s, adminNote: note || null } : s)));
@@ -639,12 +662,29 @@ export function AdminSpacesClient({
                       <BillingBadge paidUntil={s.billingPaidUntil} />
                     </div>
 
-                    {/* Notatka wewnętrzna o kliencie */}
+                    {/* Kontakt do klienta — e-mail właściciela to za mało,
+                        gdy trzeba zadzwonić w piątek po południu. */}
                     <div className="flex flex-wrap items-center gap-2 border-b border-neutral-200 py-3">
-                      <span className="text-[11px] font-semibold text-neutral-600">Notatka:</span>
-                      <Input className="h-7 min-w-[260px] flex-1 text-xs" placeholder="np. kontakt, ustalenia wdrożeniowe"
+                      <span className="text-[11px] font-semibold text-neutral-600">Kontakt:</span>
+                      <Input className="h-7 w-44 text-xs" placeholder="Osoba kontaktowa"
+                        defaultValue={s.contactPerson ?? ""}
+                        onBlur={(e) => handleContact(s.id, { contactPerson: e.target.value, contactPhone: s.contactPhone, email: s.contactEmail })} />
+                      <Input className="h-7 w-36 text-xs" placeholder="Telefon"
+                        defaultValue={s.contactPhone ?? ""}
+                        onBlur={(e) => handleContact(s.id, { contactPerson: s.contactPerson, contactPhone: e.target.value, email: s.contactEmail })} />
+                      <Input className="h-7 w-52 text-xs" placeholder="E-mail kontaktowy"
+                        defaultValue={s.contactEmail ?? ""}
+                        onBlur={(e) => handleContact(s.id, { contactPerson: s.contactPerson, contactPhone: s.contactPhone, email: e.target.value })} />
+                    </div>
+
+                    {/* Krótka notatka jednozdaniowa — zostaje obok dziennika */}
+                    <div className="flex flex-wrap items-center gap-2 border-b border-neutral-200 py-3">
+                      <span className="text-[11px] font-semibold text-neutral-600">Opis klienta:</span>
+                      <Input className="h-7 min-w-[260px] flex-1 text-xs" placeholder="np. 3 sale, sezon maj–wrzesień"
                         defaultValue={s.adminNote ?? ""} onBlur={(e) => handleNote(s.id, e.target.value)} />
                     </div>
+
+                    <SpaceNotes orgId={s.id} />
 
                     {/* Branding klienta: kolor + logo */}
                     <div className="flex flex-wrap items-center gap-2 border-b border-neutral-200 py-3">
