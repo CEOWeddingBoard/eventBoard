@@ -69,6 +69,7 @@ export type EventSpace = {
   usersUsed: number;
   maxAdmins: number | null;
   maxUsers: number | null;
+  maxGoogleCalendars: number | null;
   eventCount: number;
   loginUrl: string;
   customRoles: { value: string; label: string }[];
@@ -118,7 +119,7 @@ export async function listEventSpaces(): Promise<EventSpace[]> {
     orderBy: { createdAt: "desc" },
     select: {
       id: true, name: true, slug: true, createdAt: true, ownerId: true, plan: true,
-      maxAdmins: true, maxUsers: true, customRolesJson: true, billingPaidUntil: true, billingNote: true,
+      maxAdmins: true, maxUsers: true, maxGoogleCalendars: true, customRolesJson: true, billingPaidUntil: true, billingNote: true,
       adminNote: true, archivedAt: true, brandColor: true, brandLogoUrl: true,
       _count: { select: { events: true } },
     },
@@ -144,7 +145,7 @@ export async function listEventSpaces(): Promise<EventSpace[]> {
   return orgs.map((o) => {
     const owner = owners.find((u) => u.id === o.ownerId) ?? null;
     const plan = normalizePlan(o.plan);
-    const limits = effectiveLimits(plan, { maxAdmins: o.maxAdmins, maxUsers: o.maxUsers });
+    const limits = effectiveLimits(plan, { maxAdmins: o.maxAdmins, maxUsers: o.maxUsers, maxGoogleCalendars: o.maxGoogleCalendars });
     return {
       id: o.id,
       name: o.name,
@@ -156,6 +157,7 @@ export async function listEventSpaces(): Promise<EventSpace[]> {
       usersUsed: userMap.get(o.id) ?? 0,
       maxAdmins: limits.maxAdmins,
       maxUsers: limits.maxUsers,
+      maxGoogleCalendars: limits.maxGoogleCalendars,
       eventCount: o._count.events,
       loginUrl: `${base}/pl/auth?space=${o.slug}`,
       customRoles: parseCustomRoles(o.customRolesJson),
@@ -568,20 +570,31 @@ export async function setSpacePlan(orgId: string, plan: PlanKey): Promise<{ ok: 
 }
 
 /** Ręczne limity licencji per przestrzeń (null = domyślny z planu / bez limitu). */
-export async function setSpaceLimits(orgId: string, input: { maxAdmins: number | null; maxUsers: number | null }): Promise<{ ok: boolean; error?: string }> {
+export async function setSpaceLimits(
+  orgId: string,
+  input: { maxAdmins: number | null; maxUsers: number | null; maxGoogleCalendars?: number | null },
+): Promise<{ ok: boolean; error?: string }> {
   await assertPlatformAdmin();
-  const clean = (n: number | null) => (n == null || Number.isNaN(n) || n < 0 ? null : Math.floor(n));
+  const clean = (n: number | null | undefined) => (n == null || Number.isNaN(n) || n < 0 ? null : Math.floor(n));
   const maxAdmins = clean(input.maxAdmins);
   const maxUsers = clean(input.maxUsers);
+  const maxGoogleCalendars = clean(input.maxGoogleCalendars);
 
-  const [adminsUsed, usersUsed] = await Promise.all([
+  const [adminsUsed, usersUsed, kalendarzeUzyte] = await Promise.all([
     prisma.organizationMember.count({ where: { organizationId: orgId, role: { not: "SERVICE" }, isAdmin: true } }),
     prisma.organizationMember.count({ where: { organizationId: orgId, role: { not: "SERVICE" }, isAdmin: false } }),
+    prisma.googleCalendarConnection.count({ where: { organizationId: orgId } }),
   ]);
   if (maxAdmins != null && adminsUsed > maxAdmins) return { ok: false, error: `Adminów jest ${adminsUsed}, limit ${maxAdmins}. Usuń konta lub podnieś limit.` };
   if (maxUsers != null && usersUsed > maxUsers) return { ok: false, error: `Użytkowników jest ${usersUsed}, limit ${maxUsers}. Usuń konta lub podnieś limit.` };
+  if (maxGoogleCalendars != null && kalendarzeUzyte > maxGoogleCalendars) {
+    return { ok: false, error: `Kalendarzy jest ${kalendarzeUzyte}, limit ${maxGoogleCalendars}. Odłącz kalendarz lub podnieś limit.` };
+  }
 
-  await prisma.organization.update({ where: { id: orgId }, data: { maxAdmins, maxUsers } });
+  await prisma.organization.update({
+    where: { id: orgId },
+    data: { maxAdmins, maxUsers, maxGoogleCalendars },
+  });
   revalidatePath("/admin");
   return { ok: true };
 }

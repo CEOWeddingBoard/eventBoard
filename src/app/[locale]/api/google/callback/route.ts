@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { exchangeCodeForTokens } from "@/lib/google-calendar";
+import { effectiveLimits } from "@/lib/plans";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -50,9 +51,19 @@ export async function GET(req: NextRequest) {
       `${base}/${locale}/api/google/callback`,
     );
 
+    // Limit kalendarzy zależy od pakietu (START 5, PRO 10, ENTERPRISE bez
+    // limitu), z możliwością ręcznego nadpisania per przestrzeń.
+    const org = await prisma.organization.findUnique({
+      where: { id: state.orgId },
+      select: { plan: true, maxGoogleCalendars: true },
+    });
     const ile = await prisma.googleCalendarConnection.count({
       where: { organizationId: state.orgId },
     });
+    const limit = effectiveLimits(org?.plan, {
+      maxGoogleCalendars: org?.maxGoogleCalendars ?? null,
+    }).maxGoogleCalendars;
+    if (limit != null && ile >= limit) return wrocDo("limit");
 
     await prisma.googleCalendarConnection.create({
       data: {

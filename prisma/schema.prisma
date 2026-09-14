@@ -148,6 +148,8 @@ model Organization {
   // null = domyślny limit z planu. SERVICE nie liczy się do żadnego.
   maxAdmins              Int?
   maxUsers               Int?
+  /// Limit podłączonych kalendarzy Google. null = limit z planu.
+  maxGoogleCalendars     Int?
   // Własne role operacyjne tej przestrzeni (poza stałymi Manager/Kuchnia/...).
   // JSON: [{value, label}]. Admin platformy definiuje je per klient.
   customRolesJson        String?

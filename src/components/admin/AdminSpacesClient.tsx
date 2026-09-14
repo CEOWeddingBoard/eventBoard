@@ -151,6 +151,7 @@ export function AdminSpacesClient({
             usersUsed: 0,
             maxAdmins: PLANS[form.plan].maxAdmins,
             maxUsers: PLANS[form.plan].maxUsers,
+            maxGoogleCalendars: PLANS[form.plan].maxGoogleCalendars,
             eventCount: 0,
             loginUrl: res.space!.loginUrl,
             customRoles: [],
@@ -191,7 +192,7 @@ export function AdminSpacesClient({
   async function handlePlanChange(orgId: string, plan: PlanKey) {
     const res = await setSpacePlan(orgId, plan);
     if (res.ok) {
-      setSpaces((prev) => prev.map((s) => (s.id === orgId ? { ...s, plan, maxAdmins: s.maxAdmins ?? PLANS[plan].maxAdmins, maxUsers: s.maxUsers ?? PLANS[plan].maxUsers } : s)));
+      setSpaces((prev) => prev.map((s) => (s.id === orgId ? { ...s, plan, maxAdmins: s.maxAdmins ?? PLANS[plan].maxAdmins, maxUsers: s.maxUsers ?? PLANS[plan].maxUsers, maxGoogleCalendars: s.maxGoogleCalendars ?? PLANS[plan].maxGoogleCalendars } : s)));
       toast.success(`Plan zmieniony na ${PLANS[plan].label}`);
     } else {
       toast.error(res.error ?? "Nie udało się zmienić planu");

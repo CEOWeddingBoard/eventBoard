@@ -5,6 +5,12 @@ import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { requireOrgId } from "@/lib/auth/active-org";
 import { assertModuleEdit } from "@/lib/permissions/guard";
+import { effectiveLimits } from "@/lib/plans";
+import {
+  getValidAccessToken,
+  createCalendarEventWithToken,
+  updateCalendarEventWithToken,
+} from "@/lib/google-calendar";
 
 /**
  * Zarządzanie kalendarzami Google przestrzeni.
@@ -148,4 +154,115 @@ export async function removeGoogleCalendar(id: string): Promise<{ ok: boolean; e
   revalidatePath("/app/settings/configuration");
   revalidatePath("/app/calendar");
   return { ok: true };
+}
+
+/** Ile kalendarzy wolno podłączyć w tej przestrzeni i ile już jest. */
+export async function getGoogleCalendarLimit(): Promise<{ uzyte: number; limit: number | null }> {
+  try {
+    const organizationId = await orgIdLubBlad();
+    const [org, uzyte] = await Promise.all([
+      prisma.organization.findUnique({
+        where: { id: organizationId },
+        select: { plan: true, maxGoogleCalendars: true },
+      }),
+      prisma.googleCalendarConnection.count({ where: { organizationId } }),
+    ]);
+    const limit = effectiveLimits(org?.plan, {
+      maxGoogleCalendars: org?.maxGoogleCalendars ?? null,
+    }).maxGoogleCalendars;
+    return { uzyte, limit };
+  } catch {
+    return { uzyte: 0, limit: null };
+  }
+}
+
+/**
+ * Eksport przyjęcia do Google — druga strona synchronizacji.
+ *
+ * Kalendarz docelowy wynika z mapowania: jeśli event ma salę, a któryś
+ * kalendarz jest do niej przypisany, trafia tam. Inaczej idzie do kalendarza
+ * „całego obiektu” (bez przypisanej sali), a w ostateczności do pierwszego
+ * włączonego. Dzięki temu rezerwacja wraca na ten sam grafik, z którego
+ * czytamy zajętość — bez tego wpis lądowałby w losowym kalendarzu.
+ */
+export async function eksportujEventDoGoogle(
+  eventId: string,
+): Promise<{ ok: boolean; kalendarz?: string; error?: string }> {
+  await assertModuleEdit("events");
+  const organizationId = await orgIdLubBlad();
+
+  const event = await prisma.event.findFirst({
+    where: { id: eventId, organizationId },
+    select: {
+      id: true,
+      name: true,
+      date: true,
+      eventEndTime: true,
+      hallId: true,
+      googleCalendarEventId: true,
+      receptionLocationName: true,
+      scenarioNotes: true,
+    },
+  });
+  if (!event) return { ok: false, error: "Nie znaleziono przyjęcia." };
+
+  const polaczenia = await prisma.googleCalendarConnection.findMany({
+    where: { organizationId, isActive: true },
+    orderBy: { createdAt: "asc" },
+  });
+  if (polaczenia.length === 0) {
+    return { ok: false, error: "Nie podłączono żadnego kalendarza Google." };
+  }
+
+  const cel =
+    (event.hallId ? polaczenia.find((c) => c.venueHallId === event.hallId) : undefined) ??
+    polaczenia.find((c) => c.venueHallId === null) ??
+    polaczenia[0];
+
+  const start = new Date(event.date);
+  // Bez godziny zakończenia przyjmujemy pięć godzin — tyle trwa typowe
+  // przyjęcie, a wpis bez końca Google traktuje jako całodniowy.
+  const koniec = event.eventEndTime ?? new Date(start.getTime() + 5 * 60 * 60 * 1000);
+
+  const wejscie = {
+    summary: event.name,
+    description: event.scenarioNotes ?? undefined,
+    location: event.receptionLocationName ?? undefined,
+    start: { dateTime: start.toISOString() },
+    end: { dateTime: koniec.toISOString() },
+  };
+
+  try {
+    const token = await getValidAccessToken({
+      id: cel.id,
+      userId: cel.userId,
+      refreshToken: cel.refreshToken,
+      accessToken: cel.accessToken,
+      tokenExpiresAt: cel.tokenExpiresAt,
+      calendarId: cel.calendarId,
+    });
+    const calendarId = cel.calendarId ?? "primary";
+
+    if (event.googleCalendarEventId) {
+      await updateCalendarEventWithToken(token, calendarId, event.googleCalendarEventId, wejscie);
+    } else {
+      const googleId = await createCalendarEventWithToken(token, calendarId, wejscie, event.id);
+      await prisma.event.update({
+        where: { id: event.id },
+        data: { googleCalendarEventId: googleId },
+      });
+    }
+
+    await prisma.googleCalendarConnection.update({
+      where: { id: cel.id },
+      data: { lastSyncAt: new Date() },
+    });
+
+    revalidatePath(`/app/events/${eventId}`);
+    revalidatePath("/app/calendar");
+    return { ok: true, kalendarz: cel.label };
+  } catch (e) {
+    console.error("[google:eksport]", e);
+    return { ok: false, error: "Nie udało się zapisać w Google. Sprawdź połączenie w Konfiguracji." };
+  }
 }

@@ -3,7 +3,7 @@ import { Building2, ClipboardPaste, UtensilsCrossed } from "lucide-react";
 import { listOrganizationConfiguration, listOrganizationEventsWithWorkflow, ensureDefaultWorkflow } from "@/lib/actions/organization-config.actions";
 import { OrganizationConfigurationClient } from "./organization-configuration-client";
 import { GoogleCalendarsManager } from "@/components/google/GoogleCalendarsManager";
-import { listGoogleCalendars, listHallsForMapping } from "@/lib/actions/google-calendar.actions";
+import { listGoogleCalendars, listHallsForMapping, getGoogleCalendarLimit } from "@/lib/actions/google-calendar.actions";
 import { isGoogleCalendarConfigured } from "@/lib/google-calendar";
 
 /**
@@ -37,16 +37,20 @@ export const metadata = { robots: { index: false, follow: false } };
 
 export default async function ConfigurationPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ google?: string }>;
 }) {
   const { locale } = await params;
+  const { google: googleStatus } = await searchParams;
   await ensureDefaultWorkflow().catch(() => null);
-  const [configuration, events, kalendarze, sale] = await Promise.all([
+  const [configuration, events, kalendarze, sale, limitKalendarzy] = await Promise.all([
     listOrganizationConfiguration(),
     listOrganizationEventsWithWorkflow(),
     listGoogleCalendars(),
     listHallsForMapping(),
+    getGoogleCalendarLimit(),
   ]);
   return (
     <div className="max-w-4xl space-y-6">
@@ -61,6 +65,8 @@ export default async function ConfigurationPage({
         initial={kalendarze}
         halls={sale}
         configured={isGoogleCalendarConfigured()}
+        limit={limitKalendarzy.limit}
+        status={googleStatus}
       />
 
       <div className="grid gap-4 md:grid-cols-2">

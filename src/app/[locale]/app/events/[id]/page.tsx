@@ -7,6 +7,7 @@ import { getActiveMembership } from "@/lib/auth/active-org";
 import { getEventWithDayScheduleAndMenu } from "@/lib/actions/event.actions";
 import { DayScheduleAndMenu } from "@/components/day-schedule/day-schedule-and-menu";
 import { MenuVariantEditor } from "@/components/menu/MenuVariantEditor";
+import { ExportEventToGoogle } from "@/components/google/ExportEventToGoogle";
 import { AgendaApprovalPanel } from "@/components/agenda/AgendaApprovalPanel";
 import { GenerateAgendaButton } from "@/components/agenda/generate-agenda-button";
 import { EventClientLinkButton } from "@/components/eventboard/event-client-link-button";
@@ -188,6 +189,15 @@ export default async function EventBoardEventPage({
           viewerRoles={viewerRoles}
           canOverride={canOverride}
         />
+      )}
+
+      {canManage && (
+        <div className="flex flex-wrap gap-2">
+          <ExportEventToGoogle
+            eventId={event.id}
+            juzWyslany={Boolean((event as { googleCalendarEventId?: string | null }).googleCalendarEventId)}
+          />
+        </div>
       )}
 
       {canManage && (

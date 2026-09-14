@@ -27,11 +27,17 @@ export function GoogleCalendarsManager({
   initial,
   halls,
   configured,
+  limit,
+  status,
 }: {
   locale: string;
   initial: KalendarzWKonfiguracji[];
   halls: { id: string; name: string }[];
   configured: boolean;
+  /** null = pakiet bez limitu kalendarzy. */
+  limit: number | null;
+  /** Wynik powrotu z Google — przekazany w adresie przez callback. */
+  status?: string;
 }) {
   const [kalendarze, setKalendarze] = useState(initial);
   const [zapisuje, setZapisuje] = useState<string | null>(null);
@@ -75,11 +81,34 @@ export function GoogleCalendarsManager({
 
   return (
     <section className="rounded-lg border border-neutral-200 bg-white p-5">
-      <h2 className="text-sm font-bold text-neutral-800">Kalendarze Google</h2>
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 className="text-sm font-bold text-neutral-800">Kalendarze Google</h2>
+        <span className="text-xs tabular-nums text-neutral-400">
+          {limit == null
+            ? `${kalendarze.length} podłączonych · bez limitu`
+            : `${kalendarze.length} z ${limit} w tym pakiecie`}
+        </span>
+      </div>
       <p className="mt-1 text-xs text-neutral-500">
         Podłącz kalendarze, z których rezerwacje mają być widoczne na grafiku. Możesz podłączyć
         kilka kont — każdy kalendarz dostaje swój kolor. Rezerwacje z Google są tylko do odczytu.
       </p>
+
+      {status && (
+        <p
+          className={`mt-3 rounded-md border px-3 py-2 text-xs ${
+            status === "polaczono"
+              ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+              : "border-red-200 bg-red-50 text-red-900"
+          }`}
+        >
+          {status === "polaczono" && "Kalendarz podłączony. Nadaj mu nazwę i kolor poniżej."}
+          {status === "limit" && "Osiągnięto limit kalendarzy w tym pakiecie — podnieś pakiet albo odłącz jeden z istniejących."}
+          {status === "brak-dostepu" && "Nie masz dostępu do tej przestrzeni."}
+          {status === "sesja" && "Sesja wygasła w trakcie autoryzacji. Zaloguj się i spróbuj ponownie."}
+          {status === "blad" && "Autoryzacja nie powiodła się. Spróbuj ponownie."}
+        </p>
+      )}
 
       {!configured && (
         <p className="mt-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
@@ -168,13 +197,19 @@ export function GoogleCalendarsManager({
         ))}
       </div>
 
-      <a
-        href={`/${locale}/api/google/oauth?locale=${locale}`}
-        className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-blue-700"
-      >
-        <CalendarPlus className="h-3.5 w-3.5" />
-        Podłącz kalendarz Google
-      </a>
+      {limit != null && kalendarze.length >= limit ? (
+        <p className="mt-4 rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs text-neutral-600">
+          Wykorzystano limit {limit} kalendarzy w tym pakiecie. Odłącz jeden albo podnieś pakiet.
+        </p>
+      ) : (
+        <a
+          href={`/${locale}/api/google/oauth?locale=${locale}`}
+          className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-blue-700"
+        >
+          <CalendarPlus className="h-3.5 w-3.5" />
+          Podłącz kalendarz Google
+        </a>
+      )}
 
       {halls.length === 0 && kalendarze.length > 0 && (
         <p className="mt-2 text-[11px] text-neutral-400">
