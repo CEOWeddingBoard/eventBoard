@@ -58,6 +58,14 @@ function generatePassword(len = 12): string {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/** Jeden etap wdrożenia klienta — nazwa, czy zrobiony i gdzie to ustawić. */
+export type EtapWdrozenia = {
+  klucz: string;
+  nazwa: string;
+  zrobiony: boolean;
+  podpowiedz: string;
+};
+
 export type EventSpace = {
   id: string;
   name: string;
@@ -79,6 +87,8 @@ export type EventSpace = {
   archived: boolean;
   brandColor: string | null;
   brandLogoUrl: string | null;
+  /** Postęp wdrożenia — widoczny od razu na liście klientów. */
+  wdrozenie: EtapWdrozenia[];
 };
 
 /** Parsuje customRolesJson do listy {value,label}. */
@@ -141,6 +151,7 @@ export async function listEventSpaces(): Promise<EventSpace[]> {
   for (const g of groups) {
     (g.isAdmin ? adminMap : userMap).set(g.organizationId, g._count._all);
   }
+  const wdrozenia = await wdrozeniaDlaPrzestrzeni(orgIds);
   const base = appBase();
   return orgs.map((o) => {
     const owner = owners.find((u) => u.id === o.ownerId) ?? null;
@@ -167,8 +178,84 @@ export async function listEventSpaces(): Promise<EventSpace[]> {
       archived: !!o.archivedAt,
       brandColor: o.brandColor ?? null,
       brandLogoUrl: o.brandLogoUrl ?? null,
+      wdrozenie: wdrozenia.get(o.id) ?? [],
     };
   });
+}
+
+/**
+ * Etapy wdrożenia dla wszystkich przestrzeni naraz.
+ *
+ * Liczone zbiorczo (kilka zapytań grupujących zamiast dziesięciu na klienta),
+ * bo lista klientów ma się otwierać od razu, a nie po sekundzie. Wszystkie dane
+ * już są w bazie — to tylko ich odczytanie, nic nowego nie zapisujemy.
+ */
+async function wdrozeniaDlaPrzestrzeni(orgIds: string[]): Promise<Map<string, EtapWdrozenia[]>> {
+  const pusty = new Map<string, EtapWdrozenia[]>();
+  if (orgIds.length === 0) return pusty;
+
+  const zbierz = async <T extends { organizationId: string | null }>(
+    rows: Promise<T[]>,
+  ): Promise<Set<string>> => {
+    const out = new Set<string>();
+    for (const r of await rows) if (r.organizationId) out.add(r.organizationId);
+    return out;
+  };
+
+  const [procesy, sale, regulyMenu, kalendarze, zespol, eventy, linki, procesyRuszyly, agendy] =
+    await Promise.all([
+      zbierz(prisma.organizationWorkflow.findMany({
+        where: { organizationId: { in: orgIds }, nodes: { some: {} } },
+        select: { organizationId: true },
+      })),
+      zbierz(prisma.venue.findMany({
+        where: { organizationId: { in: orgIds }, halls: { some: {} } },
+        select: { organizationId: true },
+      })),
+      zbierz(prisma.menuParserConfig.findMany({
+        where: { organizationId: { in: orgIds } },
+        select: { organizationId: true },
+      })),
+      zbierz(prisma.googleCalendarConnection.findMany({
+        where: { organizationId: { in: orgIds } },
+        select: { organizationId: true },
+      })),
+      zbierz(prisma.organizationMember.findMany({
+        where: { organizationId: { in: orgIds }, role: { notIn: ["SERVICE", "OWNER"] } },
+        select: { organizationId: true },
+      })),
+      zbierz(prisma.event.findMany({
+        where: { organizationId: { in: orgIds } },
+        select: { organizationId: true },
+      })),
+      zbierz(prisma.event.findMany({
+        where: { organizationId: { in: orgIds }, clientLinkTokenHash: { not: null } },
+        select: { organizationId: true },
+      })),
+      zbierz(prisma.event.findMany({
+        where: { organizationId: { in: orgIds }, processState: { isNot: null } },
+        select: { organizationId: true },
+      })),
+      zbierz(prisma.event.findMany({
+        where: { organizationId: { in: orgIds }, agendaData: { isNot: null } },
+        select: { organizationId: true },
+      })),
+    ]);
+
+  for (const id of orgIds) {
+    pusty.set(id, [
+      { klucz: "proces", nazwa: "Proces obsługi", zrobiony: procesy.has(id), podpowiedz: "Ustawienia → Procesy" },
+      { klucz: "sale", nazwa: "Sale", zrobiony: sale.has(id), podpowiedz: "Ustawienia → Sale" },
+      { klucz: "menu", nazwa: "Reguły importu menu", zrobiony: regulyMenu.has(id), podpowiedz: "Konfiguracja → Reguły importu menu" },
+      { klucz: "kalendarz", nazwa: "Kalendarz Google", zrobiony: kalendarze.has(id), podpowiedz: "Konfiguracja → Kalendarze Google" },
+      { klucz: "zespol", nazwa: "Zespół", zrobiony: zespol.has(id), podpowiedz: "Zespół → Dodaj konto" },
+      { klucz: "event", nazwa: "Pierwsze przyjęcie", zrobiony: eventy.has(id), podpowiedz: "Eventy → Nowy event" },
+      { klucz: "link", nazwa: "Link wysłany klientowi", zrobiony: linki.has(id), podpowiedz: "Event → Link dla klienta" },
+      { klucz: "proces-ruszyl", nazwa: "Proces uruchomiony", zrobiony: procesyRuszyly.has(id), podpowiedz: "Event → Proces obsługi" },
+      { klucz: "agenda", nazwa: "Agenda wypełniona", zrobiony: agendy.has(id), podpowiedz: "Kroki procesu zasilają agendę" },
+    ]);
+  }
+  return pusty;
 }
 
 /** Lekki branding klienta — kolor przewodni (hex) i logo (URL). */

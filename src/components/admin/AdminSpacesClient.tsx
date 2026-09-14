@@ -79,6 +79,30 @@ function Credentials({ email, password, loginUrl }: { email: string; password: s
   );
 }
 
+/**
+ * Postęp wdrożenia klienta — ile etapów za nami.
+ *
+ * Wszystkie dane liczone są z bazy, więc pasek nie wymaga niczego odhaczania
+ * ręcznie: jak klient podłączy kalendarz albo wyśle link, etap zapala się sam.
+ */
+function PostepWdrozenia({ etapy }: { etapy: { zrobiony: boolean }[] }) {
+  if (etapy.length === 0) return null;
+  const zrobione = etapy.filter((e) => e.zrobiony).length;
+  const komplet = zrobione === etapy.length;
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ${
+        komplet ? "bg-emerald-100 text-emerald-700" : "bg-blue-50 text-blue-700"
+      }`}
+      title={komplet ? "Wdrożenie zakończone" : "Etapy wdrożenia"}
+    >
+      <span className="tabular-nums">
+        {komplet ? "Wdrożony" : `Wdrożenie ${zrobione}/${etapy.length}`}
+      </span>
+    </span>
+  );
+}
+
 function BillingBadge({ paidUntil }: { paidUntil: string | null }) {
   let cls = "bg-neutral-100 text-neutral-500";
   let text = "Płatność: brak";
@@ -152,6 +176,7 @@ export function AdminSpacesClient({
             maxAdmins: PLANS[form.plan].maxAdmins,
             maxUsers: PLANS[form.plan].maxUsers,
             maxGoogleCalendars: PLANS[form.plan].maxGoogleCalendars,
+            wdrozenie: [],
             eventCount: 0,
             loginUrl: res.space!.loginUrl,
             customRoles: [],
@@ -505,6 +530,7 @@ export function AdminSpacesClient({
                         </span>
                       </span>
                       <span className="inline-flex items-center gap-1"><CalendarDays className="h-3 w-3" />{s.eventCount} eventów</span>
+                      <PostepWdrozenia etapy={s.wdrozenie} />
                       <BillingBadge paidUntil={s.billingPaidUntil} />
                     </div>
                   </div>
@@ -570,6 +596,32 @@ export function AdminSpacesClient({
                           onBlur={(e) => handleLimits(s.id, s.maxAdmins, e.target.value === "" ? null : parseInt(e.target.value, 10))} />
                       </label>
                       <span className="text-[11px] text-neutral-400">(puste = bez limitu)</span>
+                    </div>
+
+                    {/* Etapy wdrożenia — od razu widać, gdzie klient utknął */}
+                    <div className="border-b border-neutral-200 py-3">
+                      <span className="text-[11px] font-semibold text-neutral-600">Wdrożenie:</span>
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {s.wdrozenie.map((etap) => (
+                          <span
+                            key={etap.klucz}
+                            title={etap.zrobiony ? "Zrobione" : etap.podpowiedz}
+                            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium ${
+                              etap.zrobiony
+                                ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
+                                : "bg-neutral-100 text-neutral-500"
+                            }`}
+                          >
+                            {etap.zrobiony ? <Check className="h-3 w-3" /> : <span className="h-1.5 w-1.5 rounded-full bg-neutral-300" />}
+                            {etap.nazwa}
+                          </span>
+                        ))}
+                      </div>
+                      {s.wdrozenie.some((e) => !e.zrobiony) && (
+                        <p className="mt-1.5 text-[11px] text-neutral-400">
+                          Najbliższy krok: {s.wdrozenie.find((e) => !e.zrobiony)?.podpowiedz}
+                        </p>
+                      )}
                     </div>
 
                     {/* Płatność klienta — ręczne oznaczenie (SaaS bez Stripe) */}
