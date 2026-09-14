@@ -41,9 +41,13 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: 'npm run dev',
+    // W CI stawiamy build produkcyjny, nie `npm run dev`.
+    // Powód jest konkretny: w NODE_ENV=development `getCurrentUser()` zwraca
+    // użytkownika testowego BEZ sprawdzania cookie, więc brama sesji jest
+    // wyłączona i testy „panel wymaga logowania” niczego nie sprawdzają.
+    command: process.env.CI ? 'npm run build && npm run start' : 'npm run dev',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
+    timeout: 300 * 1000,
   },
 })

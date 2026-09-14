@@ -13,7 +13,10 @@ import { test, expect } from "@playwright/test";
 test.describe("Brama sesji", () => {
   test("logowanie jest pod /pl/auth i pokazuje formularz", async ({ page }) => {
     await page.goto("/pl/auth");
-    await expect(page.getByText(/Zaloguj do EventBoard/i)).toBeVisible();
+    // Formularz, nie nagłówek: nagłówek zmienia się zależnie od tego, czy link
+    // niósł nazwę przestrzeni. Pola e-mail i hasło są tam zawsze.
+    await expect(page.locator("#signin-email")).toBeVisible();
+    await expect(page.locator("#signin-password")).toBeVisible();
   });
 
   test("panel obiektu bez sesji przekierowuje na logowanie", async ({ page }) => {
@@ -45,9 +48,12 @@ test.describe("Portal klienta", () => {
     await expect(page.getByText(/Link jest nieaktualny/i)).toBeVisible();
   });
 
-  test("komunikat nie zdradza, czy token istniał, czy wygasł", async ({ page }) => {
+  test("komunikat nie rozróżnia tokenu nieznanego od wygasłego", async ({ page }) => {
     await page.goto("/pl/portal/inny-zmyslony-token-0987654321");
     const tresc = await page.locator("body").innerText();
-    expect(tresc).not.toMatch(/wygas[łl]|nie istnieje|nieznany token/i);
+    // Komunikat mówi „wygasł ALBO został unieważniony” — celowo nie wskazuje,
+    // który przypadek zaszedł. Zdradzałoby to, które tokeny istnieją.
+    expect(tresc).toMatch(/Link jest nieaktualny/i);
+    expect(tresc).not.toMatch(/nie istnieje|nieznany token|nie znaleziono/i);
   });
 });
