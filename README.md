@@ -1,78 +1,77 @@
-# Wedding AI Planner
+# EventBoard
 
-A comprehensive SaaS application for planning weddings with AI assistance.
+Platforma SaaS dla sal, restauracji i obiektów eventowych. Obiekt prowadzi w niej obsługę
+przyjęć: kalendarz, wydarzenia, **procesy obsługi**, warianty menu, agendę dla kuchni
+i obsługi, zespół z uprawnieniami oraz zapytania ofertowe.
 
-## Status
+Sercem produktu jest **proces**: konfigurowalne kroki z rolami („kto wypełnia", „kto
+akceptuje"), z których **automatycznie składa się agenda**. Agenda nie ma osobnej
+konfiguracji — jedynym źródłem prawdy jest proces.
 
-This project has been analyzed and repaired to fix a critical 404 error and establish a stable foundation for future development. The authentication system (Clerk) has been temporarily mocked to allow for development without requiring external service credentials.
+## Model dostępu
 
-## Tech Stack
+Nie ma publicznej rejestracji. Przestrzenie klientów zakłada administrator platformy
+(`/pl/admin`, konto z `User.role = "ADMIN"`), on też generuje dane logowania. Nowa
+przestrzeń startuje **pusta** — co klient dostaje, ustala się na wdrożeniu, przypisując
+wzorce z biblioteki procesów.
 
-- **Frontend**: Next.js 14 (App Router), TypeScript, TailwindCSS, shadcn/ui, React Query
-- **Backend**: Next.js API Routes, Prisma ORM
-- **Database**: PostgreSQL
-- **Auth**: Clerk
-- **Deployment**: Docker
+Klient końcowy (para młoda, organizator przyjęcia) **nie ma konta**. Dostaje link
+z tokenem do portalu `/pl/portal/<token>`, gdzie wypełnia swoje kroki procesu.
 
-## Getting Started
+Płatności są ręczne — faktura poza systemem, status opłacenia ustawia administrator.
 
-### Prerequisites
+## Stack
 
-- **Node.js**: Version 18 or higher.
-- **Docker & Docker Compose**: Required to run the local PostgreSQL database.
+Next.js 15 (App Router) · TypeScript · React 18 · TailwindCSS + shadcn/ui · Prisma 5 +
+PostgreSQL · next-intl · TanStack Query · Playwright + Jest · Railway
 
-### Local Development Setup
+Logowanie jest **własne**: e-mail + hasło (bcrypt) i podpisany token sesji w cookie.
 
-1.  **Clone the repository**
-    ```bash
-    git clone <repository-url>
-    cd wedding-ai-planner
-    ```
+## Uruchomienie
 
-2.  **Install dependencies**
-    ```bash
-    npm install
-    ```
+Wymagania: Node 18.17+ (poniżej 22) i **PostgreSQL** — schemat Prisma jest pod Postgresa,
+SQLite nie wystarczy.
 
-3.  **Start the database container**
-    This command will start a PostgreSQL database in a Docker container.
-    ```bash
-    docker-compose up -d
-    ```
+```bash
+npm install
+cp .env.example .env.local     # uzupełnij DATABASE_URL i AUTH_SESSION_SECRET
+npx prisma migrate deploy
+npm run db:seed
+npm run dev                    # http://localhost:3000
+```
 
-4.  **Set up environment variables**
-    Create `.env.local` file with database connection:
-    ```bash
-    DATABASE_URL="postgresql://postgres:postgres@localhost:5432/wedding_planner?schema=public"
-    ```
+Bazę lokalnie najszybciej podniesiesz Dockerem:
 
-5.  **Apply database schema**
-    This command will create the necessary tables in the database based on the Prisma schema.
-    ```bash
-    npx prisma migrate dev
-    ```
-    Or if you prefer to push without migration history:
-    ```bash
-    npx prisma db push
-    ```
+```bash
+docker-compose up -d
+```
 
-6.  **Run the application**
-    ```bash
-    npm run dev
-    ```
+> **Uwaga przy pracy lokalnej:** w `NODE_ENV=development` `getCurrentUser()` zwraca
+> użytkownika testowego **bez sprawdzania cookie**. Testując realny przepływ logowania
+> i uprawnień, licz się z tym obejściem.
 
-The application will be available at [http://localhost:3000](http://localhost:3000). You will be automatically logged in with a mock user and redirected to the dashboard.
+## Testy i jakość
 
-## Project Structure Highlights
+```bash
+npm test          # Jest
+npm run test:e2e  # Playwright
+npm run lint      # ESLint
+npx tsc --noEmit  # typy
+```
 
--   `src/app/`: Contains the Next.js App Router structure.
-    -   `src/app/page.tsx`: The public landing page.
-    -   `src/app/dashboard/`: The main application interface after logging in.
--   `src/app/api/`: API routes for handling backend logic.
--   `src/lib/auth-mock.ts`: A simple mock for the authentication system, allowing development without real user accounts.
--   `prisma/`: Contains the Prisma schema (`schema.prisma`) defining the database models.
--   `docker-compose.yml`: Defines the local development environment, including the PostgreSQL database service.
+Typy i lint **blokują build** (`next.config.mjs`) i są krokami blokującymi w CI.
+Testy E2E izolacji danych i uprawnień pomijają się bez kont testowych — patrz
+`E2E_*` w `.env.example`.
 
-## License
+## Dokumentacja
 
-Private
+| Plik | Co zawiera |
+|---|---|
+| [CLAUDE.md](CLAUDE.md) | architektura, pułapki, konwencje — zacznij tutaj |
+| [PLAN-NAPRAWY.md](PLAN-NAPRAWY.md) | domknięte fazy: typy, izolacja danych, uprawnienia, reset hasła, monitoring |
+| [PLAN-PRODUKCJA.md](PLAN-PRODUKCJA.md) | domknięte etapy: portal klienta, powiadomienia, kroki procesu, RODO, sprzątanie |
+| [docs/](docs/) | dokumentacja produktowa; `docs/archiwum-weddingboard/` to materiały poprzedniego produktu |
+
+## Licencja
+
+Prywatna. Koda Labs PSA.

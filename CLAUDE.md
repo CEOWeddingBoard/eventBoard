@@ -237,8 +237,7 @@ prisma/schema.prisma         ~85 modeli; EventBoard używa ich podzbioru
 
 ## Zmienne środowiskowe
 
-Wzorzec: `.env.example` (częściowo nieaktualny — zawiera klucze Clerk, nie zawiera
-`AUTH_SESSION_SECRET`, `TWILIO_*`). Lokalne nadpisania: `.env.local`.
+Wzorzec: `.env.example` — odzwierciedla stan faktyczny. Lokalne nadpisania: `.env.local`.
 
 Realnie używane: `DATABASE_URL` · `AUTH_SESSION_SECRET` (lub `JWT_SECRET`) ·
 `NEXT_PUBLIC_APP_URL` · `CRON_SECRET` · `RESEND_API_KEY` / `RESEND_FROM` ·
@@ -329,8 +328,6 @@ o alergiach gości nie wychodzą do zewnętrznego dostawcy.
 
 ## Znane rozbieżności
 
-- `README.md` opisuje stary produkt („Wedding AI Planner”, Clerk, mock auth) i jest nieaktualny.
-- `.env.example` też jest nieaktualny — ma klucze Clerk i Stripe, nie ma `AUTH_SESSION_SECRET`.
 - Dwie podatności w `postcss` bundlowanym w Next 15 — do zamknięcia wyłącznie przez
   major upgrade do Next 16. Świadomie odłożone, nie przeoczone.
 - `PLAN-NAPRAWY.md` (fazy 2–6: typy, izolacja danych, reset hasła, monitoring, uprawnienia)

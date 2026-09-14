@@ -44,7 +44,31 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     needs: lint-and-test
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    # Gałąź robocza to feature/P1, więc warunek na main/master oznaczał, że E2E
+    # nie uruchamiały się NIGDY — łącznie z testami izolacji danych i uprawnień.
+    if: github.event_name == 'push'
+
+    # Aplikacja nie wstanie bez bazy, a schemat jest pod PostgreSQL.
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: eventboard_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/eventboard_test?schema=public
+      AUTH_SESSION_SECRET: e2e-secret-nie-uzywany-poza-ci
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+
     steps:
       - uses: actions/checkout@v4
 
@@ -57,6 +81,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Przygotuj bazę
+        run: npx prisma migrate deploy
+
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
@@ -65,3 +92,14 @@ jobs:
         env:
           CI: true
           PLAYWRIGHT_TEST_BASE_URL: http://localhost:3000
+          # Bez tych sekretów testy izolacji i uprawnień same się pomijają
+          # (zobacz nagłówki plików w e2e/) — nie wywracają CI, ale też niczego
+          # nie pilnują. Ustaw je w Settings → Secrets → Actions.
+          E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
+          E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
+          E2E_NONE_EMAIL: ${{ secrets.E2E_NONE_EMAIL }}
+          E2E_NONE_PASSWORD: ${{ secrets.E2E_NONE_PASSWORD }}
+          E2E_VIEW_EMAIL: ${{ secrets.E2E_VIEW_EMAIL }}
+          E2E_VIEW_PASSWORD: ${{ secrets.E2E_VIEW_PASSWORD }}
+          E2E_EDIT_EMAIL: ${{ secrets.E2E_EDIT_EMAIL }}
+          E2E_EDIT_PASSWORD: ${{ secrets.E2E_EDIT_PASSWORD }}
