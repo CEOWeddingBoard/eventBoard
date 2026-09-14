@@ -78,9 +78,7 @@ const plans: Plan[] = [
   },
 ];
 
-export function LandingPricing({
-}: {
-}) {
+export function LandingPricing() {
   const [annual, setAnnual] = useState(true);
 
   return (

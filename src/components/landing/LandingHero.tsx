@@ -78,18 +78,21 @@ export function LandingHero() {
             System dla sal i restauracji
           </span>
 
+          {/* Nagłówek mówi o wyniku, nie o bólu. „Koniec z Excelem” nazywał
+              problem, ale nie obiecywał niczego konkretnego. */}
           <h1 className="mt-6 text-4xl font-extrabold leading-[1.12] tracking-tight sm:text-5xl lg:text-6xl">
-            Koniec z Excelem i telefonami
+            Agenda dla kuchni gotowa sama,
             <br />
-            w obsłudze{" "}
+            zanim{" "}
             <span className="bg-gradient-to-r from-[#9a7b32] to-[#7a5f28] bg-clip-text text-transparent">
-              eventów
+              zadzwoni klient
             </span>
           </h1>
 
           <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-stone-700 sm:text-lg">
-            Jeden proces prowadzi każde przyjęcie — od zapytania po gotową agendę dla kuchni.
-            Mniej godzin koordynacji, mniej pomyłek, wszystkie ustalenia w jednym miejscu.
+            Ustalasz raz, jak wygląda obsługa przyjęcia — kto co wypełnia i kto zatwierdza.
+            Klient uzupełnia swoje kroki sam, przez link bez zakładania konta, a agenda dla
+            kuchni i obsługi składa się z tego automatycznie. Bez przepisywania z Excela.
           </p>
 
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -100,9 +103,17 @@ export function LandingHero() {
               Umów spotkanie demo
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </a>
+            {/* Miękkie wejście: większość odwiedzających nie jest jeszcze gotowa
+                rozmawiać z człowiekiem, a demo było jedynym dostępnym ruchem. */}
+            <a
+              href="#jak-to-dziala"
+              className="inline-flex items-center gap-2 rounded-full border-2 border-[#0f172a] bg-white px-7 py-3 text-sm font-semibold text-[#0f172a] transition-all hover:-translate-y-0.5 hover:bg-[#0f172a] hover:text-white"
+            >
+              Zobacz, jak to działa
+            </a>
             <a
               href="#kalkulator"
-              className="inline-flex items-center gap-2 rounded-full border-2 border-[#0f172a] bg-white px-7 py-3 text-sm font-semibold text-[#0f172a] transition-all hover:-translate-y-0.5 hover:bg-[#0f172a] hover:text-white"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-stone-600 underline-offset-4 transition-colors hover:text-stone-900 hover:underline"
             >
               Policz, ile oszczędzisz
             </a>
@@ -127,13 +138,15 @@ export function LandingHero() {
             aria-hidden
           />
           <div className="relative overflow-hidden rounded-2xl border border-stone-200/80 bg-white shadow-2xl shadow-slate-300/60">
-            {/* Pasek przeglądarki */}
-            <div className="flex items-center gap-2 border-b border-stone-100 px-4 py-3">
-              <span className="h-2.5 w-2.5 rounded-full bg-[#f3a8a8]" />
-              <span className="h-2.5 w-2.5 rounded-full bg-[#f5d08f]" />
-              <span className="h-2.5 w-2.5 rounded-full bg-[#a8d8b9]" />
-              <span className="mx-auto hidden rounded-md bg-stone-100 px-10 py-1 text-xs text-stone-600 sm:block">
-                eventboard.pl
+            {/* Bez paska przeglądarki: to jest rysunek poglądowy, nie zrzut
+                ekranu, a ramka okna sugerowałaby, że patrzysz na prawdziwy panel.
+                Prawdziwe zrzuty robi scripts/capture-product-screenshots.cjs. */}
+            <div className="flex items-center justify-between border-b border-stone-100 px-4 py-2.5">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-stone-400">
+                Tak wygląda praca na jednym przyjęciu
+              </span>
+              <span className="rounded-full bg-stone-100 px-2 py-0.5 text-[10px] font-medium text-stone-500">
+                widok poglądowy
               </span>
             </div>
 
