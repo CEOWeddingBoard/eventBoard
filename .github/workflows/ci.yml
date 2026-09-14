@@ -81,8 +81,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # `migrate deploy` NIE zbuduje bazy od zera: historia migracji zakłada
+      # istniejący schemat (pierwsza migracja robi ALTER TABLE "guests", a żadna
+      # go nie tworzy). Produkcja radzi sobie z tym przez
+      # scripts/prisma-migrate-deploy.cjs, który w razie potrzeby robi db push.
+      # Dla bazy jednorazowej w CI idziemy prosto do źródła prawdy — schematu.
       - name: Przygotuj bazę
-        run: npx prisma migrate deploy
+        run: npx prisma db push --skip-generate
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
