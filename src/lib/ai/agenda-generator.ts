@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { generateAIResponse } from "@/lib/ai";
-import { buildAgendaDocx, buildAgendaDocxWithImages, type AgendaImage } from "@/lib/agenda/agenda-docx";
+import { buildAgendaDocx, buildAgendaDocxWithImages, type AgendaImage, type AgendaBranding } from "@/lib/agenda/agenda-docx";
 import { AGENDA_TARGETS, AGENDA_TARGET_GROUPS, agendaTargetLabel } from "@/lib/workflow-agenda-fields";
 
 interface AgendaData {
@@ -400,7 +400,13 @@ export async function generateAgendaDocxBase64(
     .filter((v) => v.imageUrl)
     .map((v) => ({ caption: v.label, dataUrl: v.imageUrl as string }));
 
-  const buffer = images.length > 0 ? buildAgendaDocxWithImages(text, images) : buildAgendaDocx(text);
+  const branding = await agendaBranding(eventId);
+
+  const buffer =
+    images.length > 0 || branding.logoDataUrl
+      ? buildAgendaDocxWithImages(text, images, branding)
+      : buildAgendaDocx(text, branding);
+
   return {
     base64: buffer.toString("base64"),
     fileName: "agenda.docx",
@@ -415,4 +421,60 @@ export async function checkAllAgendaApproved(eventId: string): Promise<boolean> 
 
   if (approvals.length === 0) return true;
   return approvals.every((a) => a.status === "APPROVED");
+}
+
+/**
+ * Logo i dane kontaktowe obiektu do nagłówka i stopki agendy.
+ *
+ * Logo bywa zapisane jako data URL (wgrane w ustawieniach) albo jako zwykły
+ * adres — wtedy pobieramy je tutaj i zamieniamy na data URL, bo generator DOCX
+ * osadza bajty, nie linki. Awaria pobrania nie może wywrócić generowania
+ * agendy: dokument bez logo jest wciąż użyteczny, brak dokumentu nie jest.
+ */
+async function agendaBranding(eventId: string): Promise<AgendaBranding> {
+  try {
+    const event = await prisma.event.findUnique({
+      where: { id: eventId },
+      select: {
+        organization: {
+          select: { name: true, address: true, city: true, phone: true, email: true, brandLogoUrl: true },
+        },
+      },
+    });
+    const org = event?.organization;
+    if (!org) return {};
+
+    const adres = [org.address, org.city].map((x) => (x ?? "").trim()).filter(Boolean).join(", ");
+
+    return {
+      nazwaObiektu: org.name,
+      adres: adres || null,
+      telefon: org.phone,
+      email: org.email,
+      logoDataUrl: await logoJakoDataUrl(org.brandLogoUrl),
+    };
+  } catch (e) {
+    console.error("[agenda:branding]", e);
+    return {};
+  }
+}
+
+async function logoJakoDataUrl(url: string | null | undefined): Promise<string | null> {
+  const adres = (url ?? "").trim();
+  if (!adres) return null;
+  if (adres.startsWith("data:")) return adres;
+  if (!/^https?:\/\//i.test(adres)) return null;
+
+  try {
+    const res = await fetch(adres);
+    if (!res.ok) return null;
+    const typ = res.headers.get("content-type") ?? "";
+    if (!/^image\/(png|jpe?g)$/i.test(typ)) return null;
+    const bytes = Buffer.from(await res.arrayBuffer());
+    // Logo w dokumencie to kilkadziesiąt kilobajtów; większy plik to pomyłka.
+    if (bytes.byteLength > 2 * 1024 * 1024) return null;
+    return `data:${typ};base64,${bytes.toString("base64")}`;
+  } catch {
+    return null;
+  }
 }

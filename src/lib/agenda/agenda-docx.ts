@@ -116,7 +116,41 @@ function agendaBodyParts(text: string): string[] {
   return parts;
 }
 
-export function buildAgendaDocx(text: string): Buffer {
+/** Dane obiektu drukowane w agendzie: logo u góry, kontakt w stopce. */
+export type AgendaBranding = {
+  nazwaObiektu?: string | null;
+  adres?: string | null;
+  telefon?: string | null;
+  email?: string | null;
+  /** Logo jako data URL — ten sam format, co skany menu. */
+  logoDataUrl?: string | null;
+};
+
+/**
+ * Stopka agendy: kto wydał dokument i jak się z nim skontaktować.
+ *
+ * Agenda krąży po kuchni i obsłudze w wersji papierowej, często między
+ * obiektami (kucharz z zewnątrz, firma cateringowa). Bez nagłówka i stopki
+ * nie wiadomo, czyj to dokument ani gdzie dzwonić, gdy coś się nie zgadza.
+ */
+function stopkaXml(b: AgendaBranding): string {
+  const czesci = [b.nazwaObiektu, b.adres, b.telefon, b.email]
+    .map((x) => (x ?? "").trim())
+    .filter(Boolean);
+  if (czesci.length === 0) return "";
+  return (
+    ruleXml("D1D5DB", 6) +
+    `<w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:rPr><w:color w:val="9CA3AF"/><w:sz w:val="16"/></w:rPr><w:t xml:space="preserve">${escapeXml(czesci.join(" · "))}</w:t></w:r></w:p>`
+  );
+}
+
+export function buildAgendaDocx(text: string, branding?: AgendaBranding): Buffer {
+  if (branding) {
+    const parts = agendaBodyParts(text);
+    const stopka = stopkaXml(branding);
+    if (stopka) parts.push(paragraphXml(" "), stopka);
+    return buildDocxFromBody(parts.join(""));
+  }
   return buildDocxFromBody(agendaBodyParts(text).join(""));
 }
 
@@ -155,9 +189,26 @@ function drawingXml(rid: string, cx: number, cy: number, id: number): string {
 }
 
 /** Buduje agendę DOCX z osadzonymi skanami menu pod każdym wariantem. */
-export function buildAgendaDocxWithImages(text: string, images: AgendaImage[]): Buffer {
+export function buildAgendaDocxWithImages(
+  text: string,
+  images: AgendaImage[],
+  branding?: AgendaBranding,
+): Buffer {
   const parts = agendaBodyParts(text);
   const media: { name: string; bytes: Buffer; rid: string }[] = [];
+
+  // Logo obiektu na samej górze — agenda krąży poza obiektem, więc musi być
+  // widać, czyj to dokument, zanim ktokolwiek zacznie czytać treść.
+  const logo = branding?.logoDataUrl ? parseDataUrl(branding.logoDataUrl) : null;
+  if (logo) {
+    const rid = "rIdLogo";
+    media.push({ name: `logo.${logo.ext}`, bytes: logo.bytes, rid });
+    const { w, h } = imageDims(logo.bytes, logo.ext);
+    const maxW = 1600200; // ~4,5 cm — logo, nie ilustracja
+    const cx = Math.min(maxW, Math.round(w * 9525));
+    const cy = Math.round(cx * (h / Math.max(1, w)));
+    parts.unshift(drawingXml(rid, cx, cy, 900));
+  }
 
   const valid = images.map((img) => ({ img, p: parseDataUrl(img.dataUrl) })).filter((x) => x.p);
   if (valid.length > 0) {
@@ -173,6 +224,11 @@ export function buildAgendaDocxWithImages(text: string, images: AgendaImage[]): 
       const cy = Math.round(cx * (h / Math.max(1, w)));
       parts.push(drawingXml(rid, cx, cy, 1000 + i));
     });
+  }
+
+  if (branding) {
+    const stopka = stopkaXml(branding);
+    if (stopka) parts.push(paragraphXml(" "), stopka);
   }
 
   if (media.length === 0) {

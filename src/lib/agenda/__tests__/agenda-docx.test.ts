@@ -87,3 +87,29 @@ describe("buildAgendaDocx", () => {
     expect((xml.match(/<w:p>/g) || []).length).toBeGreaterThanOrEqual(3);
   });
 });
+
+describe("logo i stopka obiektu w agendzie", () => {
+  it("stopka niesie nazwę obiektu i kontakt", () => {
+    const xml = documentXml(
+      buildAgendaDocx("Agenda\nMenu: Wariant B", {
+        nazwaObiektu: "Restauracja Pod Lipami",
+        adres: "ul. Kwiatowa 3, Poznań",
+        telefon: "600 100 200",
+        email: "kontakt@podlipami.pl",
+      }),
+    );
+    expect(xml).toContain("Restauracja Pod Lipami");
+    expect(xml).toContain("600 100 200");
+    expect(xml).toContain("kontakt@podlipami.pl");
+  });
+
+  it("brak danych obiektu nie dokłada pustej stopki", () => {
+    const xml = documentXml(buildAgendaDocx("Agenda\nMenu: Wariant B", {}));
+    expect(xml).not.toContain(" · ");
+  });
+
+  it("agenda bez brandingu działa jak dotąd", () => {
+    const xml = documentXml(buildAgendaDocx("Agenda\nMenu: Wariant B"));
+    expect(xml).toContain("Wariant B");
+  });
+});
