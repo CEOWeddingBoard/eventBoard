@@ -99,7 +99,7 @@ export default async function AuthPage({
                 EVENT<span className="text-[#7a5f28]">BOARD</span>
               </span>
             </div>
-            <p className="mt-3 text-sm text-neutral-500">Zaloguj się do swojej przestrzeni</p>
+            <p className="mt-3 text-sm text-neutral-500">Zaloguj się do panelu swojego obiektu</p>
           </>
         )}
       </div>
@@ -111,7 +111,7 @@ export default async function AuthPage({
       />
 
       <p className="mt-6 text-center text-xs text-neutral-400">
-        Nie masz jeszcze przestrzeni? Skontaktuj się z nami — zakładamy ją po ustaleniu subskrypcji.
+        Nie masz jeszcze konta? Napisz do nas — zakładamy je po ustaleniu abonamentu.
       </p>
     </div>
   );

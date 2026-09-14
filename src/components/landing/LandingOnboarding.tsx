@@ -23,7 +23,7 @@ const kroki = [
     icon: PlugZap,
     tytul: "Przestrzeń gotowa do pracy",
     opis:
-      "Zakładamy Twoją przestrzeń, ustawiamy proces, role i menu. Dostajesz dane logowania dla siebie i zespołu.",
+      "Zakładamy konto Twojego obiektu, ustawiamy proces, role i menu. Dostajesz dane logowania dla siebie i zespołu.",
   },
   {
     icon: CalendarCheck,
@@ -68,7 +68,7 @@ export function LandingOnboarding() {
           <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-[#7a5f28]" />
           <p className="text-sm leading-relaxed text-stone-700">
             <span className="font-semibold text-stone-900">Twoje dane zostają Twoje.</span>{" "}
-            Każdy klient ma osobną przestrzeń, a komplet danych — przyjęcia, menu, agendy,
+            Każdy obiekt ma osobne, odseparowane konto, a komplet danych — przyjęcia, menu, agendy,
             procesy — pobierzesz w każdej chwili jako jeden plik. Bez rozmów o tym,
             czy da się wyjść.
           </p>

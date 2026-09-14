@@ -20,11 +20,13 @@ export function LandingHeader({
         <nav aria-label="Nawigacja główna" className="hidden items-center gap-8 text-sm font-medium text-stone-600 md:flex">
           <a href="#jak-to-dziala" className="transition-colors hover:text-stone-900">Jak to działa</a>
           <a href="#features" className="transition-colors hover:text-stone-900">Funkcje</a>
+          <a href="#dla-kogo" className="transition-colors hover:text-stone-900">Dla kogo</a>
           <a href="#kalkulator" className="transition-colors hover:text-stone-900">Ile oszczędzisz</a>
+          <a href="#faq" className="transition-colors hover:text-stone-900">Pytania</a>
           <a href="#pricing" className="transition-colors hover:text-stone-900">Cennik</a>
         </nav>
         {/* Świadomie BEZ linku do panelu. Strona sprzedażowa nie może być
-            drogą do aplikacji — dostęp do przestrzeni daje wyłącznie adres
+            drogą do aplikacji — dostęp do panelu daje wyłącznie adres
             przekazany przez administratora przy wdrożeniu. */}
         <div className="flex items-center gap-3">
           <a

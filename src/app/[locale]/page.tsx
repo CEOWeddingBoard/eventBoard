@@ -3,6 +3,9 @@ import { LandingHeader } from "@/components/landing/LandingHeader";
 import { LandingHero } from "@/components/landing/LandingHero";
 import { LandingFeatures } from "@/components/landing/LandingFeatures";
 import { LandingBeforeAfter } from "@/components/landing/LandingBeforeAfter";
+import { LandingDlaKogo } from "@/components/landing/LandingDlaKogo";
+import { LandingDlaKlienta } from "@/components/landing/LandingDlaKlienta";
+import { LandingFaq } from "@/components/landing/LandingFaq";
 import { LandingHowItWorks } from "@/components/landing/LandingHowItWorks";
 import { LandingRoi } from "@/components/landing/LandingRoi";
 import { LandingOnboarding } from "@/components/landing/LandingOnboarding";
@@ -21,12 +24,15 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
       <LandingHeader homeUrl={u("/")} />
       <main>
         <LandingHero />
+        <LandingDlaKogo />
         <LandingBeforeAfter />
         <LandingHowItWorks />
+        <LandingDlaKlienta />
         <LandingFeatures />
         <LandingRoi />
         <LandingOnboarding />
         <LandingPricing />
+        <LandingFaq />
         <LandingCta />
       </main>
       <LandingFooter />
