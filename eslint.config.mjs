@@ -12,7 +12,18 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     "node_modules/**",
+    "coverage/**",
+    "test-app/**",
   ]),
+  {
+    // Skrypty narzędziowe i pliki konfiguracyjne to CommonJS uruchamiany
+    // bezpośrednio przez Node — `require` jest tam poprawną formą, nie zaszłością.
+    files: ["scripts/**", "*.config.{js,cjs,mjs,ts}", "jest.setup.{ts,tsx}"],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

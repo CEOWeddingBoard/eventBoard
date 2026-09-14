@@ -161,7 +161,7 @@ jest.mock('@tanstack/react-query', () => {
 // Mock next/cache
 jest.mock('next/cache', () => ({
   revalidatePath: jest.fn(),
-  unstable_cache: jest.fn((fn: Function) => fn),
+  unstable_cache: jest.fn(<T,>(fn: T) => fn),
 }));
 
 // Uprawnienia modułowe: w testach logiki biznesowej bramka ma przepuszczać.
