@@ -1,25 +1,53 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from "@playwright/test";
 
 /**
- * E2E tests for authentication flow
+ * Brama sesji i widoczność paneli.
+ *
+ * Wcześniej ten plik sprawdzał tytuł strony `/pl/sign-in` — trasy z czasów
+ * logowania przez Clerk. Teraz pilnuje rzeczy, które realnie chronią produkt
+ * i nie wymagają kont testowych: że panel obiektu nie wpuszcza bez sesji,
+ * że panel administratora nie zdradza swojego istnienia, i że portal klienta
+ * nie otwiera się na zmyślony token.
  */
 
-test.describe('Authentication', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/pl/sign-in')
-  })
+test.describe("Brama sesji", () => {
+  test("logowanie jest pod /pl/auth i pokazuje formularz", async ({ page }) => {
+    await page.goto("/pl/auth");
+    await expect(page.getByText(/Zaloguj do EventBoard/i)).toBeVisible();
+  });
 
-  test('should display sign in page', async ({ page }) => {
-    await expect(page).toHaveTitle(/Sign In|Zaloguj/)
-  })
+  test("panel obiektu bez sesji przekierowuje na logowanie", async ({ page }) => {
+    await page.goto("/pl/app/dashboard");
+    await expect(page).toHaveURL(/\/pl\/auth/);
+  });
 
-  test('should navigate to sign up', async ({ page }) => {
-    const signUpLink = page.getByRole('link', { name: /sign up|zarejestruj/i })
-    if (await signUpLink.isVisible()) {
-      await signUpLink.click()
-      await expect(page).toHaveURL(/sign-up/)
+  test("kalendarz i eventy też są za bramą", async ({ page }) => {
+    for (const sciezka of ["/pl/app/calendar", "/pl/app/events"]) {
+      await page.goto(sciezka);
+      await expect(page).toHaveURL(/\/pl\/auth/);
     }
-  })
+  });
+});
 
-  // Note: Actual login tests would require Clerk test mode or mocking
-})
+test.describe("Panel administratora platformy", () => {
+  // Celowo NIE przekierowuje na logowanie: przekierowanie zdradzałoby, że panel
+  // istnieje. Dla nie-admina ma być zwykłe 404.
+  test("dla niezalogowanego zwraca 404, nie przekierowanie", async ({ page }) => {
+    const odpowiedz = await page.goto("/pl/admin");
+    expect(odpowiedz?.status()).toBe(404);
+    await expect(page).toHaveURL(/\/pl\/admin/);
+  });
+});
+
+test.describe("Portal klienta", () => {
+  test("zmyślony token nie otwiera portalu", async ({ page }) => {
+    await page.goto("/pl/portal/token-ktorego-nie-ma-1234567890");
+    await expect(page.getByText(/Link jest nieaktualny/i)).toBeVisible();
+  });
+
+  test("komunikat nie zdradza, czy token istniał, czy wygasł", async ({ page }) => {
+    await page.goto("/pl/portal/inny-zmyslony-token-0987654321");
+    const tresc = await page.locator("body").innerText();
+    expect(tresc).not.toMatch(/wygas[łl]|nie istnieje|nieznany token/i);
+  });
+});
