@@ -32,7 +32,7 @@ model User {
   tasks               Task[]
   createdEvents       Event[]
   eventParticipants   EventParticipant[]
-  googleCalendar      GoogleCalendarConnection?
+  googleCalendars     GoogleCalendarConnection[]
   organizationMembers OrganizationMember[]
   ownedOrganizations  Organization[]            @relation("OrganizationOwner")
 
@@ -175,6 +175,7 @@ model Organization {
   blockedDates            OrgBlockedDate[]
   templates               OrgTemplate[]
   notifications           OrgNotification[]
+  googleCalendars         GoogleCalendarConnection[]
   leads                   OrgLead[]
   agendaTemplates         AgendaTemplate[]
   agendaDocumentTemplates AgendaDocumentTemplate[]
@@ -297,17 +298,35 @@ model AgendaDocumentTemplate {
 }
 
 // Połączenie z Google Calendar (OAuth) – jeden na użytkownika
+/// Podłączony kalendarz Google. Jedna przestrzeń może mieć ich wiele — obiekt
+/// zwykle prowadzi kilka kalendarzy na różnych kontach (sala, właściciel,
+/// koordynator). Każde połączenie ma swój kolor na grafiku i może być
+/// przypisane do konkretnej sali.
 model GoogleCalendarConnection {
-  id             String    @id @default(cuid())
-  userId         String    @unique
-  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  /// Kto podłączył konto — token należy do tej osoby, ale kalendarz do przestrzeni.
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Nazwa widoczna na grafiku, np. „Kalendarz sali”, „Kalendarz Marka”.
+  label          String       @default("Kalendarz Google")
+  /// Kolor pozycji na grafiku (hex). Bez tego nie da się odróżnić źródeł.
+  color          String       @default("#0ea5e9")
+  /// Sala, której dotyczy ten kalendarz. Null = rezerwacje całego obiektu.
+  venueHallId    String?
   refreshToken   String
   accessToken    String?
   tokenExpiresAt DateTime?
   calendarId     String? // np. "primary" lub id kalendarza
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  /// Wyłączone połączenie zostaje z tokenem, ale znika z grafiku.
+  isActive       Boolean      @default(true)
+  lastSyncAt     DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
+  @@index([organizationId, isActive])
+  @@index([userId])
   @@map("google_calendar_connections")
 }
 

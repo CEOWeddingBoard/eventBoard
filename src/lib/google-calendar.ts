@@ -360,7 +360,9 @@ export async function listAllUpcomingEvents(
   connection: GoogleCalendarConnection,
   calendarId?: string,
   timeMin?: Date,
-  maxResults = 50
+  maxResults = 50,
+  /** Górna granica zakresu — grafik pokazuje konkretny miesiąc, nie „od dziś”. */
+  timeMax?: Date
 ): Promise<ParsedGoogleEvent[]> {
   const token = await getValidAccessToken(connection);
   const calId = calendarId ?? connection.calendarId ?? "primary";
@@ -370,6 +372,7 @@ export async function listAllUpcomingEvents(
     maxResults: String(maxResults),
   });
   if (timeMin) params.set("timeMin", timeMin.toISOString());
+  if (timeMax) params.set("timeMax", timeMax.toISOString());
   const res = await fetch(
     `${calendarBase(calId)}?${params.toString()}`,
     { headers: { Authorization: `Bearer ${token}` } }

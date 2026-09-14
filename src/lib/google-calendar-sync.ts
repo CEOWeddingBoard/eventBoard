@@ -196,19 +196,13 @@ export async function syncAllToGoogle(): Promise<{ ok: boolean; error?: string }
   const tokenResult = await import("@/lib/google-calendar-clerk").then((m) => m.getGoogleCalendarToken());
   if (!tokenResult.ok) {
     if (tokenResult.reason === "unauthenticated") return { ok: false, error: "Zaloguj się" };
-    if (tokenResult.reason === "no_google_token" || tokenResult.reason === "no_connection") {
+    if (tokenResult.reason === "no_connection") {
       return {
         ok: false,
-        error: "Synchronizacja z Google Kalendarzem jest dostępna tylko po zalogowaniu przez Google. Możesz pobrać plik .ics na tej stronie.",
+        error: "Nie podłączono żadnego kalendarza Google. Zrób to w Konfiguracji, albo pobierz plik .ics na tej stronie.",
       };
     }
     return { ok: false, error: "Brak dostępu do Google Calendar" };
-  }
-  if (tokenResult.source !== "clerk") {
-    return {
-      ok: false,
-      error: "Synchronizacja z Google Kalendarzem jest dostępna tylko dla użytkowników logujących się przez Google. Użyj przycisku „Pobierz plik .ics”.",
-    };
   }
 
   const ctx: TokenOrConnection = { type: "token", token: tokenResult.token, calendarId: tokenResult.calendarId };

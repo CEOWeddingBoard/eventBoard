@@ -1,3 +1,37 @@
-export async function GET() {
-  return new Response("Google Calendar integration is disabled", { status: 404 });
+import { NextRequest, NextResponse } from "next/server";
+import { getCurrentUser } from "@/lib/auth/utils";
+import { getActiveOrgId } from "@/lib/auth/active-org";
+import { getOAuthAuthorizeUrl, isGoogleCalendarConfigured } from "@/lib/google-calendar";
+
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
+/**
+ * Start autoryzacji Google Calendar.
+ *
+ * `state` niesie ID przestrzeni, bo połączenie należy do niej, a nie do osoby,
+ * która akurat klika — kalendarz sali ma działać także wtedy, gdy podłączający
+ * manager odejdzie z pracy. Callback sprawdza, czy wracający użytkownik nadal
+ * ma dostęp do tej przestrzeni.
+ */
+export async function GET(req: NextRequest) {
+  const user = await getCurrentUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const orgId = await getActiveOrgId(user.id);
+  if (!orgId) return NextResponse.json({ error: "Brak aktywnej przestrzeni" }, { status: 403 });
+
+  if (!isGoogleCalendarConfigured()) {
+    return NextResponse.json(
+      { error: "Brak GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET w konfiguracji serwera." },
+      { status: 503 },
+    );
+  }
+
+  const locale = req.nextUrl.searchParams.get("locale") ?? "pl";
+  const base = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? req.nextUrl.origin;
+  const redirectUri = `${base}/${locale}/api/google/callback`;
+
+  const state = Buffer.from(JSON.stringify({ orgId, locale })).toString("base64url");
+  return NextResponse.redirect(getOAuthAuthorizeUrl(redirectUri, state));
 }

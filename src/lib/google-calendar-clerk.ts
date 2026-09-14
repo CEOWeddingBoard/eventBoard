@@ -1,45 +1,40 @@
-/**
- * Pobiera token Google (do Calendar API) z Clerk – gdy użytkownik loguje się przez Google.
- * Clerk w Dashboard musi mieć dodany scope: https://www.googleapis.com/auth/calendar
- * (Configure → Social connections → Google → Additional scopes).
- * Nie wymaga GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET w aplikacji.
- */
-
-import { getCurrentUser } from "@/lib/auth/utils";
+import "server-only";
 import { prisma } from "@/lib/prisma";
-import type { GoogleCalendarConnection } from "@/lib/google-calendar";
+import { getCurrentUser } from "@/lib/auth/utils";
+import { getActiveOrgId } from "@/lib/auth/active-org";
+import { getValidAccessToken, type GoogleCalendarConnection } from "@/lib/google-calendar";
+
+/**
+ * Token dostępu do jednego kalendarza przestrzeni.
+ *
+ * Nazwa pliku jest zaszłością po logowaniu przez Clerk — token brało się wtedy
+ * z sesji Clerka i było jedno na użytkownika. Teraz połączenia należą do
+ * PRZESTRZENI i jest ich wiele, więc trzeba powiedzieć, o które chodzi.
+ */
 
 export type GoogleCalendarTokenResult =
-  | { ok: true; token: string; calendarId: string; source: "clerk" | "connection" }
-  | { ok: false; reason: "unauthenticated" | "no_google_token" | "no_connection" };
+  | { ok: true; token: string; calendarId: string; connectionId: string }
+  | { ok: false; reason: "unauthenticated" | "no_connection" };
 
-/**
- * Zwraca token dostępu do Google Calendar: najpierw z Clerk (logowanie przez Google),
- * jeśli brak – z zapisanego połączenia OAuth (GoogleCalendarConnection).
- */
-export async function getGoogleCalendarToken(): Promise<GoogleCalendarTokenResult> {
-  const currentUser = await getCurrentUser();
-  const clerkUserId = currentUser?.id ?? null;
-  if (!clerkUserId) {
-    return { ok: false, reason: "unauthenticated" };
-  }
+export async function getGoogleCalendarToken(
+  connectionId?: string,
+): Promise<GoogleCalendarTokenResult> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, reason: "unauthenticated" };
 
-  const user = await prisma.user.findUnique({
-    where: { id: clerkUserId },
-    select: { id: true },
+  const orgId = await getActiveOrgId(user.id);
+  if (!orgId) return { ok: false, reason: "no_connection" };
+
+  const connection = await prisma.googleCalendarConnection.findFirst({
+    where: {
+      organizationId: orgId,
+      isActive: true,
+      ...(connectionId ? { id: connectionId } : {}),
+    },
+    orderBy: { createdAt: "asc" },
   });
-  if (!user) {
-    return { ok: false, reason: "no_google_token" };
-  }
+  if (!connection) return { ok: false, reason: "no_connection" };
 
-  const connection = await prisma.googleCalendarConnection.findUnique({
-    where: { userId: user.id },
-  });
-  if (!connection) {
-    return { ok: false, reason: "no_connection" };
-  }
-
-  const { getValidAccessToken } = await import("@/lib/google-calendar");
   const conn: GoogleCalendarConnection = {
     id: connection.id,
     userId: connection.userId,
@@ -48,15 +43,11 @@ export async function getGoogleCalendarToken(): Promise<GoogleCalendarTokenResul
     tokenExpiresAt: connection.tokenExpiresAt,
     calendarId: connection.calendarId,
   };
-  try {
-    const token = await getValidAccessToken(conn);
-    return {
-      ok: true,
-      token,
-      calendarId: connection.calendarId ?? "primary",
-      source: "connection",
-    };
-  } catch {
-    return { ok: false, reason: "no_connection" };
-  }
+
+  return {
+    ok: true,
+    token: await getValidAccessToken(conn),
+    calendarId: connection.calendarId ?? "primary",
+    connectionId: connection.id,
+  };
 }

@@ -33,6 +33,16 @@ export type BlockedDayItem = {
   reason: string | null;
 };
 
+/** Rezerwacja z kalendarza Google — warstwa tylko do odczytu. */
+export type GoogleDayItem = {
+  id: string;
+  tytul: string;
+  kolor: string;
+  zrodlo: string;
+  calyDzien: boolean;
+  godzina: string | null;
+};
+
 export function EventBoardCalendar({
   locale,
   monthLabel,
@@ -42,6 +52,7 @@ export function EventBoardCalendar({
   eventsByDay,
   blockedDates,
   categories,
+  googleByDay = {},
   monthsWithEntries = [],
   currentMonth,
   canEdit = true,
@@ -52,6 +63,7 @@ export function EventBoardCalendar({
   nextHref: string;
   days: (string | null)[]; // ISO date lub null (puste pola siatki)
   eventsByDay: Record<string, CalendarEventItem[]>;
+  googleByDay?: Record<string, GoogleDayItem[]>;
   blockedDates: BlockedDayItem[];
   categories: { id: string; name: string }[];
   monthsWithEntries?: string[];
@@ -233,6 +245,7 @@ export function EventBoardCalendar({
         <div className="grid grid-cols-7">
           {days.map((iso, idx) => {
             const dayEvents = iso ? eventsByDay[iso] ?? [] : [];
+            const dayGoogle = iso ? googleByDay[iso] ?? [] : [];
             const isToday = iso === today;
             const dayNumber = iso ? parseInt(iso.slice(8, 10), 10) : null;
             const block = iso ? blockedByDay.get(iso) ?? null : null;
@@ -304,6 +317,30 @@ export function EventBoardCalendar({
                       {dayEvents.length > 3 && (
                         <p className="px-1.5 text-[10px] text-neutral-400">
                           +{dayEvents.length - 3} więcej
+                        </p>
+                      )}
+
+                      {/* Rezerwacje z kalendarzy Google — tylko do odczytu,
+                          w kolorze swojego kalendarza. Lewy pasek odróżnia je
+                          od przyjęć prowadzonych w EventBoardzie. */}
+                      {dayGoogle.slice(0, 2).map((g) => (
+                        <div
+                          key={g.id}
+                          title={`${g.tytul} — ${g.zrodlo}${g.godzina ? ` · ${g.godzina}` : ""}`}
+                          className="rounded-r border-l-2 bg-neutral-50 px-1.5 py-0.5 text-[10px] text-neutral-600"
+                          style={{ borderLeftColor: g.kolor }}
+                        >
+                          <span className="flex items-center gap-1">
+                            {g.godzina && (
+                              <span className="shrink-0 font-mono text-[9px] text-neutral-400">{g.godzina}</span>
+                            )}
+                            <span className="truncate">{g.tytul}</span>
+                          </span>
+                        </div>
+                      ))}
+                      {dayGoogle.length > 2 && (
+                        <p className="px-1.5 text-[10px] text-neutral-400">
+                          +{dayGoogle.length - 2} z kalendarzy
                         </p>
                       )}
                     </div>

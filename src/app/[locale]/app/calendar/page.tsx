@@ -3,11 +3,13 @@ import { getCurrentUser } from "@/lib/auth/utils";
 import { prisma } from "@/lib/prisma";
 import { getActiveMembership } from "@/lib/auth/active-org";
 import { canEditModule } from "@/lib/permissions/guard";
+import { listOrgGoogleReservations } from "@/lib/google-calendar-org";
 import { ensureEventP1Columns } from "@/lib/events/event-schema-migration";
 import {
   EventBoardCalendar,
   type CalendarEventItem,
   type BlockedDayItem,
+  type GoogleDayItem,
 } from "@/components/eventboard/event-board-calendar";
 
 export const metadata = { robots: { index: false, follow: false } };
@@ -73,6 +75,24 @@ export default async function CalendarPage({
     },
     orderBy: { date: "asc" },
   });
+
+  // Rezerwacje z kalendarzy Google jako osobna warstwa: tylko do odczytu,
+  // w kolorze swojego kalendarza. Obiekt musi widzieć, że termin jest zajęty,
+  // nawet jeśli wpis powstał na czyimś telefonie.
+  const rezerwacjeGoogle = await listOrgGoogleReservations(gridStart, gridEnd);
+  const googleByDay: Record<string, GoogleDayItem[]> = {};
+  for (const r of rezerwacjeGoogle) {
+    const key = r.start.slice(0, 10);
+    if (!key) continue;
+    (googleByDay[key] ??= []).push({
+      id: r.id,
+      tytul: r.tytul,
+      kolor: r.kolor,
+      zrodlo: r.polaczenieLabel,
+      calyDzien: r.calyDzien,
+      godzina: r.calyDzien ? null : new Date(r.start).toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" }),
+    });
+  }
 
   const eventsByDay: Record<string, CalendarEventItem[]> = {};
   for (const event of events) {
@@ -146,6 +166,7 @@ export default async function CalendarPage({
         reason: b.reason,
       })) satisfies BlockedDayItem[]}
       categories={categories.map((c) => ({ id: c.id, name: c.name }))}
+      googleByDay={googleByDay}
       monthsWithEntries={monthsWithEntries}
       currentMonth={monthKey(firstOfMonth)}
     />

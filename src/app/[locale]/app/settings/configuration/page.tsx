@@ -2,6 +2,9 @@ import Link from "next/link";
 import { Building2, ClipboardPaste, UtensilsCrossed } from "lucide-react";
 import { listOrganizationConfiguration, listOrganizationEventsWithWorkflow, ensureDefaultWorkflow } from "@/lib/actions/organization-config.actions";
 import { OrganizationConfigurationClient } from "./organization-configuration-client";
+import { GoogleCalendarsManager } from "@/components/google/GoogleCalendarsManager";
+import { listGoogleCalendars, listHallsForMapping } from "@/lib/actions/google-calendar.actions";
+import { isGoogleCalendarConfigured } from "@/lib/google-calendar";
 
 /**
  * Kroki konfiguracji obiektu. Świadomie krótka lista — agenda NIE ma tu
@@ -39,9 +42,11 @@ export default async function ConfigurationPage({
 }) {
   const { locale } = await params;
   await ensureDefaultWorkflow().catch(() => null);
-  const [configuration, events] = await Promise.all([
+  const [configuration, events, kalendarze, sale] = await Promise.all([
     listOrganizationConfiguration(),
     listOrganizationEventsWithWorkflow(),
+    listGoogleCalendars(),
+    listHallsForMapping(),
   ]);
   return (
     <div className="max-w-4xl space-y-6">
@@ -51,6 +56,13 @@ export default async function ConfigurationPage({
           Ustaw raz sposób pracy, a przy tworzeniu eventu wybierz gotowy typ i proces.
         </p>
       </div>
+      <GoogleCalendarsManager
+        locale={locale}
+        initial={kalendarze}
+        halls={sale}
+        configured={isGoogleCalendarConfigured()}
+      />
+
       <div className="grid gap-4 md:grid-cols-2">
         {steps.map((step) => (
           <Link
