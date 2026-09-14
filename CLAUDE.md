@@ -67,8 +67,8 @@ odwołują się do `jest.config.simple.js`. Playwright sam podnosi `npm run dev`
 
 ### Auth: własna sesja, nie Clerk
 
-`package.json` zawiera `@clerk/*`, ale **żaden plik w `src` nie importuje Clerka**. Logowanie to
-e-mail + hasło (bcrypt) i podpisany JWT (`jose`) w cookie:
+Clerk został usunięty z zależności — logowanie to e-mail + hasło (bcrypt) i podpisany
+JWT (`jose`) w cookie:
 
 - `src/lib/auth/session-token.ts` — cookie `wb_session`, 7 dni, sekret z
   `AUTH_SESSION_SECRET` → `JWT_SECRET` → `PARTNER_ACCESS_SECRET` → wartość deweloperska.
@@ -273,8 +273,12 @@ Moduł serwerowy (jose, OOXML, Node crypto) testuj w środowisku `node` — pier
 `/** @jest-environment node */`. `jest.setup.tsx` dokłada polyfille `TextEncoder`, WebCrypto
 i `structuredClone`, bo jsdom ich nie ma.
 
-Osiem suit z czasów produktu weselnego (guest/seating/task/event actions, seating-ai,
-welcome-email, integration) ma nieaktualne asercje i jest czerwonych — to nie regresja.
+**Cała suita jest zielona (45/45) i ma taka zostać** — `npm run test:ci` jest krokiem
+blokującym w CI. Osiem suit po produkcie weselnym padało wcześniej na nieaktualnych
+asercjach i brakach w mockach; naprawione, nie usunięte. Jeśli któraś znowu się wywali,
+sprawdź najpierw mocki: akcje czytają event przez `findFirst`, dostęp sprawdza
+`canAccessEvent`, a porównania całego rekordu zamienione są na `expect.objectContaining`,
+żeby nowe pole eventu nie wywracało testu.
 
 E2E: `e2e/auth.spec.ts` + `e2e/api/`; przeglądarki Chromium, Firefox, WebKit, Pixel 5, iPhone 12.
 
@@ -325,8 +329,10 @@ o alergiach gości nie wychodzą do zewnętrznego dostawcy.
 
 ## Znane rozbieżności
 
-- `src/lib/actions/event-client.actions.ts:71` generuje link dla klienta
-  `/${locale}/portal/${token}`, ale **trasa `[locale]/portal` nie istnieje** — link daje 404.
 - `README.md` opisuje stary produkt („Wedding AI Planner”, Clerk, mock auth) i jest nieaktualny.
-- `PLAN-NAPRAWY.md` — bieżący plan naprawy blokerów produkcyjnych (izolacja danych między
-  klientami, reset hasła, domknięcie typów, monitoring). Zajrzyj tam przed większą zmianą.
+- `.env.example` też jest nieaktualny — ma klucze Clerk i Stripe, nie ma `AUTH_SESSION_SECRET`.
+- Dwie podatności w `postcss` bundlowanym w Next 15 — do zamknięcia wyłącznie przez
+  major upgrade do Next 16. Świadomie odłożone, nie przeoczone.
+- `PLAN-NAPRAWY.md` (fazy 2–6: typy, izolacja danych, reset hasła, monitoring, uprawnienia)
+  i `PLAN-PRODUKCJA.md` (portal klienta, powiadomienia, kroki procesu, RODO, sprzątanie) —
+  oba domknięte; zajrzyj tam po kontekst decyzji przed większą zmianą.
