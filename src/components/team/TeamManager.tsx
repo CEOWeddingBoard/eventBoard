@@ -4,8 +4,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { UserPlus, ShieldCheck, Crown, Trash2, Copy, Check, Shield } from "lucide-react";
-import { addTeamMember, updateTeamMember, removeTeamMember, setModulePermission, type TeamContext, type TeamMember } from "@/lib/actions/team.actions";
+import { UserPlus, ShieldCheck, Crown, Trash2, Copy, Check, Shield, Plus, KeyRound } from "lucide-react";
+import { addTeamMember, updateTeamMember, removeTeamMember, setModulePermission, saveOrgCustomRoles, resetTeamMemberPassword, type TeamContext, type TeamMember } from "@/lib/actions/team.actions";
 import { APP_MODULES, PERM_LEVELS, type PermLevel } from "@/lib/permissions/modules";
 
 const OP_ROLES = [
@@ -28,6 +28,7 @@ function Copyable({ value }: { value: string }) {
 
 export function TeamManager({ initial }: { initial: TeamContext }) {
   const [ctx, setCtx] = useState<TeamContext>(initial);
+  const [novaRola, setNovaRola] = useState("");
   const [form, setForm] = useState<{ name: string; email: string; isAdmin: boolean; roles: string[] }>({ name: "", email: "", isAdmin: false, roles: [] });
   const [creds, setCreds] = useState<{ email: string; password: string } | null>(null);
   const [busy, setBusy] = useState(false);
@@ -61,6 +62,31 @@ export function TeamManager({ initial }: { initial: TeamContext }) {
       }
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function handleDodajRole() {
+    const label = novaRola.trim();
+    if (!label) return;
+    const nastepne = [...(ctx.customRoles ?? []), { value: label, label }];
+    const res = await saveOrgCustomRoles(nastepne);
+    if (res.ok) {
+      setCtx((c) => ({ ...c, customRoles: nastepne }));
+      setNovaRola("");
+      toast.success(`Dodano rolę „${label}”`);
+    } else {
+      toast.error(res.error ?? "Nie udało się dodać roli");
+    }
+  }
+
+  async function handleUsunRole(value: string) {
+    const nastepne = (ctx.customRoles ?? []).filter((r) => r.value !== value);
+    const res = await saveOrgCustomRoles(nastepne);
+    if (res.ok) {
+      setCtx((c) => ({ ...c, customRoles: nastepne }));
+      toast.success("Rola usunięta");
+    } else {
+      toast.error(res.error ?? "Nie udało się usunąć roli");
     }
   }
 
@@ -142,6 +168,48 @@ export function TeamManager({ initial }: { initial: TeamContext }) {
 
       {ctx.canManage && (
         <section className="rounded-xl border border-neutral-200 bg-white p-5">
+          <h2 className="flex items-center gap-2 text-sm font-bold text-neutral-800">
+            <Plus className="h-4 w-4 text-[#7a5f28]" /> Role własne
+          </h2>
+          <p className="mt-1 text-xs text-neutral-500">
+            Poza gotowymi rolami możesz dodać swoje — np. Florysta, DJ, Koordynator sali.
+            Pojawią się przy członkach zespołu, w krokach procesu i w tabeli uprawnień niżej.
+          </p>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            {(ctx.customRoles ?? []).map((r) => (
+              <span key={r.value} className="inline-flex items-center gap-1.5 rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-700">
+                {r.label}
+                <button
+                  type="button"
+                  onClick={() => handleUsunRole(r.value)}
+                  aria-label={`Usuń rolę ${r.label}`}
+                  className="text-neutral-400 hover:text-red-500"
+                >
+                  <Trash2 className="h-3 w-3" />
+                </button>
+              </span>
+            ))}
+            {(ctx.customRoles ?? []).length === 0 && (
+              <span className="text-xs text-neutral-400">Brak ról własnych.</span>
+            )}
+          </div>
+          <div className="mt-3 flex gap-2">
+            <Input
+              value={novaRola}
+              onChange={(e) => setNovaRola(e.target.value)}
+              placeholder="np. Florysta"
+              className="h-9 max-w-xs text-sm"
+              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleDodajRole(); } }}
+            />
+            <Button type="button" size="sm" variant="outline" onClick={handleDodajRole} disabled={!novaRola.trim()}>
+              <Plus className="mr-1 h-3.5 w-3.5" /> Dodaj rolę
+            </Button>
+          </div>
+        </section>
+      )}
+
+      {ctx.canManage && (
+        <section className="rounded-xl border border-neutral-200 bg-white p-5">
           <h2 className="flex items-center gap-2 text-sm font-bold text-neutral-800"><Shield className="h-4 w-4 text-[#7a5f28]" /> Uprawnienia (rola × moduł)</h2>
           <p className="mt-1 text-xs text-neutral-500">
             Ustaw, co dana rola widzi i może zmieniać. <b>Brak</b> = nie widzi w menu, <b>Podgląd</b> = tylko czyta, <b>Edycja</b> = pełny dostęp.
@@ -210,7 +278,24 @@ function MemberRow({ m, canManage, roleOptions, onSave, onRemove }: {
 }) {
   const [roles, setRoles] = useState<string[]>(m.roles);
   const [isAdmin, setIsAdmin] = useState<boolean>(m.isAdmin);
+  const [noweHaslo, setNoweHaslo] = useState<string | null>(null);
+  const [resetuje, setResetuje] = useState(false);
   const dirty = JSON.stringify(roles) !== JSON.stringify(m.roles) || isAdmin !== m.isAdmin;
+
+  async function handleReset() {
+    setResetuje(true);
+    try {
+      const res = await resetTeamMemberPassword(m.memberId);
+      if (res.ok && res.password) {
+        setNoweHaslo(res.password);
+        toast.success("Nowe hasło wygenerowane — przekaż je tej osobie.");
+      } else {
+        toast.error(res.error ?? "Nie udało się zresetować hasła");
+      }
+    } finally {
+      setResetuje(false);
+    }
+  }
 
   function toggle(r: string) {
     setRoles((prev) => (prev.includes(r) ? prev.filter((x) => x !== r) : [...prev, r]));
@@ -227,12 +312,34 @@ function MemberRow({ m, canManage, roleOptions, onSave, onRemove }: {
           </div>
           <p className="text-xs text-neutral-500">{m.email}</p>
         </div>
-        {canManage && !m.isOwner && (
-          <button onClick={() => onRemove(m)} className="rounded p-1.5 text-neutral-400 hover:bg-red-50 hover:text-red-500" title="Usuń konto">
-            <Trash2 className="h-4 w-4" />
-          </button>
+        {canManage && (
+          <div className="flex items-center gap-1">
+            {/* Reset hasła w obrębie przestrzeni: właściciel sali nie musi dzwonić
+                do dostawcy, gdy kelner zgubi hasło. */}
+            <button
+              onClick={handleReset}
+              disabled={resetuje}
+              className="rounded p-1.5 text-neutral-400 hover:bg-amber-50 hover:text-amber-600 disabled:opacity-40"
+              title="Ustaw nowe hasło"
+            >
+              <KeyRound className="h-4 w-4" />
+            </button>
+            {!m.isOwner && (
+              <button onClick={() => onRemove(m)} className="rounded p-1.5 text-neutral-400 hover:bg-red-50 hover:text-red-500" title="Usuń konto">
+                <Trash2 className="h-4 w-4" />
+              </button>
+            )}
+          </div>
         )}
       </div>
+
+      {noweHaslo && (
+        <div className="mt-2 flex flex-wrap items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs">
+          <span className="font-semibold text-amber-900">Nowe hasło:</span>
+          <Copyable value={noweHaslo} />
+          <span className="text-amber-800/80">Pokazujemy je tylko teraz — przekaż je tej osobie.</span>
+        </div>
+      )}
       <div className="mt-2 flex flex-wrap items-center gap-1.5">
         {roleOptions.map((r) => {
           const on = roles.includes(r.value);

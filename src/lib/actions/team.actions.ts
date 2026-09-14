@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { hashPassword } from "@/lib/auth/password";
 import { getActiveOrgId, getActiveMembership } from "@/lib/auth/active-org";
+import { PRESET_ROLE_VALUES } from "@/lib/workflow-roles";
 import { effectiveLimits } from "@/lib/plans";
 import {
   effectiveModuleAccess,
@@ -285,4 +286,86 @@ export async function removeTeamMember(memberId: string): Promise<{ ok: boolean;
   await prisma.organizationMember.delete({ where: { id: memberId } });
   revalidatePath("/app/team");
   return { ok: true };
+}
+
+/**
+ * Role własne przestrzeni — „Florysta", „DJ", „Barman od whisky".
+ *
+ * Do tej pory `customRolesJson` było wyłącznie ODCZYTYWANE: edytor procesu
+ * pozwalał wpisać rolę własną na kroku, ale nigdzie nie dało się jej dodać do
+ * listy obiektu, więc nie pojawiała się przy członkach zespołu. Rola, której
+ * nikt nie ma, blokuje krok na zawsze.
+ */
+export async function saveOrgCustomRoles(
+  roles: { value: string; label: string }[],
+): Promise<{ ok: boolean; error?: string }> {
+  const c = await ctx();
+  if (!c.canManage) return { ok: false, error: "Tylko administrator może zmieniać role." };
+
+  const czyste: { value: string; label: string }[] = [];
+  const zajete = new Set(PRESET_ROLE_VALUES.map((v) => v.toLowerCase()));
+
+  for (const r of roles) {
+    const label = (r.label ?? "").trim();
+    if (!label) continue;
+    if (label.length > 40) return { ok: false, error: "Nazwa roli może mieć najwyżej 40 znaków." };
+    // Rola własna jest przechowywana pod swoją nazwą — dopasowanie ról działa
+    // po nazwie i po etykiecie, więc kolizja z rolą gotową myliłaby obie strony.
+    if (zajete.has(label.toLowerCase())) {
+      return { ok: false, error: `Rola „${label}" już istnieje.` };
+    }
+    zajete.add(label.toLowerCase());
+    czyste.push({ value: label, label });
+  }
+
+  if (czyste.length > 30) return { ok: false, error: "Najwyżej 30 ról własnych." };
+
+  await prisma.organization.update({
+    where: { id: c.orgId },
+    data: { customRolesJson: JSON.stringify(czyste) },
+  });
+  revalidatePath("/app/team");
+  return { ok: true };
+}
+
+/**
+ * Reset hasła członka zespołu przez administratora przestrzeni.
+ *
+ * Dotąd hasło mógł zmienić wyłącznie administrator platformy
+ * (`resetAccountPassword` w admin.actions). Właściciel sali, któremu kelner
+ * zgubił hasło, musiał dzwonić do dostawcy — przy modelu bez samorejestracji
+ * to była realna blokada.
+ *
+ * Nowe hasło zwracamy raz, do przekazania osobie; nie zapisujemy go nigdzie
+ * w czytelnej postaci.
+ */
+export async function resetTeamMemberPassword(
+  memberId: string,
+): Promise<{ ok: boolean; password?: string; email?: string; error?: string }> {
+  const c = await ctx();
+  if (!c.canManage) return { ok: false, error: "Tylko administrator może resetować hasła." };
+
+  const member = await prisma.organizationMember.findFirst({
+    where: { id: memberId, organizationId: c.orgId },
+    select: { role: true, user: { select: { id: true, email: true } } },
+  });
+  if (!member?.user) return { ok: false, error: "Nie znaleziono członka." };
+  // Konto serwisowe należy do dostawcy, nie do przestrzeni klienta.
+  if (member.role === "SERVICE") return { ok: false, error: "To konto obsługuje dostawca systemu." };
+
+  const haslo = generateReadablePassword();
+  await prisma.user.update({
+    where: { id: member.user.id },
+    data: { password: await hashPassword(haslo) },
+  });
+
+  return { ok: true, password: haslo, email: member.user.email };
+}
+
+/** Hasło do przekazania ustnie lub SMS-em — bez znaków mylących się w druku. */
+function generateReadablePassword(len = 12): string {
+  const znaki = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let out = "";
+  for (let i = 0; i < len; i++) out += znaki[Math.floor(Math.random() * znaki.length)];
+  return out;
 }
