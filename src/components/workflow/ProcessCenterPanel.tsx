@@ -502,8 +502,12 @@ export function ProcessCenterPanel({
           </div>
           {!isDone && (
             <div className="flex-shrink-0 text-right">
-              <span className="text-xs font-medium text-neutral-500">
-                {Math.round((completedCount / totalCount) * 100)}%
+              {/* Konkretny licznik mówi więcej niż procent: „krok 3 z 7” od razu
+                  odpowiada na pytanie „ile jeszcze przede mną”. */}
+              <span className="text-xs font-medium text-neutral-500 tabular-nums">
+                {completedCount >= totalCount
+                  ? `Gotowe · ${totalCount} z ${totalCount}`
+                  : `Krok ${completedCount + 1} z ${totalCount}`}
               </span>
               <div className="w-24 h-1.5 bg-neutral-200 rounded-full mt-1 overflow-hidden">
                 <div

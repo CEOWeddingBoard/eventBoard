@@ -1,4 +1,4 @@
-import { CalendarDays, Clock, MapPin, Users } from "lucide-react";
+import { CalendarDays, Clock, MapPin, UtensilsCrossed, Users } from "lucide-react";
 import { getEventClientPortalData } from "@/lib/actions/event-client.actions";
 import { getEventProcessStateForPortal } from "@/lib/actions/process-runtime.actions";
 import { ClientProcessStep } from "@/components/workflow/ClientProcessStep";
@@ -102,6 +102,60 @@ export default async function ClientPortalPage({
             </div>
           )}
         </section>
+
+        {/* Harmonogram i menu były pobierane, ale nigdzie nie pokazywane —
+            klient widział wyłącznie swój bieżący krok. Dla niego to jest cała
+            aplikacja, jaką zna, więc pokazujemy ustalenia, które już zapadły. */}
+        {data.schedule.length > 0 && (
+          <section className="rounded-lg border border-neutral-200 bg-white p-6">
+            <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-neutral-800">
+              <Clock className="h-4 w-4 text-neutral-400" />
+              Plan dnia
+            </h2>
+            <ol className="mt-3 space-y-2">
+              {data.schedule.map((poz, i) => (
+                <li key={i} className="flex gap-3 text-sm">
+                  <span className="w-12 shrink-0 font-mono text-neutral-500 tabular-nums">{poz.time}</span>
+                  <div className="min-w-0">
+                    <p className="font-medium text-neutral-800">{poz.title}</p>
+                    {poz.location && <p className="text-xs text-neutral-500">{poz.location}</p>}
+                    {poz.description && <p className="text-xs text-neutral-500">{poz.description}</p>}
+                  </div>
+                </li>
+              ))}
+            </ol>
+            <p className="mt-3 text-xs text-neutral-400">
+              Plan może się jeszcze zmieniać — obiekt da znać, gdy będzie ostateczny.
+            </p>
+          </section>
+        )}
+
+        {data.menuVariants.length > 0 && (
+          <section className="rounded-lg border border-neutral-200 bg-white p-6">
+            <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-neutral-800">
+              <UtensilsCrossed className="h-4 w-4 text-neutral-400" />
+              Menu
+            </h2>
+            <div className="mt-3 space-y-4">
+              {data.menuVariants.map((wariant) => (
+                <div key={wariant.id}>
+                  <p className="text-sm font-semibold text-neutral-800">{wariant.label}</p>
+                  {wariant.description && (
+                    <p className="text-xs text-neutral-500">{wariant.description}</p>
+                  )}
+                  <ul className="mt-1.5 space-y-0.5">
+                    {wariant.courses.map((danie, i) => (
+                      <li key={i} className="flex gap-2 text-sm text-neutral-700">
+                        <span className="w-24 shrink-0 text-xs text-neutral-400">{danie.typeLabel}</span>
+                        <span>{danie.name}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {processState ? (
           <ClientProcessStep

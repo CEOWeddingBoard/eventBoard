@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { DashboardShortcuts } from "@/components/dashboard/dashboard-shortcuts";
 import { eventStatusLabel } from "@/lib/event-status";
+import { PierwszeKroki } from "@/components/dashboard/PierwszeKroki";
 
 /** Miesiąc w formie „sie 2026” — same numery nie mówiły, o który rok chodzi. */
 function monthLabel(key: string): string {
@@ -48,6 +49,14 @@ export default async function DashboardPage({
       _sum: { amount: true },
     }),
     prisma.organizationMember.count({ where: { organizationId: org.id } }),
+  ]);
+
+  // Stan „pierwszych kroków" — świeża przestrzeń nie może witać pustką.
+  const [workflowCount, eventsZLinkiem] = await Promise.all([
+    prisma.organizationWorkflow.count({ where: { organizationId: org.id } }),
+    prisma.event.count({
+      where: { organizationId: org.id, clientLinkTokenHash: { not: null } },
+    }).catch(() => 0),
   ]);
 
   const pendingDecisions = events.filter((e) => e.clientWorkflowStatus === "MENU_SUBMITTED");
@@ -104,6 +113,15 @@ export default async function DashboardPage({
     <div className="space-y-6">
       {/* Plan widnieje już w górnym pasku — druga plakietka tylko dublowała. */}
       <h1>{org.name}</h1>
+
+      <PierwszeKroki
+        locale={locale}
+        stan={{
+          maProces: workflowCount > 0,
+          maEvent: events.length > 0,
+          maLinkDlaKlienta: eventsZLinkiem > 0,
+        }}
+      />
 
       {/* KPI */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

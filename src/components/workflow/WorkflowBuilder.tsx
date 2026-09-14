@@ -28,6 +28,7 @@ import {
   type StepField,
 } from "@/lib/workflow-agenda-fields";
 import { AgendaPreview } from "@/components/workflow/AgendaPreview";
+import { sprawdzProces } from "@/lib/workflow-validation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -47,14 +48,16 @@ import {
   ClipboardList,
   UtensilsCrossed,
   ArrowRight,
+  AlertTriangle,
   Table2,
   ClipboardPaste,
 } from "lucide-react";
 
+// „Równoległe” świadomie nie ma tu wpisu: runtime nie rozgałęzia procesu
+// równolegle, a opcja w liście obiecywała funkcję, której nie ma.
 const NODE_TYPES: { value: WorkflowNodeData["nodeType"]; label: string }[] = [
   { value: "ACTION", label: "Akcja (liniowa)" },
   { value: "DECISION", label: "Decyzja (rozgałęzienie)" },
-  { value: "PARALLEL", label: "Równoległe" },
   { value: "END", label: "Koniec procesu" },
 ];
 
@@ -289,7 +292,11 @@ function NodeEditor({
 
       {/* Tabs */}
       <div className="flex border-b border-neutral-200 text-sm">
-        {(["basic", "fields", "mappings", "conditions"] as Tab[]).map((t) => (
+        {(["basic", "fields", "mappings", "conditions"] as Tab[])
+          // Mapowanie pól to starszy mechanizm — w nowym procesie tylko myli,
+          // bo robi to samo co zakładka „Pola”. Pokazujemy, gdy już coś zawiera.
+          .filter((t) => t !== "mappings" || node.fieldMappings.length > 0)
+          .map((t) => (
           <button
             key={t}
             type="button"
@@ -958,6 +965,8 @@ export function WorkflowBuilder({
     }
   }
 
+  const ostrzezenia = sprawdzProces(nodes, { nazwa: name });
+
   return (
     <div className="space-y-6">
       {/* Header metadata */}
@@ -983,8 +992,19 @@ export function WorkflowBuilder({
             <Input
               value={eventType}
               onChange={(e) => setEventType(e.target.value)}
-              placeholder="WEDDING, CORPORATE, …"
+              placeholder="np. Wesele"
+              list="typy-eventow"
             />
+            <datalist id="typy-eventow">
+              {["Wesele", "Komunia", "Chrzciny", "Bankiet firmowy", "Wigilia", "Urodziny", "Stypa"].map(
+                (t) => (
+                  <option key={t} value={t} />
+                ),
+              )}
+            </datalist>
+            <p className="mt-1 text-[11px] text-neutral-400">
+              Zostaw puste, jeśli proces ma pasować do każdego rodzaju przyjęcia.
+            </p>
           </div>
         </div>
         <div>
@@ -1078,6 +1098,27 @@ export function WorkflowBuilder({
         <AgendaPreview nodes={nodes} />
       </div>
       </div>
+
+      {/* Ostrzeżenia — nie blokują zapisu. Bywają procesy czysto organizacyjne,
+          które świadomie nie zasilają agendy; decyzja należy do człowieka. */}
+      {ostrzezenia.length > 0 && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+          <p className="flex items-center gap-1.5 text-sm font-semibold text-amber-900">
+            <AlertTriangle className="w-4 h-4 shrink-0" />
+            Sprawdź przed zapisem
+          </p>
+          <ul className="mt-1.5 space-y-1">
+            {ostrzezenia.map((o) => (
+              <li key={o.kod} className="text-[13px] text-amber-900/90">
+                • {o.tresc}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-[11px] text-amber-800/70">
+            Możesz zapisać mimo to — to podpowiedź, nie blokada.
+          </p>
+        </div>
+      )}
 
       {/* Save */}
       <div className="flex items-center gap-3 pt-2">
