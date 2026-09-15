@@ -51,9 +51,9 @@ const problemy = [
       "Obsługa pracuje na telefonie, a agendę eventu pobierasz jako jeden dokument do druku — z osobnymi sekcjami uwag dla kuchni i dla obsługi, z logo i danymi obiektu.",
   },
   {
-    problem: "„Nie będę wpinał karty ani zmieniał tego, jak księgujemy.”",
+    problem: "„Nie wiem, ile klient jeszcze dopłacił i komu mam przypomnieć o zaliczce.”",
     rozwiazanie:
-      "Nie musisz. Fakturujemy poza systemem, bez wpinania karty. Zaliczki i dopłaty klienta odnotowujesz w evencie ręcznie — tak, jak robisz to dziś, tylko w jednym miejscu.",
+      "Zaliczki, raty i dopłatę końcową odnotowujesz przy evencie. Widzisz, ile wpłynęło i ile zostało, a system sam przypomina o terminach zaliczek — przed i po dacie płatności.",
   },
   {
     problem: "„A jeśli za rok stwierdzę, że to nie dla nas? Dane zostaną u was.”",
