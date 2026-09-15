@@ -27,6 +27,7 @@ import {
   sourceFieldsFor,
   type StepField,
 } from "@/lib/workflow-agenda-fields";
+import { AGREGACJE } from "@/lib/workflow-table-summary";
 import { AgendaPreview } from "@/components/workflow/AgendaPreview";
 import { sprawdzProces } from "@/lib/workflow-validation";
 import { Button } from "@/components/ui/button";
@@ -565,10 +566,9 @@ function NodeEditor({
         {tab === "fields" && (
           <div className="space-y-3">
             <p className="text-xs text-neutral-500">
-              Pola, które wypełnia osoba odpowiedzialna za krok (klient w portalu
-              albo zespół w panelu). Po zatwierdzeniu wartość trafia do agendy pod
-              wskazane miejsce. Pole typu „Godzina” oznaczone jako pozycja
-              harmonogramu tworzy linię w harmonogramie agendy.
+              {node.actionType === "TABLE"
+                ? "Kolumny arkusza, który wypełnia osoba odpowiedzialna za krok. Kolumnę z liczbami można sumować, a kolumnę z powtarzalnymi wartościami — grupować i zliczać; do agendy trafia wtedy gotowe zestawienie zamiast listy wszystkich wierszy."
+                : "Pola, które wypełnia osoba odpowiedzialna za krok (klient w portalu albo zespół w panelu). Po zatwierdzeniu wartość trafia do agendy pod wskazane miejsce. Pole typu „Godzina” oznaczone jako pozycja harmonogramu tworzy linię w harmonogramie agendy."}
             </p>
             {(node.fields ?? []).map((f, i) => (
               <div key={i} className="rounded-lg border border-neutral-200 p-2.5 space-y-2">
@@ -628,13 +628,40 @@ function NodeEditor({
                     <input type="checkbox" checked={f.required ?? false} onChange={(e) => updateStepField(i, { ...f, required: e.target.checked })} className="rounded" />
                     Wymagane
                   </label>
-                  {f.type === "time" && (
+                  {f.type === "time" && node.actionType !== "TABLE" && (
                     <label className="flex items-center gap-1.5 cursor-pointer text-xs text-neutral-600">
                       <input type="checkbox" checked={f.scheduleLine ?? false} onChange={(e) => updateStepField(i, { ...f, scheduleLine: e.target.checked })} className="rounded" />
                       Pozycja harmonogramu
                     </label>
                   )}
+                  {/* Kolumna z liczbami albo z powtarzalnymi wartościami ma iść
+                      do agendy jako zestawienie, nie jako sto dwadzieścia wierszy. */}
+                  {node.actionType === "TABLE" && (
+                    <label className="flex items-center gap-1.5 text-xs text-neutral-600">
+                      Podsumowanie
+                      <select
+                        value={f.aggregate ?? ""}
+                        onChange={(e) =>
+                          updateStepField(i, {
+                            ...f,
+                            aggregate: (e.target.value || undefined) as StepField["aggregate"],
+                          })
+                        }
+                        className="rounded-md border border-neutral-300 bg-white px-2 py-1 text-xs"
+                      >
+                        <option value="">— bez podsumowania —</option>
+                        {AGREGACJE.map((a) => (
+                          <option key={a.value} value={a.value}>{a.label}</option>
+                        ))}
+                      </select>
+                    </label>
+                  )}
                 </div>
+                {node.actionType === "TABLE" && f.aggregate && (
+                  <p className="text-[11px] text-neutral-500">
+                    {AGREGACJE.find((a) => a.value === f.aggregate)?.hint}
+                  </p>
+                )}
               </div>
             ))}
             <Button type="button" variant="outline" size="sm" onClick={addStepField} className="text-xs">

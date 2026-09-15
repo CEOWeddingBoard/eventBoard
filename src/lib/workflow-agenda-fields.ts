@@ -130,6 +130,10 @@ export type StepField = {
   // „GG:MM — nazwa kroku" w harmonogramie agendy (harmonogram Z PROCESU).
   scheduleLine?: boolean;
   options?: string[];
+  // Tylko krok TABLE: jak podsumować tę kolumnę. `sum` liczy sumę wartości,
+  // `group` grupuje wiersze po wartości i zlicza wystąpienia.
+  // Szczegóły i liczenie: `src/lib/workflow-table-summary.ts`.
+  aggregate?: "sum" | "group";
 };
 
 export const STEP_FIELD_TYPES: { value: StepFieldType; label: string }[] = [
@@ -187,26 +191,4 @@ export function parseTableRows(raw: unknown): TableRow[] {
 /** Czy wiersz ma cokolwiek wpisane — puste wiersze nie idą do agendy. */
 export function isRowFilled(row: TableRow): boolean {
   return Object.values(row).some((v) => String(v ?? "").trim() !== "");
-}
-
-/**
- * Co tabela odkłada w agendzie: dla każdej kolumny ze wskazanym miejscem
- * w agendzie — jej wartości z kolejnych wierszy, każda w nowej linii.
- */
-export function tableAgendaEntries(
-  columns: StepField[],
-  rows: TableRow[],
-): { targetAgendaKey: string; value: string }[] {
-  const filled = rows.filter(isRowFilled);
-  const out: { targetAgendaKey: string; value: string }[] = [];
-
-  for (const col of columns) {
-    if (!col.targetAgendaKey) continue;
-    const values = filled
-      .map((r) => String(r[col.key] ?? "").trim())
-      .filter((v) => v !== "");
-    if (values.length === 0) continue;
-    out.push({ targetAgendaKey: col.targetAgendaKey, value: values.join("\n") });
-  }
-  return out;
 }

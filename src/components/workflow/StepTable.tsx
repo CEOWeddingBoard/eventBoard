@@ -2,9 +2,14 @@
 
 import { useRef, useState } from "react";
 import Papa from "papaparse";
-import { Download, Plus, Trash2, Upload } from "lucide-react";
+import { Download, Plus, Sigma, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { StepField, TableRow } from "@/lib/workflow-agenda-fields";
+import {
+  formatujLiczbe,
+  maPodsumowanie,
+  podsumujTabele,
+} from "@/lib/workflow-table-summary";
 
 /**
  * Tabela kroku procesu — lista gości, teksty na winietki, cokolwiek, co jest
@@ -135,6 +140,10 @@ export function StepTable({
 
   const visibleRows = rows.length > 0 ? rows : [emptyRow(columns)];
 
+  // Zestawienie liczy się w przeglądarce przy każdej zmianie komórki: osoba
+  // wypełniająca widzi „mięsne × 45” od razu, a nie dopiero w agendzie.
+  const podsumowanie = maPodsumowanie(columns) ? podsumujTabele(columns, rows) : null;
+
   return (
     <div className="space-y-2">
       <div className="overflow-x-auto rounded-md border border-neutral-200">
@@ -243,6 +252,54 @@ export function StepTable({
       </div>
 
       {importError && <p className="text-sm text-red-600">{importError}</p>}
+
+      {podsumowanie && podsumowanie.liczbaWierszy > 0 && (
+        <div className="rounded-md border border-blue-100 bg-blue-50/60 p-3">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-blue-900">
+            <Sigma className="h-3.5 w-3.5" />
+            Zestawienie
+            <span className="font-normal text-blue-700">
+              · {podsumowanie.liczbaWierszy}{" "}
+              {podsumowanie.liczbaWierszy === 1 ? "wiersz" : "wierszy"}
+            </span>
+          </div>
+
+          {podsumowanie.sumy.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+              {podsumowanie.sumy.map((s) => (
+                <span key={s.key} className="text-sm text-blue-900">
+                  {s.label}:{" "}
+                  <b className="tabular-nums">{formatujLiczbe(s.suma)}</b>
+                </span>
+              ))}
+            </div>
+          )}
+
+          {podsumowanie.grupy.map((g) => (
+            <div key={g.key} className="mt-2">
+              <p className="text-[11px] uppercase tracking-wide text-blue-700">{g.label}</p>
+              <ul className="mt-1 space-y-0.5">
+                {g.pozycje.map((p) => (
+                  <li key={p.wartosc} className="flex flex-wrap items-baseline gap-x-2 text-sm">
+                    <span className="font-medium text-blue-950">{p.wartosc}</span>
+                    <span className="tabular-nums text-blue-700">× {p.liczba}</span>
+                    {p.sumy
+                      .filter((s) => s.suma !== 0)
+                      .map((s) => (
+                        <span key={s.key} className="text-xs text-blue-600">
+                          {s.label}: <b className="tabular-nums">{formatujLiczbe(s.suma)}</b>
+                        </span>
+                      ))}
+                  </li>
+                ))}
+              </ul>
+              {g.pozycje.length === 0 && (
+                <p className="mt-1 text-xs text-blue-600">Kolumna jeszcze nieuzupełniona.</p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

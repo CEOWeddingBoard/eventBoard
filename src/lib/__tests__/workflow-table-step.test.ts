@@ -11,10 +11,10 @@ import {
   parseTableRows,
   isRowFilled,
   isTableStep,
-  tableAgendaEntries,
   TABLE_ROWS_KEY,
   type StepField,
 } from "@/lib/workflow-agenda-fields";
+import { tableAgendaEntries } from "@/lib/workflow-table-summary";
 import { policzPodgladAgendy } from "@/lib/workflow-agenda-preview";
 import {
   approveRolesLabel,

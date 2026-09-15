@@ -53,10 +53,18 @@ export function policzPodgladAgendy(nodes: WorkflowNodeData[]): PodgladAgendy {
         continue;
       }
       if (!pole.targetAgendaKey) continue;
+      // Kolumna z podsumowaniem oddaje zestawienie, a nie kolejne wiersze —
+      // podgląd ma to powiedzieć wprost, bo to zupełnie inna treść w agendzie.
+      const opisKolumny = (nazwa: string) => {
+        if (pole.aggregate === "sum") return `suma kolumny „${nazwa}”`;
+        if (pole.aggregate === "group") return `zestawienie kolumny „${nazwa}”`;
+        return `kolumna „${nazwa}”`;
+      };
+
       dopisz(pole.targetAgendaKey, {
         krok: nazwaKroku,
         pole: tabela
-          ? `kolumna „${pole.label?.trim() || pole.key}”`
+          ? opisKolumny(pole.label?.trim() || pole.key)
           : pole.label?.trim() || pole.key,
       });
       wklad++;

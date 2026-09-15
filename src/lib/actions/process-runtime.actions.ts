@@ -12,9 +12,9 @@ import {
   isTableStep,
   parseTableRows,
   isRowFilled,
-  tableAgendaEntries,
   type StepField,
 } from "@/lib/workflow-agenda-fields";
+import { tableAgendaEntries } from "@/lib/workflow-table-summary";
 
 export type ProcessNodeStatus = "pending" | "current" | "completed";
 
