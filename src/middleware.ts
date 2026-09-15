@@ -82,6 +82,10 @@ const isWebhookPath = (pathname: string) =>
 const isLocaleAgnosticPublicRoute = (pathname: string) =>
   pathname === "/org" ||
   pathname.startsWith("/org/") ||
+  // Strona pary młodej — adres wysyłany parze ma być krótki, bez prefiksu
+  // języka. Bez tego wpisu intlMiddleware przepisze go na /pl/wedding/... ,
+  // gdzie nie ma trasy, i link da 404.
+  pathname.startsWith("/wedding/") ||
   // Endpointy maszynowe pod gołym /api — bez prefiksu locale, inaczej
   // intlMiddleware przepisałby je na /pl/api/... i zwracał 404.
   pathname === "/api/admin/bootstrap" ||
