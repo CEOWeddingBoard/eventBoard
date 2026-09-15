@@ -18,7 +18,14 @@ const eslintConfig = defineConfig([
   {
     // Skrypty narzędziowe i pliki konfiguracyjne to CommonJS uruchamiany
     // bezpośrednio przez Node — `require` jest tam poprawną formą, nie zaszłością.
-    files: ["scripts/**", "*.config.{js,cjs,mjs,ts}", "jest.setup.{ts,tsx}"],
+    files: [
+      "scripts/**",
+      // Generator broszury w docs/ to skrypt Node uruchamiany ręcznie,
+      // nie część aplikacji — obowiązują go te same zasady co scripts/.
+      "docs/**",
+      "*.config.{js,cjs,mjs,ts}",
+      "jest.setup.{ts,tsx}",
+    ],
     rules: {
       "@typescript-eslint/no-require-imports": "off",
       "@typescript-eslint/no-explicit-any": "off",
