@@ -43,7 +43,8 @@
    * wyglądały jak z innego produktu niż aplikacja.
    */
   .landing-clean :is(h1, h2, h3, h4, h5, h6),
-  .org-public :is(h1, h2, h3, h4, h5, h6) {
+  .org-public :is(h1, h2, h3, h4, h5, h6),
+  .legal-page :is(h1, h2, h3, h4, h5, h6) {
     font-family: inherit;
   }
 }

@@ -91,7 +91,9 @@ export function GoogleCalendarsManager({
       </div>
       <p className="mt-1 text-xs text-neutral-500">
         Podłącz kalendarze, z których rezerwacje mają być widoczne na grafiku. Możesz podłączyć
-        kilka kont — każdy kalendarz dostaje swój kolor. Rezerwacje z Google są tylko do odczytu.
+        kilka kont — każdy kalendarz dostaje swój kolor. Synchronizacja działa w obie strony:
+        rezerwacje z Google widać na grafiku, a przyjęcia z EventBoarda trafiają do
+        przypisanego kalendarza.
       </p>
 
       {status && (
@@ -197,7 +199,16 @@ export function GoogleCalendarsManager({
         ))}
       </div>
 
-      {limit != null && kalendarze.length >= limit ? (
+      {!configured ? (
+        <span
+          className="mt-4 inline-flex cursor-not-allowed items-center gap-1.5 rounded-md bg-neutral-200 px-3 py-2 text-xs font-medium text-neutral-500"
+          title="Najpierw uzupełnij GOOGLE_CLIENT_ID i GOOGLE_CLIENT_SECRET na serwerze"
+          aria-disabled="true"
+        >
+          <CalendarPlus className="h-3.5 w-3.5" />
+          Podłącz kalendarz Google
+        </span>
+      ) : limit != null && kalendarze.length >= limit ? (
         <p className="mt-4 rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs text-neutral-600">
           Wykorzystano limit {limit} kalendarzy w tym pakiecie. Odłącz jeden albo podnieś pakiet.
         </p>

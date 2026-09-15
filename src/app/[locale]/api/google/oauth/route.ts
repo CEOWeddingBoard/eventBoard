@@ -21,14 +21,17 @@ export async function GET(req: NextRequest) {
   const orgId = await getActiveOrgId(user.id);
   if (!orgId) return NextResponse.json({ error: "Brak aktywnej przestrzeni" }, { status: 403 });
 
+  const locale = req.nextUrl.searchParams.get("locale") ?? "pl";
+
+  // Ta trasa jest celem KLIKNIĘCIA, nie wywołaniem z JavaScriptu — surowy JSON
+  // z błędem lądował więc użytkownikowi na całym ekranie. Wracamy tam, skąd
+  // przyszedł, z informacją do pokazania w interfejsie.
   if (!isGoogleCalendarConfigured()) {
-    return NextResponse.json(
-      { error: "Brak GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET w konfiguracji serwera." },
-      { status: 503 },
+    return NextResponse.redirect(
+      new URL(`/${locale}/app/settings/configuration?google=nieskonfigurowany`, req.nextUrl.origin),
     );
   }
 
-  const locale = req.nextUrl.searchParams.get("locale") ?? "pl";
   const base = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? req.nextUrl.origin;
   const redirectUri = `${base}/${locale}/api/google/callback`;
 
