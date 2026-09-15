@@ -26,6 +26,8 @@ import { EVENT_STATUS_OPTIONS, eventStatusFilterLabel } from "@/lib/event-status
 import { createEvent, updateEvent, duplicateEvent } from "@/lib/actions/event.actions";
 import { EventClientLinkButton } from "@/components/eventboard/event-client-link-button";
 import { listEventTypes } from "@/lib/actions/event-type.actions";
+import { sprawdzTerminEventu } from "@/lib/actions/event.actions";
+import type { Kolizja } from "@/lib/kolizje-terminow";
 
 type EventType = {
   id: string;
@@ -118,6 +120,7 @@ export function EventBoardEventsList({
   const [editForm, setEditForm] = useState({ name: "", date: "", guests: "", hallId: "" });
   const [editing, setEditing] = useState(false);
 
+  const [kolizje, setKolizje] = useState<Kolizja[]>([]);
   const [eventTypes, setEventTypes] = useState<EventType[]>([]);
   const [selectedTypeId, setSelectedTypeId] = useState("");
   const [customFieldValues, setCustomFieldValues] = useState<Record<string, string>>({});
@@ -127,6 +130,22 @@ export function EventBoardEventsList({
       listEventTypes().then(setEventTypes);
     }
   }, [newOpen]);
+
+  // Ostrzeżenie o zajętym terminie pojawia się PRZED kliknięciem „Utwórz”,
+  // a nie po. Podwójna rezerwacja sali kończy się odwoływaniem przyjęcia.
+  useEffect(() => {
+    if (!newOpen || !form.date) {
+      setKolizje([]);
+      return;
+    }
+    let aktualne = true;
+    sprawdzTerminEventu({ date: form.date, hallId: form.hallId || null }).then((k) => {
+      if (aktualne) setKolizje(k);
+    });
+    return () => {
+      aktualne = false;
+    };
+  }, [newOpen, form.date, form.hallId]);
 
   const handleTypeChange = (typeId: string) => {
     setSelectedTypeId(typeId);
@@ -632,13 +651,43 @@ export function EventBoardEventsList({
               />
               To jest wesele — udostępnij portal parze (link + PIN)
             </label>
+            {kolizje.length > 0 && (
+              <div
+                className={`rounded-lg border px-3 py-2.5 ${
+                  kolizje.some((k) => k.waga === "blokada")
+                    ? "border-red-200 bg-red-50"
+                    : "border-amber-200 bg-amber-50"
+                }`}
+              >
+                <p
+                  className={`text-xs font-semibold ${
+                    kolizje.some((k) => k.waga === "blokada") ? "text-red-800" : "text-amber-800"
+                  }`}
+                >
+                  {kolizje.some((k) => k.waga === "blokada")
+                    ? "Termin jest zajęty"
+                    : "Tego dnia coś już jest"}
+                </p>
+                <ul className="mt-1 space-y-0.5">
+                  {kolizje.map((k, i) => (
+                    <li key={i} className="text-xs text-neutral-700">
+                      • {k.opis}
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-1.5 text-[11px] text-neutral-500">
+                  Możesz zapisać mimo to — decyzja należy do Ciebie.
+                </p>
+              </div>
+            )}
+
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="outline" onClick={() => setNewOpen(false)}>
                 Anuluj
               </Button>
               <Button type="submit" disabled={creating}>
                 {creating ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : null}
-                Utwórz
+                {kolizje.some((k) => k.waga === "blokada") ? "Utwórz mimo to" : "Utwórz"}
               </Button>
             </div>
           </form>

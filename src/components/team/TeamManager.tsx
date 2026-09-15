@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { UserPlus, ShieldCheck, Crown, Trash2, Copy, Check, Shield, Plus, KeyRound } from "lucide-react";
 import { addTeamMember, updateTeamMember, removeTeamMember, setModulePermission, saveOrgCustomRoles, resetTeamMemberPassword, type TeamContext, type TeamMember } from "@/lib/actions/team.actions";
 import { APP_MODULES, PERM_LEVELS, type PermLevel } from "@/lib/permissions/modules";
+import { StaffManager } from "@/components/team/StaffManager";
 
 const OP_ROLES = [
   { value: "MANAGER", label: "Manager" },
@@ -165,6 +166,8 @@ export function TeamManager({ initial }: { initial: TeamContext }) {
           )}
         </section>
       )}
+
+      <StaffManager canManage={ctx.canManage} roleOptions={allRoles} />
 
       {ctx.canManage && (
         <section className="rounded-xl border border-neutral-200 bg-white p-5">

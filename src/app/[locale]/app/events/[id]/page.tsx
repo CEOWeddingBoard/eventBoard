@@ -8,6 +8,7 @@ import { getEventWithDayScheduleAndMenu } from "@/lib/actions/event.actions";
 import { DayScheduleAndMenu } from "@/components/day-schedule/day-schedule-and-menu";
 import { MenuVariantEditor } from "@/components/menu/MenuVariantEditor";
 import { ExportEventToGoogle } from "@/components/google/ExportEventToGoogle";
+import { EventStaffPanel } from "@/components/eventboard/EventStaffPanel";
 import { AgendaApprovalPanel } from "@/components/agenda/AgendaApprovalPanel";
 import { GenerateAgendaButton } from "@/components/agenda/generate-agenda-button";
 import { EventClientLinkButton } from "@/components/eventboard/event-client-link-button";
@@ -190,6 +191,8 @@ export default async function EventBoardEventPage({
           canOverride={canOverride}
         />
       )}
+
+      <EventStaffPanel eventId={event.id} canEdit={canManage} />
 
       {canManage && (
         <div className="flex flex-wrap gap-2">

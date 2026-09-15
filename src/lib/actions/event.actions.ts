@@ -2,6 +2,7 @@
 
 import { getCurrentUser } from "@/lib/auth/utils";
 import { getActiveOrgId, requireOrgId } from "@/lib/auth/active-org";
+import { znajdzKolizje, type Kolizja } from "@/lib/kolizje-terminow";
 import { prisma } from "@/lib/prisma"
 import type { Prisma } from "@prisma/client"
 import { assertModuleEdit } from "@/lib/permissions/guard";
@@ -897,4 +898,59 @@ export async function duplicateEvent(eventId: string) {
   revalidatePath("/pl/app");
   revalidatePath("/en/app");
   return copy;
+}
+
+/**
+ * Sprawdzenie terminu przed zapisem przyjęcia.
+ *
+ * Wołane z formularza przy zmianie daty lub sali — ostrzeżenie pojawia się,
+ * zanim ktokolwiek kliknie „Utwórz”. Świadomie nie blokuje zapisu: dwa wesela
+ * na dwóch salach tego samego dnia to normalny dzień dużego obiektu.
+ */
+export async function sprawdzTerminEventu(input: {
+  date: string;
+  hallId?: string | null;
+  pomijanyEventId?: string | null;
+}): Promise<Kolizja[]> {
+  try {
+    const user = await getCurrentUser();
+    if (!user) return [];
+    const organizationId = await getActiveOrgId(user.id);
+    if (!organizationId) return [];
+
+    const data = new Date(input.date);
+    if (Number.isNaN(data.getTime())) return [];
+
+    const od = new Date(data);
+    od.setHours(0, 0, 0, 0);
+    const doKiedy = new Date(data);
+    doKiedy.setHours(23, 59, 59, 999);
+
+    const [eventy, zablokowane] = await Promise.all([
+      prisma.event.findMany({
+        where: { organizationId, date: { gte: od, lte: doKiedy } },
+        select: { id: true, name: true, date: true, hallId: true, hall: { select: { name: true } } },
+      }),
+      prisma.orgBlockedDate.findMany({
+        where: { organizationId, date: { gte: od, lte: doKiedy } },
+        select: { date: true, reason: true },
+      }),
+    ]);
+
+    return znajdzKolizje(
+      { data, hallId: input.hallId ?? null, pomijanyEventId: input.pomijanyEventId ?? null },
+      eventy.map((e) => ({
+        id: e.id,
+        name: e.name,
+        date: e.date,
+        hallId: e.hallId,
+        hallName: e.hall?.name ?? null,
+      })),
+      zablokowane,
+    );
+  } catch (e) {
+    // Sprawdzenie terminu nie może zablokować tworzenia eventu.
+    console.error("[event:sprawdzTermin]", e);
+    return [];
+  }
 }

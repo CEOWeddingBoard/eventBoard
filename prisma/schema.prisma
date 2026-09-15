@@ -182,6 +182,7 @@ model Organization {
   notifications           OrgNotification[]
   googleCalendars         GoogleCalendarConnection[]
   adminNotes              OrgAdminNote[]
+  staff                   OrgStaff[]
   leads                   OrgLead[]
   agendaTemplates         AgendaTemplate[]
   agendaDocumentTemplates AgendaDocumentTemplate[]
@@ -227,6 +228,49 @@ model OrgAdminNote {
 
   @@index([organizationId, createdAt])
   @@map("org_admin_notes")
+}
+
+/// Personel obiektu — ludzie BEZ kont w systemie.
+/// Kelner czy kucharz nie musi się logować, żeby trafić na obsadę przyjęcia
+/// i do agendy. Konta zakłada się tylko tym, którzy realnie pracują w panelu.
+/// (Modele VenueStaff/VenueStaffShift to zaszłość po produkcie weselnym —
+/// były przypięte do Venue i do martwego modelu rezerwacji.)
+model OrgStaff {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name           String
+  /// Rola operacyjna — te same wartości co role kroków procesu.
+  role           String       @default("STAFF")
+  phone          String?
+  note           String?
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  obsady EventStaff[]
+
+  @@index([organizationId, isActive])
+  @@map("org_staff")
+}
+
+/// Obsada konkretnego przyjęcia: kto pracuje, od której i w jakiej roli.
+model EventStaff {
+  id        String   @id @default(cuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  staffId   String
+  staff     OrgStaff @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  /// Rola na tym przyjęciu — bywa inna niż domyślna (kelner jako koordynator).
+  role      String?
+  startTime String?
+  endTime   String?
+  note      String?
+  createdAt DateTime @default(now())
+
+  @@unique([eventId, staffId])
+  @@index([eventId])
+  @@map("event_staff")
 }
 
 model MenuParserConfig {
@@ -411,6 +455,7 @@ model Event {
   workflowStageId       String? // DEPRECATED: zachowane dla kompatybilności, użyj processState
   workflowHistory       EventWorkflowHistory[]
   processState          EventProcessState?
+  staff                 EventStaff[]
   agendaData            EventAgendaData?
   // Ostatnie wysłane przypomnienie o kroku czekającym na akceptację (dedup).
   approvalReminderAt    DateTime?

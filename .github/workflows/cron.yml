@@ -44,6 +44,13 @@ jobs:
             "${{ secrets.APP_URL }}/api/cron/step-approval-reminders"
           echo
 
+      - name: Zaliczki i raty
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --header "x-cron-secret: ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.APP_URL }}/api/cron/payment-reminders"
+          echo
+
       - name: Przypomnienia o zadaniach
         run: |
           curl --fail-with-body --silent --show-error \
