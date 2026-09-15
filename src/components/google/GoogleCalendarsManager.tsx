@@ -109,6 +109,8 @@ export function GoogleCalendarsManager({
           {status === "brak-dostepu" && "Nie masz dostępu do tej przestrzeni."}
           {status === "sesja" && "Sesja wygasła w trakcie autoryzacji. Zaloguj się i spróbuj ponownie."}
           {status === "blad" && "Autoryzacja nie powiodła się. Spróbuj ponownie."}
+          {status === "nieskonfigurowany" &&
+            "Serwer nie ma kluczy Google — uzupełnij GOOGLE_CLIENT_ID i GOOGLE_CLIENT_SECRET."}
         </p>
       )}
 
