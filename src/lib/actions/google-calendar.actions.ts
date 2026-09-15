@@ -266,3 +266,103 @@ export async function eksportujEventDoGoogle(
     return { ok: false, error: "Nie udało się zapisać w Google. Sprawdź połączenie w Konfiguracji." };
   }
 }
+
+/**
+ * Automatyczna synchronizacja przyjęcia do Google.
+ *
+ * Wołana po każdym zapisie przyjęcia, nie przez człowieka — dlatego
+ * NIGDY nie rzuca i nie sprawdza uprawnień modułu: zapis przyjęcia nie może
+ * się wywrócić dlatego, że Google akurat nie odpowiada. Uprawnienia
+ * sprawdziła już akcja, która ten zapis wykonała.
+ *
+ * Decyduje sama, co zrobić: wpis powstaje, aktualizuje się przy zmianie
+ * daty czy sali, a przy statusie ARCHIVED znika z kalendarza. Bez tego
+ * ostatniego przesunięty albo odwołany termin zostawał w Google zablokowany
+ * na zawsze — grafik pokazywałby nieprawdę.
+ */
+export async function zsynchronizujEventZGoogle(eventId: string): Promise<void> {
+  try {
+    const event = await prisma.event.findUnique({
+      where: { id: eventId },
+      select: {
+        id: true,
+        name: true,
+        date: true,
+        eventEndTime: true,
+        hallId: true,
+        status: true,
+        organizationId: true,
+        googleCalendarEventId: true,
+        receptionLocationName: true,
+        scenarioNotes: true,
+      },
+    });
+    if (!event?.organizationId) return;
+
+    const polaczenia = await prisma.googleCalendarConnection.findMany({
+      where: { organizationId: event.organizationId, isActive: true },
+      orderBy: { createdAt: "asc" },
+    });
+    if (polaczenia.length === 0) return;
+
+    const cel =
+      (event.hallId ? polaczenia.find((c) => c.venueHallId === event.hallId) : undefined) ??
+      polaczenia.find((c) => c.venueHallId === null) ??
+      polaczenia[0];
+
+    const token = await getValidAccessToken({
+      id: cel.id,
+      userId: cel.userId,
+      refreshToken: cel.refreshToken,
+      accessToken: cel.accessToken,
+      tokenExpiresAt: cel.tokenExpiresAt,
+      calendarId: cel.calendarId,
+    });
+    const calendarId = cel.calendarId ?? "primary";
+
+    // Przyjęcie zarchiwizowane zwalnia termin — wpis musi zniknąć z Google.
+    if (event.status === "ARCHIVED") {
+      if (event.googleCalendarEventId) {
+        const { deleteCalendarEventWithToken } = await import("@/lib/google-calendar");
+        await deleteCalendarEventWithToken(token, calendarId, event.googleCalendarEventId);
+        await prisma.event.update({
+          where: { id: event.id },
+          data: { googleCalendarEventId: null },
+        });
+      }
+      return;
+    }
+
+    const start = new Date(event.date);
+    // Bez godziny zakończenia przyjmujemy pięć godzin — wpis bez końca Google
+    // traktuje jako całodniowy i zabrudziłby widok kalendarza.
+    const koniec = event.eventEndTime ?? new Date(start.getTime() + 5 * 60 * 60 * 1000);
+
+    const wejscie = {
+      summary: event.status === "DRAFT" ? `[wstępna] ${event.name}` : event.name,
+      description: event.scenarioNotes ?? undefined,
+      location: event.receptionLocationName ?? undefined,
+      start: { dateTime: start.toISOString() },
+      end: { dateTime: koniec.toISOString() },
+    };
+
+    if (event.googleCalendarEventId) {
+      await updateCalendarEventWithToken(token, calendarId, event.googleCalendarEventId, wejscie);
+    } else {
+      const googleId = await createCalendarEventWithToken(token, calendarId, wejscie, event.id);
+      await prisma.event.update({
+        where: { id: event.id },
+        data: { googleCalendarEventId: googleId },
+      });
+    }
+
+    await prisma.googleCalendarConnection.update({
+      where: { id: cel.id },
+      data: { lastSyncAt: new Date() },
+    });
+  } catch (e) {
+    // Log, nie wyjątek: przyjęcie jest już zapisane, a obiekt ma w karcie
+    // przycisk ręcznego wysłania, gdyby Google było chwilowo niedostępne.
+    console.error("[google:autosync]", eventId, e);
+  }
+}

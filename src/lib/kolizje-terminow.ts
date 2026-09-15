@@ -10,7 +10,11 @@
  * podejmuje człowiek, system ma tylko nie pozwolić przeoczyć.
  */
 
-export type RodzajKolizji = "ta-sama-sala" | "dzien-zablokowany" | "ten-sam-dzien";
+export type RodzajKolizji =
+  | "ta-sama-sala"
+  | "dzien-zablokowany"
+  | "ten-sam-dzien"
+  | "rezerwacja-google";
 
 export type Kolizja = {
   rodzaj: RodzajKolizji;
@@ -37,6 +41,23 @@ export type IstniejacyEvent = {
   hallName: string | null;
 };
 
+/**
+ * Rezerwacja z podłączonego kalendarza Google.
+ *
+ * Termin zajęty w Google blokuje salę dokładnie tak samo jak przyjęcie
+ * wpisane w EventBoardzie — grafik to pokazywał, ale sprawdzenie terminu
+ * przy zakładaniu przyjęcia tego nie widziało i obiekt mógł spokojnie
+ * wpisać drugie wesele na zajętą salę.
+ */
+export type RezerwacjaGoogle = {
+  tytul: string;
+  start: Date;
+  /** Sala przypisana do kalendarza. Null = rezerwacja całego obiektu. */
+  venueHallId: string | null;
+  /** Nazwa kalendarza — człowiek musi wiedzieć, gdzie tego szukać. */
+  zrodlo: string;
+};
+
 export function tenSamDzien(a: Date, b: Date): boolean {
   return (
     a.getFullYear() === b.getFullYear() &&
@@ -56,6 +77,7 @@ export function znajdzKolizje(
   wejscie: WejscieDoSprawdzenia,
   eventy: IstniejacyEvent[],
   zablokowaneDni: { date: Date; reason: string | null }[] = [],
+  rezerwacjeGoogle: RezerwacjaGoogle[] = [],
 ): Kolizja[] {
   const out: Kolizja[] = [];
   const data = wejscie.data;
@@ -104,6 +126,18 @@ export function znajdzKolizje(
       waga: "uwaga",
       eventId: e.id,
       opis: `Tego dnia jest już przyjęcie „${e.name}" na sali ${e.hallName ?? "innej"}.`,
+    });
+  }
+
+  for (const r of rezerwacjeGoogle.filter((r) => tenSamDzien(r.start, data))) {
+    // Kalendarz przypisany do TEJ sali zajmuje ją tak samo jak własne przyjęcie.
+    const tenSamZasob = !!wejscie.hallId && r.venueHallId === wejscie.hallId;
+    out.push({
+      rodzaj: "rezerwacja-google",
+      waga: tenSamZasob ? "blokada" : "uwaga",
+      opis: tenSamZasob
+        ? `Sala jest zajęta w kalendarzu „${r.zrodlo}": „${r.tytul}".`
+        : `Tego dnia jest rezerwacja w kalendarzu „${r.zrodlo}": „${r.tytul}".`,
     });
   }
 

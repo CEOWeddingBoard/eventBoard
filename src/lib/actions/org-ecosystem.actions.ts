@@ -518,6 +518,12 @@ export async function convertLeadToEvent(leadId: string) {
 
   await prisma.orgLead.update({ where: { id: leadId }, data: { status: "WON" } });
   revalidatePath("/pl/app");
+
+  // Zapytanie zamienione w przyjęcie blokuje termin, więc musi być widoczne
+  // w Google tak samo jak przyjęcie założone ręcznie.
+  const { zsynchronizujEventZGoogle } = await import("@/lib/actions/google-calendar.actions");
+  void zsynchronizujEventZGoogle(event.id);
+
   return event;
 }
 

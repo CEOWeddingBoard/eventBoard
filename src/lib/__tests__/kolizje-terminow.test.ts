@@ -6,7 +6,12 @@
  * decyzji, a nie jako drobna uwaga.
  */
 
-import { znajdzKolizje, maPowazneKolizje, tenSamDzien } from "@/lib/kolizje-terminow";
+import {
+  znajdzKolizje,
+  maPowazneKolizje,
+  tenSamDzien,
+  type RezerwacjaGoogle,
+} from "@/lib/kolizje-terminow";
 
 const dzien = (iso: string) => new Date(`${iso}T12:00:00`);
 
@@ -91,5 +96,64 @@ describe("znajdzKolizje", () => {
 
   it("pusty kalendarz to brak kolizji", () => {
     expect(znajdzKolizje({ data: dzien("2026-06-14"), hallId: "sala-a" }, [])).toEqual([]);
+  });
+});
+
+describe("rezerwacje z kalendarzy Google", () => {
+  const dzien = new Date("2026-08-15T12:00:00");
+  const rezerwacja = (over: Partial<RezerwacjaGoogle> = {}): RezerwacjaGoogle => ({
+    tytul: "Chrzciny Nowaków",
+    start: new Date("2026-08-15T14:00:00"),
+    venueHallId: null,
+    zrodlo: "Kalendarz sali",
+    ...over,
+  });
+
+  it("zajęta ta sama sala to blokada, nie sugestia", () => {
+    const k = znajdzKolizje(
+      { data: dzien, hallId: "sala-a" },
+      [],
+      [],
+      [rezerwacja({ venueHallId: "sala-a" })],
+    );
+    expect(k).toHaveLength(1);
+    expect(k[0].waga).toBe("blokada");
+    expect(k[0].rodzaj).toBe("rezerwacja-google");
+    expect(k[0].opis).toContain("Kalendarz sali");
+  });
+
+  it("rezerwacja na innej sali to tylko uwaga", () => {
+    const k = znajdzKolizje(
+      { data: dzien, hallId: "sala-a" },
+      [],
+      [],
+      [rezerwacja({ venueHallId: "sala-b" })],
+    );
+    expect(k[0].waga).toBe("uwaga");
+  });
+
+  it("rezerwacja całego obiektu nie blokuje konkretnej sali, ale ostrzega", () => {
+    const k = znajdzKolizje({ data: dzien, hallId: "sala-a" }, [], [], [rezerwacja()]);
+    expect(k[0].waga).toBe("uwaga");
+  });
+
+  it("rezerwacja z innego dnia nie ma znaczenia", () => {
+    const k = znajdzKolizje(
+      { data: dzien, hallId: "sala-a" },
+      [],
+      [],
+      [rezerwacja({ start: new Date("2026-08-16T14:00:00"), venueHallId: "sala-a" })],
+    );
+    expect(k).toEqual([]);
+  });
+
+  it("nazwa rezerwacji trafia do opisu, żeby dało się ją znaleźć w Google", () => {
+    const k = znajdzKolizje(
+      { data: dzien, hallId: "sala-a" },
+      [],
+      [],
+      [rezerwacja({ tytul: "Konferencja ACME", venueHallId: "sala-a" })],
+    );
+    expect(k[0].opis).toContain("Konferencja ACME");
   });
 });

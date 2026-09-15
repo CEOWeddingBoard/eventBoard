@@ -653,6 +653,9 @@ export async function createEvent(data: {
   revalidatePath("/pl/app");
   revalidatePath("/en/app");
 
+  const { zsynchronizujEventZGoogle } = await import("@/lib/actions/google-calendar.actions");
+  void zsynchronizujEventZGoogle(event.id);
+
   return event;
 }
 
@@ -808,8 +811,11 @@ export async function updateEvent(eventId: string, data: {
   revalidatePath("/pl/app");
   revalidatePath("/en/app");
 
-  const { syncAllToGoogle } = await import("@/lib/google-calendar-sync");
-  void syncAllToGoogle().catch(() => {});
+  // Synchronizacja dotyczy TEGO przyjęcia. Poprzednio wołane `syncAllToGoogle`
+  // szukało pierwszego eventu zalogowanego użytkownika, więc przy kilku
+  // przyjęciach w przestrzeni aktualizowało w Google zupełnie inny termin.
+  const { zsynchronizujEventZGoogle } = await import("@/lib/actions/google-calendar.actions");
+  void zsynchronizujEventZGoogle(eventId);
 
   return event;
 }
@@ -926,7 +932,11 @@ export async function sprawdzTerminEventu(input: {
     const doKiedy = new Date(data);
     doKiedy.setHours(23, 59, 59, 999);
 
-    const [eventy, zablokowane] = await Promise.all([
+    // Rezerwacje z Google liczą się tak samo jak własne przyjęcia — termin
+    // zajęty w kalendarzu sali blokuje tę salę, choć w bazie nie ma eventu.
+    const { listOrgGoogleReservations } = await import("@/lib/google-calendar-org");
+
+    const [eventy, zablokowane, zGoogle] = await Promise.all([
       prisma.event.findMany({
         where: { organizationId, date: { gte: od, lte: doKiedy } },
         select: { id: true, name: true, date: true, hallId: true, hall: { select: { name: true } } },
@@ -935,6 +945,7 @@ export async function sprawdzTerminEventu(input: {
         where: { organizationId, date: { gte: od, lte: doKiedy } },
         select: { date: true, reason: true },
       }),
+      listOrgGoogleReservations(od, doKiedy).catch(() => []),
     ]);
 
     return znajdzKolizje(
@@ -947,6 +958,12 @@ export async function sprawdzTerminEventu(input: {
         hallName: e.hall?.name ?? null,
       })),
       zablokowane,
+      zGoogle.map((r) => ({
+        tytul: r.tytul,
+        start: new Date(r.start),
+        venueHallId: r.venueHallId,
+        zrodlo: r.polaczenieLabel,
+      })),
     );
   } catch (e) {
     // Sprawdzenie terminu nie może zablokować tworzenia eventu.
