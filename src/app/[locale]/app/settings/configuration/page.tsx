@@ -3,6 +3,7 @@ import { Building2, ClipboardPaste, UtensilsCrossed } from "lucide-react";
 import { listOrganizationConfiguration, listOrganizationEventsWithWorkflow, ensureDefaultWorkflow } from "@/lib/actions/organization-config.actions";
 import { OrganizationConfigurationClient } from "./organization-configuration-client";
 import { GoogleCalendarsManager } from "@/components/google/GoogleCalendarsManager";
+import { GoogleAuditLog } from "@/components/google/GoogleAuditLog";
 import { listGoogleCalendars, listHallsForMapping, getGoogleCalendarLimit } from "@/lib/actions/google-calendar.actions";
 import { isGoogleCalendarConfigured } from "@/lib/google-calendar";
 
@@ -68,6 +69,8 @@ export default async function ConfigurationPage({
         limit={limitKalendarzy.limit}
         status={googleStatus}
       />
+
+      <GoogleAuditLog />
 
       <div className="grid gap-4 md:grid-cols-2">
         {steps.map((step) => (

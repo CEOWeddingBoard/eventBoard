@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { CalendarPlus, Trash2, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { GoogleConnectWizard } from "@/components/google/GoogleConnectWizard";
 import { Input } from "@/components/ui/input";
 import {
   updateGoogleCalendar,
@@ -39,6 +40,7 @@ export function GoogleCalendarsManager({
   /** Wynik powrotu z Google — przekazany w adresie przez callback. */
   status?: string;
 }) {
+  const [kreator, setKreator] = useState(false);
   const [kalendarze, setKalendarze] = useState(initial);
   const [zapisuje, setZapisuje] = useState<string | null>(null);
 
@@ -215,13 +217,22 @@ export function GoogleCalendarsManager({
           Wykorzystano limit {limit} kalendarzy w tym pakiecie. Odłącz jeden albo podnieś pakiet.
         </p>
       ) : (
-        <a
-          href={`/${locale}/api/google/oauth?locale=${locale}`}
+        <button
+          type="button"
+          onClick={() => setKreator(true)}
           className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-blue-700"
         >
           <CalendarPlus className="h-3.5 w-3.5" />
           Podłącz kalendarz Google
-        </a>
+        </button>
+      )}
+
+      {kreator && (
+        <GoogleConnectWizard
+          locale={locale}
+          configured={configured}
+          onClose={() => setKreator(false)}
+        />
       )}
 
       {halls.length === 0 && kalendarze.length > 0 && (

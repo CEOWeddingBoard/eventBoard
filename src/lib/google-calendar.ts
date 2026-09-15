@@ -5,7 +5,33 @@
 
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
 const CALENDAR_API = "https://www.googleapis.com/calendar/v3";
-const SCOPE = "https://www.googleapis.com/auth/calendar";
+/**
+ * Poziom dostępu, o jaki prosimy Google przy podłączaniu kalendarza.
+ *
+ * Google zna tylko dwa stopnie: odczyt albo pełny zapis na wydarzeniach.
+ * Nie ma zakresu „twórz i zmieniaj, ale nie kasuj", więc WRITE i FULL proszą
+ * o ten sam zakres, a różnicę — czy wolno skasować wpis po zarchiwizowaniu
+ * przyjęcia — egzekwuje już EventBoard. Mówimy o tym wprost w kreatorze,
+ * bo obietnica „Google tego pilnuje" byłaby nieprawdą.
+ */
+export type GoogleAccessMode = "READ" | "WRITE" | "FULL";
+
+const SCOPE_READ = "https://www.googleapis.com/auth/calendar.readonly";
+const SCOPE_WRITE = "https://www.googleapis.com/auth/calendar.events";
+
+export function scopeForMode(mode: GoogleAccessMode): string {
+  return mode === "READ" ? SCOPE_READ : SCOPE_WRITE;
+}
+
+/** Czy przy tym poziomie wolno zapisywać cokolwiek w kalendarzu. */
+export function canWrite(mode: string | null | undefined): boolean {
+  return mode === "WRITE" || mode === "FULL";
+}
+
+/** Czy wolno usunąć wpis, gdy przyjęcie trafia do archiwum. */
+export function canDelete(mode: string | null | undefined): boolean {
+  return mode === "FULL";
+}
 const EXTENDED_PROP_SOURCE = "weddingPlannerSource";
 const EXTENDED_PROP_ID = "weddingPlannerId";
 const EXTENDED_PROP_EVENT_TYPE = "eventType";
@@ -35,7 +61,11 @@ export function isGoogleCalendarConfigured(): boolean {
   return getClientConfig() !== null;
 }
 
-export function getOAuthAuthorizeUrl(redirectUri: string, state?: string): string {
+export function getOAuthAuthorizeUrl(
+  redirectUri: string,
+  state?: string,
+  mode: GoogleAccessMode = "FULL",
+): string {
   const config = getClientConfig();
   if (!config) throw new Error(NOT_CONFIGURED_MSG);
   const { clientId } = config;
@@ -43,7 +73,7 @@ export function getOAuthAuthorizeUrl(redirectUri: string, state?: string): strin
     client_id: clientId,
     redirect_uri: redirectUri,
     response_type: "code",
-    scope: SCOPE,
+    scope: scopeForMode(mode),
     access_type: "offline",
     prompt: "consent",
   });

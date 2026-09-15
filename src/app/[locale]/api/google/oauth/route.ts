@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { getActiveOrgId } from "@/lib/auth/active-org";
-import { getOAuthAuthorizeUrl, isGoogleCalendarConfigured } from "@/lib/google-calendar";
+import {
+  getOAuthAuthorizeUrl,
+  isGoogleCalendarConfigured,
+  type GoogleAccessMode,
+} from "@/lib/google-calendar";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -35,6 +39,12 @@ export async function GET(req: NextRequest) {
   const base = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? req.nextUrl.origin;
   const redirectUri = `${base}/${locale}/api/google/callback`;
 
-  const state = Buffer.from(JSON.stringify({ orgId, locale })).toString("base64url");
-  return NextResponse.redirect(getOAuthAuthorizeUrl(redirectUri, state));
+  // Poziom dostępu wybiera człowiek w kreatorze; decyduje o zakresie, o jaki
+  // prosimy Google, więc musi przejechać przez `state` i wrócić w callbacku.
+  const zadany = req.nextUrl.searchParams.get("mode");
+  const mode: GoogleAccessMode =
+    zadany === "READ" || zadany === "WRITE" || zadany === "FULL" ? zadany : "FULL";
+
+  const state = Buffer.from(JSON.stringify({ orgId, locale, mode })).toString("base64url");
+  return NextResponse.redirect(getOAuthAuthorizeUrl(redirectUri, state, mode));
 }

@@ -372,27 +372,34 @@ model AgendaDocumentTemplate {
 /// koordynator). Każde połączenie ma swój kolor na grafiku i może być
 /// przypisane do konkretnej sali.
 model GoogleCalendarConnection {
-  id             String       @id @default(cuid())
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  id                 String       @id @default(cuid())
+  organizationId     String
+  organization       Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   /// Kto podłączył konto — token należy do tej osoby, ale kalendarz do przestrzeni.
-  userId         String
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId             String
+  user               User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   /// Nazwa widoczna na grafiku, np. „Kalendarz sali”, „Kalendarz Marka”.
-  label          String       @default("Kalendarz Google")
+  label              String       @default("Kalendarz Google")
   /// Kolor pozycji na grafiku (hex). Bez tego nie da się odróżnić źródeł.
-  color          String       @default("#0ea5e9")
+  color              String       @default("#0ea5e9")
   /// Sala, której dotyczy ten kalendarz. Null = rezerwacje całego obiektu.
-  venueHallId    String?
-  refreshToken   String
-  accessToken    String?
-  tokenExpiresAt DateTime?
-  calendarId     String? // np. "primary" lub id kalendarza
+  venueHallId        String?
+  /// Co EventBoard może robić w tym kalendarzu: READ | WRITE | FULL.
+  /// READ prosi Google o węższy zakres (calendar.readonly) i jest egzekwowane
+  /// po stronie Google. WRITE i FULL mają ten sam zakres, bo Google nie zna
+  /// uprawnienia „zapisuj, ale nie kasuj" — różnicę egzekwuje EventBoard.
+  accessMode         String       @default("FULL")
+  /// Adres konta Google, z którego podłączono kalendarz — do dziennika zmian.
+  googleAccountEmail String?
+  refreshToken       String
+  accessToken        String?
+  tokenExpiresAt     DateTime?
+  calendarId         String? // np. "primary" lub id kalendarza
   /// Wyłączone połączenie zostaje z tokenem, ale znika z grafiku.
-  isActive       Boolean      @default(true)
-  lastSyncAt     DateTime?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  isActive           Boolean      @default(true)
+  lastSyncAt         DateTime?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
 
   @@index([organizationId, isActive])
   @@index([userId])
@@ -1898,4 +1905,38 @@ model EventAccessLink {
 
   @@index([eventId])
   @@map("event_access_links")
+}
+
+/// Dziennik operacji na kalendarzach Google.
+///
+/// Zapis do cudzego kalendarza jest działaniem nieodwracalnym z perspektywy
+/// obiektu: ktoś patrzy potem na termin i musi wiedzieć, skąd się wziął albo
+/// czemu zniknął. Dlatego notujemy jedno i drugie konto — kto działał
+/// w EventBoardzie i na jakim koncie Google to wylądowało.
+model GoogleCalendarAuditLog {
+  id                 String  @id @default(cuid())
+  organizationId     String
+  connectionId       String?
+  /// Nazwa i konto Google przepisane w chwili zdarzenia — wpis w dzienniku
+  /// ma być czytelny także po odłączeniu kalendarza.
+  connectionLabel    String?
+  googleAccountEmail String?
+
+  /// CREATE | UPDATE | DELETE | CONNECT | DISCONNECT | MODE_CHANGE
+  action  String
+  /// Czego dotyczyło: nazwa przyjęcia albo opis zmiany.
+  subject String?
+  eventId String?
+
+  /// Kto wywołał. Null = automat (synchronizacja po zapisie przyjęcia).
+  actorUserId String?
+  actorEmail  String?
+
+  ok      Boolean @default(true)
+  message String?
+
+  createdAt DateTime @default(now())
+
+  @@index([organizationId, createdAt])
+  @@map("google_calendar_audit_logs")
 }

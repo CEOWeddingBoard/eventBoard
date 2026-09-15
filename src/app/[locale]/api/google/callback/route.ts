@@ -10,12 +10,22 @@ export const runtime = "nodejs";
 /** Kolory nadawane kolejnym kalendarzom, żeby grafik był czytelny od razu. */
 const KOLORY = ["#0ea5e9", "#f97316", "#8b5cf6", "#10b981", "#ec4899", "#eab308"];
 
-function odczytajState(state: string | null): { orgId: string; locale: string } | null {
+function odczytajState(
+  state: string | null,
+): { orgId: string; locale: string; mode: string } | null {
   if (!state) return null;
   try {
     const parsed = JSON.parse(Buffer.from(state, "base64url").toString("utf8"));
     if (typeof parsed?.orgId !== "string") return null;
-    return { orgId: parsed.orgId, locale: typeof parsed.locale === "string" ? parsed.locale : "pl" };
+    const mode =
+      parsed?.mode === "READ" || parsed?.mode === "WRITE" || parsed?.mode === "FULL"
+        ? parsed.mode
+        : "FULL";
+    return {
+      orgId: parsed.orgId,
+      locale: typeof parsed.locale === "string" ? parsed.locale : "pl",
+      mode,
+    };
   } catch {
     return null;
   }
@@ -65,16 +75,50 @@ export async function GET(req: NextRequest) {
     }).maxGoogleCalendars;
     if (limit != null && ile >= limit) return wrocDo("limit");
 
-    await prisma.googleCalendarConnection.create({
+    // Adres konta Google bierzemy z kalendarza podstawowego — jego `id` to
+    // właśnie ten adres. Dzięki temu dziennik mówi, NA JAKIM koncie coś się
+    // wydarzyło, a nie tylko kto kliknął w EventBoardzie. Nie prosimy o osobny
+    // zakres do danych profilowych, bo ten wystarcza.
+    let kontoGoogle: string | null = null;
+    try {
+      const odp = await fetch(
+        "https://www.googleapis.com/calendar/v3/calendars/primary",
+        { headers: { Authorization: `Bearer ${tokeny.accessToken}` } },
+      );
+      if (odp.ok) {
+        const dane = (await odp.json()) as { id?: string };
+        kontoGoogle = typeof dane.id === "string" ? dane.id : null;
+      }
+    } catch {
+      // Brak adresu nie jest powodem, by odrzucić połączenie — dziennik
+      // pokaże wtedy samą nazwę kalendarza.
+    }
+
+    const polaczenie = await prisma.googleCalendarConnection.create({
       data: {
         organizationId: state.orgId,
         userId: user.id,
-        label: `Kalendarz ${ile + 1}`,
+        label: kontoGoogle ? `Kalendarz ${kontoGoogle}` : `Kalendarz ${ile + 1}`,
         color: KOLORY[ile % KOLORY.length],
         refreshToken: tokeny.refreshToken,
         accessToken: tokeny.accessToken,
         tokenExpiresAt: new Date(Date.now() + tokeny.expiresIn * 1000),
         calendarId: "primary",
+        accessMode: state.mode,
+        googleAccountEmail: kontoGoogle,
+      },
+    });
+
+    await prisma.googleCalendarAuditLog.create({
+      data: {
+        organizationId: state.orgId,
+        connectionId: polaczenie.id,
+        connectionLabel: polaczenie.label,
+        googleAccountEmail: kontoGoogle,
+        action: "CONNECT",
+        subject: `Poziom dostępu: ${state.mode}`,
+        actorUserId: user.id,
+        actorEmail: user.email ?? null,
       },
     });
 
