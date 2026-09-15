@@ -8,7 +8,13 @@ const nextConfig = {
   distDir: process.env.NODE_ENV === "development" ? ".next-dev" : ".next",
   experimental: {
     serverActions: {
+      // Każda domena, spod której ktoś realnie korzysta z panelu, musi tu być:
+      // server action wywołana spod nieznanego origin jest odrzucana, więc
+      // brak wpisu objawia się jako „nic się nie zapisuje" na całej aplikacji.
+      // eventboard.pl — produkt dla obiektów; weddingboard.pl — magazyn ślubny.
       allowedOrigins: [
+        "eventboard.pl",
+        "www.eventboard.pl",
         "weddingboard.pl",
         "www.weddingboard.pl",
         "*.up.railway.app",
@@ -74,8 +80,11 @@ const nextConfig = {
         headers: [
           { key: "Access-Control-Allow-Credentials", value: "true" },
           {
+            // Endpointy pod gołym /api są maszynowe (cron, webhooki, health),
+            // a panel woła własne API z tego samego origin, więc nagłówek
+            // dotyczy wyłącznie wywołań z zewnątrz. Wskazuje domenę produktu.
             key: "Access-Control-Allow-Origin",
-            value: "https://weddingboard.pl",
+            value: "https://eventboard.pl",
           },
           {
             key: "Access-Control-Allow-Methods",
