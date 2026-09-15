@@ -12,7 +12,7 @@ const segmenty = [
   {
     icon: PartyPopper,
     tytul: "Sale weselne",
-    opis: "Wesela, poprawiny, komunie. Para ustala menu i szczegóły sama, przez link — bez wieczornych telefonów.",
+    opis: "Wesela, poprawiny, komunie. Klient ustala menu i szczegóły sam, przez link — bez wieczornych telefonów.",
   },
   {
     icon: ChefHat,
@@ -33,14 +33,14 @@ const segmenty = [
 
 export function LandingDlaKogo() {
   return (
-    <section id="dla-kogo" className="bg-[#faf9f7] py-24">
+    <section id="dla-kogo" className="bg-[#f6f7f9] py-24">
       <div className="mx-auto max-w-6xl px-6">
         <div className="text-center">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#7a5f28]">Dla kogo</p>
-          <h2 className="mx-auto mt-3 max-w-2xl text-3xl font-extrabold tracking-tight text-stone-900 sm:text-4xl">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#8a6a22]">Dla kogo</p>
+          <h2 className="mx-auto mt-3 max-w-2xl text-3xl font-bold tracking-[-0.02em] text-slate-900 sm:text-4xl">
             Jeśli prowadzisz przyjęcia, to jest dla Ciebie
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-stone-700">
+          <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-slate-600">
             Im więcej ustaleń przechodzi przez telefon i Excela, tym więcej zyskasz.
           </p>
         </div>
@@ -49,11 +49,11 @@ export function LandingDlaKogo() {
           {segmenty.map((s) => (
             <div
               key={s.tytul}
-              className="rounded-2xl border border-stone-200 bg-white p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-[#b49b3d] hover:shadow-md"
+              className="rounded-xl border border-slate-200 bg-white p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-[#b49b3d] hover:shadow-md"
             >
-              <s.icon className="h-6 w-6 text-[#7a5f28]" />
-              <h3 className="mt-4 text-base font-bold text-stone-900">{s.tytul}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-stone-600">{s.opis}</p>
+              <s.icon className="h-6 w-6 text-[#8a6a22]" />
+              <h3 className="mt-4 text-base font-bold text-slate-900">{s.tytul}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-slate-600">{s.opis}</p>
             </div>
           ))}
         </div>

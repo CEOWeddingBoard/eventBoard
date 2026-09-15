@@ -38,11 +38,11 @@ export function LandingOnboarding() {
     <section id="wdrozenie" className="bg-white py-24">
       <div className="mx-auto max-w-5xl px-6">
         <div className="text-center">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#7a5f28]">Wdrożenie</p>
-          <h2 className="mx-auto mt-3 max-w-2xl text-3xl font-extrabold tracking-tight text-stone-900 sm:text-4xl">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#8a6a22]">Wdrożenie</p>
+          <h2 className="mx-auto mt-3 max-w-2xl text-3xl font-bold tracking-[-0.02em] text-slate-900 sm:text-4xl">
             Nie zostajesz z pustym systemem
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-stone-700">
+          <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-slate-600">
             Nie ma samodzielnej rejestracji i nie ma konfiguracji „zrób sobie sam”.
             Proces obsługi ustawiamy razem z Tobą, na Twoich przyjęciach.
           </p>
@@ -52,22 +52,22 @@ export function LandingOnboarding() {
           {kroki.map((krok, i) => (
             <li
               key={krok.tytul}
-              className="relative rounded-2xl border border-stone-200 bg-[#faf9f7] p-6"
+              className="relative rounded-xl border border-slate-200 bg-[#f6f7f9] p-6"
             >
-              <span className="absolute right-5 top-5 text-3xl font-black text-stone-200">
+              <span className="absolute right-5 top-5 text-3xl font-black text-slate-400">
                 {i + 1}
               </span>
-              <krok.icon className="h-6 w-6 text-[#7a5f28]" />
-              <h3 className="mt-4 text-base font-bold text-stone-900">{krok.tytul}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-stone-600">{krok.opis}</p>
+              <krok.icon className="h-6 w-6 text-[#8a6a22]" />
+              <h3 className="mt-4 text-base font-bold text-slate-900">{krok.tytul}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-slate-600">{krok.opis}</p>
             </li>
           ))}
         </ol>
 
-        <div className="mt-8 flex items-start gap-3 rounded-2xl border border-stone-200 bg-[#faf9f7] px-6 py-5">
-          <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-[#7a5f28]" />
-          <p className="text-sm leading-relaxed text-stone-700">
-            <span className="font-semibold text-stone-900">Twoje dane zostają Twoje.</span>{" "}
+        <div className="mt-8 flex items-start gap-3 rounded-xl border border-slate-200 bg-[#f6f7f9] px-6 py-5">
+          <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-[#8a6a22]" />
+          <p className="text-sm leading-relaxed text-slate-600">
+            <span className="font-semibold text-slate-900">Twoje dane zostają Twoje.</span>{" "}
             Każdy obiekt ma osobne, odseparowane konto, a komplet danych — przyjęcia, menu, agendy,
             procesy — pobierzesz w każdej chwili jako jeden plik. Bez rozmów o tym,
             czy da się wyjść.

@@ -82,25 +82,25 @@ export function LandingPricing() {
   const [annual, setAnnual] = useState(true);
 
   return (
-    <section id="pricing" className="bg-[#faf9f7] py-24">
+    <section id="pricing" className="bg-[#f6f7f9] py-24">
       <div className="mx-auto max-w-7xl px-6">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#7a5f28]">Cennik</p>
-          <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-stone-900 sm:text-4xl">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#8a6a22]">Cennik</p>
+          <h2 className="mt-3 text-3xl font-bold tracking-[-0.02em] text-slate-900 sm:text-4xl">
             Płacisz za wielkość obiektu, nie za liczbę imprez
           </h2>
-          <p className="mt-4 text-base text-stone-700">
+          <p className="mt-4 text-base text-slate-600">
             Wszystkie funkcje są w każdym pakiecie. Próg wyznacza liczba sal,
             a każdy plan ma przypisany limit osób pracujących w systemie.
           </p>
 
           {/* Przełącznik: miesięcznie / rocznie (2 miesiące gratis) */}
-          <div className="mt-8 inline-flex items-center gap-1 rounded-full border border-stone-200 bg-white p-1 shadow-sm">
+          <div className="mt-8 inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white p-1 shadow-sm">
             <button
               type="button"
               onClick={() => setAnnual(false)}
               className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
-                !annual ? "bg-[#0f172a] text-white" : "text-stone-600 hover:text-stone-900"
+                !annual ? "bg-[#0b1220] text-white" : "text-slate-600 hover:text-slate-900"
               }`}
             >
               Miesięcznie
@@ -109,13 +109,13 @@ export function LandingPricing() {
               type="button"
               onClick={() => setAnnual(true)}
               className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
-                annual ? "bg-[#0f172a] text-white" : "text-stone-600 hover:text-stone-900"
+                annual ? "bg-[#0b1220] text-white" : "text-slate-600 hover:text-slate-900"
               }`}
             >
               Rocznie
               <span
                 className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
-                  annual ? "bg-amber-400 text-[#0f172a]" : "bg-amber-100 text-amber-800"
+                  annual ? "bg-[#e2c46b] text-[#0b1220]" : "bg-[#fdf8ec] text-[#6b5216]"
                 }`}
               >
                 2 mies. gratis
@@ -128,26 +128,26 @@ export function LandingPricing() {
           {plans.map((plan) => (
             <div
               key={plan.name}
-              className={`relative flex flex-col rounded-2xl p-8 ${
+              className={`relative flex flex-col rounded-xl p-8 ${
                 plan.popular
-                  ? "border-2 border-[#0f172a] bg-[#0f172a] text-white shadow-2xl shadow-slate-900/25 lg:scale-[1.03]"
-                  : "border border-stone-200 bg-[#fefdfb] shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-stone-300 hover:shadow-lg hover:shadow-stone-200/70"
+                  ? "border-2 border-[#0b1220] bg-[#0b1220] text-white lg:scale-[1.02]"
+                  : "border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-slate-300"
               }`}
             >
               {plan.popular && (
-                <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-amber-400 px-3.5 py-1 text-[11px] font-bold uppercase tracking-wider text-[#0f172a] shadow-lg shadow-amber-500/30">
+                <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#e2c46b] px-3.5 py-1 text-[11px] font-bold uppercase tracking-wider text-[#0b1220]">
                   Najczęściej wybierany
                 </span>
               )}
 
               <h3
                 className={`text-sm font-bold uppercase tracking-wide ${
-                  plan.popular ? "text-amber-200" : "text-stone-700"
+                  plan.popular ? "text-[#e2c46b]" : "text-slate-600"
                 }`}
               >
                 {plan.name}
               </h3>
-              <p className={`mt-1 text-sm ${plan.popular ? "text-stone-300" : "text-stone-600"}`}>
+              <p className={`mt-1 text-sm ${plan.popular ? "text-slate-300" : "text-slate-600"}`}>
                 {plan.scale}
               </p>
 
@@ -155,7 +155,7 @@ export function LandingPricing() {
                 if (plan.monthly === null) {
                   return (
                     <div className="mt-4 flex items-baseline gap-1.5">
-                      <span className={`text-4xl font-extrabold tracking-tight ${plan.popular ? "text-white" : "text-stone-900"}`}>
+                      <span className={`text-4xl font-bold tracking-[-0.02em] ${plan.popular ? "text-white" : "text-slate-900"}`}>
                         {plan.price}
                       </span>
                     </div>
@@ -167,19 +167,19 @@ export function LandingPricing() {
                 return (
                   <div className="mt-4">
                     <div className="flex items-baseline gap-1.5">
-                      <span className={`text-4xl font-extrabold tracking-tight ${plan.popular ? "text-white" : "text-stone-900"}`}>
+                      <span className={`text-4xl font-bold tracking-[-0.02em] ${plan.popular ? "text-white" : "text-slate-900"}`}>
                         {zl(shown)}
                       </span>
-                      <span className={`text-sm font-medium ${plan.popular ? "text-stone-300" : "text-stone-600"}`}>
+                      <span className={`text-sm font-medium ${plan.popular ? "text-slate-300" : "text-slate-600"}`}>
                         / mies.
                       </span>
                     </div>
                     {annual ? (
-                      <p className={`mt-1 text-xs ${plan.popular ? "text-stone-400" : "text-stone-500"}`}>
+                      <p className={`mt-1 text-xs ${plan.popular ? "text-slate-400" : "text-slate-500"}`}>
                         <span className="line-through">{zl(plan.monthly)}</span> · rozliczane rocznie {zl(annualTotal)}
                       </p>
                     ) : (
-                      <p className={`mt-1 text-xs ${plan.popular ? "text-stone-400" : "text-stone-500"}`}>
+                      <p className={`mt-1 text-xs ${plan.popular ? "text-slate-400" : "text-slate-500"}`}>
                         lub {zl(effMonthly)}/mies. przy rozliczeniu rocznym
                       </p>
                     )}
@@ -187,19 +187,19 @@ export function LandingPricing() {
                 );
               })()}
 
-              <div className={`mt-6 h-px ${plan.popular ? "bg-white/10" : "bg-stone-100"}`} />
+              <div className={`mt-6 h-px ${plan.popular ? "bg-white/10" : "bg-slate-100"}`} />
 
               <ul className="mt-6 flex-1 space-y-3">
                 {plan.features.map((f) => (
                   <li
                     key={f}
                     className={`flex items-start gap-2.5 text-sm ${
-                      plan.popular ? "text-stone-200" : "text-stone-700"
+                      plan.popular ? "text-slate-300" : "text-slate-600"
                     }`}
                   >
                     <Check
                       className={`mt-0.5 h-4 w-4 shrink-0 ${
-                        plan.popular ? "text-amber-300" : "text-emerald-600"
+                        plan.popular ? "text-[#e2c46b]" : "text-emerald-600"
                       }`}
                     />
                     {f}
@@ -209,10 +209,10 @@ export function LandingPricing() {
 
               <Link
                 href="#kontakt"
-                className={`mt-8 block w-full rounded-full py-2.5 text-center text-sm transition-all ${
+                className={`mt-8 block w-full rounded-lg py-3 text-center text-sm transition-colors ${
                   plan.popular
-                    ? "bg-amber-400 font-bold text-[#0f172a] shadow-lg shadow-amber-500/20 hover:-translate-y-0.5 hover:bg-amber-300"
-                    : "border-2 border-[#0f172a] font-semibold text-[#0f172a] hover:-translate-y-0.5 hover:bg-[#0f172a] hover:text-white"
+                    ? "bg-white font-semibold text-[#0b1220] hover:bg-slate-100"
+                    : "border border-[#0b1220] font-semibold text-[#0b1220] hover:bg-[#0b1220] hover:text-white"
                 }`}
               >
                 {"Umów spotkanie demo"}
@@ -221,7 +221,7 @@ export function LandingPricing() {
           ))}
         </div>
 
-        <p className="mx-auto mt-10 max-w-2xl text-center text-sm text-stone-600">
+        <p className="mx-auto mt-10 max-w-2xl text-center text-sm text-slate-600">
           Salą jest osobno rezerwowalne pomieszczenie z własnym kalendarzem — takie, w którym
           może odbywać się przyjęcie niezależne od pozostałych. „Osoby w zespole” to konta
           pracowników z dostępem do systemu (właściciel, manager, kuchnia, obsługa).
