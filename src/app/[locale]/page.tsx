@@ -6,7 +6,7 @@ import { LandingFeatures } from "@/components/landing/LandingFeatures";
 import { LandingBeforeAfter } from "@/components/landing/LandingBeforeAfter";
 import { LandingDlaKogo } from "@/components/landing/LandingDlaKogo";
 import { LandingDlaKlienta } from "@/components/landing/LandingDlaKlienta";
-import { LandingFaq } from "@/components/landing/LandingFaq";
+import { LandingProblemy } from "@/components/landing/LandingProblemy";
 import { LandingHowItWorks } from "@/components/landing/LandingHowItWorks";
 import { LandingRoi } from "@/components/landing/LandingRoi";
 import { LandingOnboarding } from "@/components/landing/LandingOnboarding";
@@ -54,7 +54,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
         <LandingRoi />
         <LandingOnboarding />
         <LandingPricing />
-        <LandingFaq />
+        <LandingProblemy />
         <LandingCta />
       </main>
       <LandingFooter />
