@@ -47,7 +47,7 @@ export function LandingFeatures() {
           </h2>
           <p className="mt-4 text-base text-slate-600">
             Definiujesz kroki obsługi raz. Klient i zespół realizują je po kolei,
-            a agenda dla kuchni i obsługi składa się z tych ustaleń automatycznie.
+            a agenda eventu dla wszystkich działów składa się z tych ustaleń automatycznie.
           </p>
         </div>
 

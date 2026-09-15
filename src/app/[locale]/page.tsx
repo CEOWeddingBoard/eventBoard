@@ -26,7 +26,7 @@ import { LandingFooter } from "@/components/landing/LandingFooter";
 export const metadata: Metadata = {
   title: "EventBoard — system do obsługi przyjęć dla sal i restauracji",
   description:
-    "Ustal raz, jak wygląda obsługa przyjęcia. Klient uzupełnia swoje kroki przez link, a agenda dla kuchni i obsługi składa się automatycznie. Bez przepisywania z Excela.",
+    "Ustal raz, jak wygląda obsługa przyjęcia. Klient uzupełnia swoje kroki przez link, a agenda eventu dla kuchni, baru i obsługi składa się automatycznie. Bez przepisywania z Excela.",
   openGraph: {
     title: "EventBoard — system do obsługi przyjęć",
     description:

@@ -3,7 +3,7 @@ import { X, Check } from "lucide-react";
 const chaos = [
   "Ustalenia rozsypane po mailach, SMS-ach i karteczkach",
   "Menu i liczba porcji przepisywane ręcznie kilka razy",
-  "Agenda dla kuchni składana w Wordzie w noc przed imprezą",
+  "Zlecenie dla kuchni i obsługi składane w Wordzie w noc przed imprezą",
   "Pominięta alergia albo zdublowany termin",
   "Nikt nie wie, na jakim etapie jest dane przyjęcie",
 ];
@@ -11,8 +11,8 @@ const chaos = [
 const order = [
   "Jeden proces prowadzi obsługę krok po kroku",
   "Klient sam wybiera menu i podaje diety w swoim portalu",
-  "Agenda składa się automatycznie z zebranych ustaleń",
-  "Alergie i porcje spisane raz — widoczne dla kuchni i obsługi",
+  "Agenda eventu składa się automatycznie z zebranych ustaleń",
+  "Alergie i porcje spisane raz — widzi je kuchnia, bar i obsługa sali",
   "Na jednym ekranie widać, kto ma następny ruch",
 ];
 

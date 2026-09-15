@@ -29,7 +29,7 @@ const pytania = [
   },
   {
     p: "Czy to działa na telefonie?",
-    o: "Tak. Obsługa na sali korzysta z telefonu, a klient prawie zawsze. Agendę dla kuchni pobierasz jako dokument do druku, z logo i danymi obiektu.",
+    o: "Tak. Obsługa na sali korzysta z telefonu, a klient prawie zawsze. Agendę eventu pobierasz jako jeden dokument do druku, z osobnymi sekcjami uwag dla kuchni i dla obsługi, z logo i danymi obiektu.",
   },
   {
     p: "Czy każde przyjęcie musi mieć ten sam proces?",

@@ -90,7 +90,7 @@ export function LandingRoi() {
               <Field label="Eventy miesięcznie" value={events} display={`${events}`} min={1} max={30} onChange={setEvents} />
               <Field
                 label="Godziny koordynacji na event"
-                hint="Telefony, maile, przepisywanie ustaleń, składanie agendy dla kuchni i obsługi."
+                hint="Telefony, maile, przepisywanie ustaleń, składanie agendy eventu dla kuchni i obsługi."
                 value={hours}
                 display={`${hours} h`}
                 min={1}

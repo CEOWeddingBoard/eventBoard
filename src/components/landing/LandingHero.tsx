@@ -11,7 +11,7 @@ import { ArrowRight, Check } from "lucide-react";
  */
 
 const DOWODY = [
-  { liczba: "1", opis: "agenda zamiast maili, SMS-ów i Excela" },
+  { liczba: "1", opis: "dokument dla wszystkich działów zamiast maili i Excela" },
   { liczba: "0", opis: "kont do założenia po stronie klienta" },
   { liczba: "~24 h", opis: "koordynacji odzyskane miesięcznie" },
 ];
@@ -37,13 +37,14 @@ export function LandingHero() {
           </span>
 
           <h1 className="mt-7 text-[2.6rem] font-bold leading-[1.05] tracking-[-0.03em] text-white sm:text-6xl">
-            Agenda dla kuchni składa się sama
+            Agenda eventu składa się sama
           </h1>
 
           <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-slate-300">
             Ustalasz raz, jak wygląda obsługa przyjęcia: kto co wypełnia i kto zatwierdza.
-            Klient uzupełnia swoje kroki sam, przez link bez zakładania konta — a dokument
-            dla kuchni i obsługi powstaje z tego automatycznie.
+            Klient uzupełnia swoje kroki sam, przez link bez zakładania konta — a jeden
+            dokument dla kuchni, baru, obsługi sali i ekipy technicznej powstaje z tego
+            automatycznie.
           </p>
 
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -100,8 +101,8 @@ export function LandingHero() {
             className="w-full"
           />
           <figcaption className="border-t border-slate-100 bg-white px-4 py-2.5 text-center text-[11px] text-slate-500">
-            Panel procesu w EventBoard — każdy krok ma rolę, a agenda składa się z tego,
-            co w nich ustalicie.
+            Panel procesu w EventBoard — każdy krok ma rolę, a agenda eventu składa się
+            z tego, co w nich ustalicie.
           </figcaption>
         </figure>
       </div>

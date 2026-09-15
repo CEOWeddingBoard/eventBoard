@@ -89,7 +89,7 @@ export function LandingHowItWorks() {
           </h3>
           <p className="mt-3 text-sm leading-relaxed text-slate-600">
             Kalendarz z blokadami terminów, karty wydarzeń z menu i harmonogramem, procesy
-            z rolami dla kuchni i obsługi, portal dla klienta oraz
+            z rolami dla kuchni, baru i obsługi, portal dla klienta oraz
             finanse — wszystko opisuje to samo wydarzenie, więc informacja wpisana raz
             pojawia się wszędzie tam, gdzie jest potrzebna.
           </p>
