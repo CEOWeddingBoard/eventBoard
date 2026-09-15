@@ -15,18 +15,21 @@ import { CalendarCheck, Headphones, PlugZap, ShieldCheck } from "lucide-react";
 const kroki = [
   {
     icon: Headphones,
+    czas: "ok. 60 minut",
     tytul: "Rozmowa o tym, jak pracujecie",
     opis:
       "Pokazujesz, jak dziś prowadzisz przyjęcie — od zapytania po dzień imprezy. Z tego powstaje proces w systemie.",
   },
   {
     icon: PlugZap,
+    czas: "po naszej stronie",
     tytul: "Przestrzeń gotowa do pracy",
     opis:
       "Zakładamy konto Twojego obiektu, ustawiamy proces, role i menu. Dostajesz dane logowania dla siebie i zespołu.",
   },
   {
     icon: CalendarCheck,
+    czas: "najbliższy termin",
     tytul: "Pierwsze przyjęcie prowadzone w systemie",
     opis:
       "Wprowadzasz najbliższy termin i wysyłasz klientowi link do jego kroków. Agenda składa się sama z tego, co uzupełnicie.",
@@ -58,7 +61,10 @@ export function LandingOnboarding() {
                 {i + 1}
               </span>
               <krok.icon className="h-6 w-6 text-[#8a6a22]" />
-              <h3 className="mt-4 text-base font-bold text-slate-900">{krok.tytul}</h3>
+              <span className="mt-4 block text-[11px] font-semibold uppercase tracking-wide text-[#8a6a22]">
+                {krok.czas}
+              </span>
+              <h3 className="mt-1 text-base font-bold text-slate-900">{krok.tytul}</h3>
               <p className="mt-2 text-sm leading-relaxed text-slate-600">{krok.opis}</p>
             </li>
           ))}
