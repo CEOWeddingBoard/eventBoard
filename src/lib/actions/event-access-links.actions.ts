@@ -143,6 +143,102 @@ export async function createEventAccessLink(
   };
 }
 
+/**
+ * Wysyła gotowy link na wskazany adres.
+ *
+ * Bez tego obiekt kopiuje adres z panelu i wkleja go do własnej poczty —
+ * działa, ale przy każdym przyjęciu to kolejna ręczna czynność, a wdrożeniowo
+ * właśnie te czynności są kosztem. Pełny adres istnieje tylko tutaj, zaraz po
+ * wygenerowaniu tokenu; z bazy (skrót) nie da się go odtworzyć.
+ */
+async function wyslijLink(params: {
+  email: string;
+  url: string;
+  label: string;
+  eventName: string;
+  orgName: string | null;
+  expiresAt: Date;
+}): Promise<boolean> {
+  const klucz = process.env.RESEND_API_KEY?.trim();
+  if (!klucz) return false;
+
+  try {
+    const { Resend } = await import("resend");
+    const { getResendFrom, getPublicAppUrl } = await import("@/lib/env");
+    const pelnyUrl = `${getPublicAppUrl()}${params.url}`;
+    const nadawca = params.orgName?.trim() || "EventBoard";
+    const wazneDo = params.expiresAt.toLocaleDateString("pl-PL", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+
+    await new Resend(klucz).emails.send({
+      from: getResendFrom(),
+      to: params.email,
+      subject: `${nadawca} — Twoje ustalenia: ${params.eventName}`,
+      html: `<p>Dzień dobry,</p>
+        <p>poniżej link do ustaleń dotyczących przyjęcia <strong>${params.eventName}</strong>.
+        Nie trzeba zakładać konta ani wymyślać hasła — wystarczy kliknąć.</p>
+        <p><a href="${pelnyUrl}">${pelnyUrl}</a></p>
+        <p>Link jest ważny do ${wazneDo}.</p>
+        <p>${nadawca}</p>`,
+    });
+    return true;
+  } catch {
+    // Link jest już utworzony i widoczny w panelu — nieudana wysyłka nie może
+    // przewrócić całej akcji, bo obiekt i tak może go skopiować ręcznie.
+    return false;
+  }
+}
+
+export async function sendEventAccessLink(
+  eventId: string,
+  input: { linkId: string; email: string; url: string },
+): Promise<{ ok: boolean; error?: string }> {
+  await assertModuleEdit("events");
+
+  const email = input.email?.trim();
+  if (!email) return { ok: false, error: "Podaj adres e-mail." };
+
+  try {
+    await orgIdDlaEventu(eventId);
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Brak dostępu." };
+  }
+
+  const link = await prisma.eventAccessLink.findFirst({
+    where: { id: input.linkId, eventId },
+    select: { label: true, expiresAt: true, revokedAt: true },
+  });
+  if (!link) return { ok: false, error: "Nie znaleziono linku." };
+  if (link.revokedAt) return { ok: false, error: "Ten link jest już unieważniony." };
+
+  const event = await prisma.event.findUnique({
+    where: { id: eventId },
+    select: { name: true, organization: { select: { name: true } } },
+  });
+
+  const wyslano = await wyslijLink({
+    email,
+    url: input.url,
+    label: link.label,
+    eventName: event?.name ?? "przyjęcie",
+    orgName: event?.organization?.name ?? null,
+    expiresAt: link.expiresAt,
+  });
+
+  if (!wyslano) {
+    return { ok: false, error: "Nie udało się wysłać — skopiuj adres i wyślij ręcznie." };
+  }
+
+  await prisma.eventAccessLink.update({
+    where: { id: input.linkId },
+    data: { email },
+  });
+  return { ok: true };
+}
+
 export async function revokeEventAccessLink(
   linkId: string,
 ): Promise<{ ok: boolean; error?: string }> {

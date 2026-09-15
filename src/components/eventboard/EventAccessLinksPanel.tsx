@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Link2, Plus, Ban, Copy, Check } from "lucide-react";
+import { Link2, Plus, Ban, Copy, Check, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   listEventAccessLinks,
   createEventAccessLink,
   revokeEventAccessLink,
+  sendEventAccessLink,
   type LinkDecyzyjny,
 } from "@/lib/actions/event-access-links.actions";
 import { ASSIGNEE_ROLE_OPTIONS, assigneeRoleLabel } from "@/lib/workflow-roles";
@@ -47,7 +48,8 @@ export function EventAccessLinksPanel({
   const [form, setForm] = useState({ role: "CLIENT", label: "", email: "" });
   const [wlasnaRola, setWlasnaRola] = useState("");
   const [busy, setBusy] = useState(false);
-  const [swiezyLink, setSwiezyLink] = useState<{ id: string; url: string } | null>(null);
+  const [swiezyLink, setSwiezyLink] = useState<{ id: string; url: string; path: string } | null>(null);
+  const [wysylka, setWysylka] = useState(false);
   const [skopiowany, setSkopiowany] = useState(false);
 
   useEffect(() => {
@@ -68,7 +70,11 @@ export function EventAccessLinksPanel({
       });
       if (res.ok && res.link) {
         setLinki((prev) => [...(prev ?? []), res.link!]);
-        setSwiezyLink({ id: res.link.id, url: `${window.location.origin}${res.link.url}` });
+        setSwiezyLink({
+          id: res.link.id,
+          url: `${window.location.origin}${res.link.url}`,
+          path: res.link.url!,
+        });
         setSkopiowany(false);
         setForm({ role: form.role, label: "", email: "" });
       } else {
@@ -88,6 +94,31 @@ export function EventAccessLinksPanel({
       if (swiezyLink?.id === id) setSwiezyLink(null);
     } else {
       toast.error(res.error ?? "Nie udało się unieważnić");
+    }
+  }
+
+  async function wyslijMailem() {
+    const link = linki?.find((l) => l.id === swiezyLink?.id);
+    const email = form.email.trim() || link?.email || "";
+    if (!swiezyLink || !email) {
+      toast.error("Podaj adres e-mail przed wystawieniem linku.");
+      return;
+    }
+    setWysylka(true);
+    try {
+      const res = await sendEventAccessLink(eventId, {
+        linkId: swiezyLink.id,
+        email,
+        url: swiezyLink.path,
+      });
+      if (res.ok) {
+        toast.success(`Link wysłany na ${email}`);
+        setLinki((prev) => (prev ?? []).map((l) => (l.id === swiezyLink.id ? { ...l, email } : l)));
+      } else {
+        toast.error(res.error ?? "Nie udało się wysłać");
+      }
+    } finally {
+      setWysylka(false);
     }
   }
 
@@ -174,6 +205,16 @@ export function EventAccessLinksPanel({
             <code className="min-w-0 flex-1 truncate rounded bg-white px-2 py-1.5 text-[11px] text-neutral-700">
               {swiezyLink.url}
             </code>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={wyslijMailem}
+              disabled={wysylka}
+            >
+              <Send className="mr-1 h-3.5 w-3.5" />
+              Wyślij mailem
+            </Button>
             <Button type="button" size="sm" variant="outline" onClick={kopiuj}>
               {skopiowany ? (
                 <>
