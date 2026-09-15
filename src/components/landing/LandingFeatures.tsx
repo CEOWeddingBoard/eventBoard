@@ -121,7 +121,7 @@ export function LandingFeatures() {
           </div>
 
           {/* Warianty menu ze skanami */}
-          <div className={`${cardBase} md:col-span-3 lg:col-span-5`}>
+          <div className={`${cardBase} md:col-span-3 lg:col-span-4`}>
             <div className="mb-4 flex items-start justify-between gap-3">
               <span className={iconTile}>
                 <UtensilsCrossed className="h-6 w-6" />
@@ -174,7 +174,7 @@ export function LandingFeatures() {
           </div>
 
           {/* Płatności — cashflow */}
-          <div className={`${cardBase} md:col-span-6 lg:col-span-3`}>
+          <div className={`${cardBase} md:col-span-6 lg:col-span-4`}>
             <div className="mb-4 flex items-start justify-between gap-3">
               <span className={iconTile}>
                 <Wallet className="h-6 w-6" />
@@ -197,64 +197,53 @@ export function LandingFeatures() {
           </div>
 
           {/* Kosztorys i umowa */}
-          <div className={`${cardBase} md:col-span-6 lg:col-span-6 lg:p-8`}>
+          <div className={`${cardBase} md:col-span-3 lg:col-span-3`}>
             <div className="mb-4 flex items-start justify-between gap-3">
               <span className={iconTile}>
                 <Receipt className="h-6 w-6" />
               </span>
             </div>
-            <h3 className="text-base font-semibold text-slate-900 lg:text-lg">Kosztorys i umowa</h3>
-            <p className="mt-2 max-w-md text-sm leading-relaxed text-slate-600">
-              Wycena liczona z menu (cena za osobę + dopłaty) i liczby gości. Gotową
-              umowę pobierasz jako dokument DOCX jednym kliknięciem.
+            <h3 className="text-base font-semibold text-slate-900">Kosztorys i umowa</h3>
+            <p className="mt-1.5 text-sm leading-relaxed text-slate-600">
+              Wycena liczona z menu i liczby gości. Umowę pobierasz jako dokument DOCX
+              jednym kliknięciem.
             </p>
-            <div className="mt-6 flex flex-wrap gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-600">
-                <FileText className="h-4 w-4 text-slate-500" /> Umowa DOCX
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-600">
-                Wycena per osoba
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-600">
-                Checklista produkcyjna
-              </span>
-            </div>
           </div>
 
           {/* Kalendarz z blokadami */}
-          <div className={`${cardBase} md:col-span-3 lg:col-span-4`}>
+          <div className={`${cardBase} md:col-span-3 lg:col-span-3`}>
             <div className="mb-4 flex items-start justify-between gap-3">
               <span className={iconTile}>
                 <CalendarDays className="h-6 w-6" />
               </span>
             </div>
-            <h3 className="text-sm font-semibold text-slate-900">Kalendarz i obłożenie</h3>
+            <h3 className="text-base font-semibold text-slate-900">Kalendarz i obłożenie</h3>
             <p className="mt-1.5 text-sm leading-relaxed text-slate-600">
               Terminy, blokady dat i obłożenie — osobno dla każdej sali.
             </p>
           </div>
 
           {/* Wizytówka + zapytania */}
-          <div className={`${cardBase} md:col-span-3 lg:col-span-4`}>
+          <div className={`${cardBase} md:col-span-3 lg:col-span-3`}>
             <div className="mb-4 flex items-start justify-between gap-3">
               <span className={iconTile}>
                 <Globe className="h-6 w-6" />
               </span>
             </div>
-            <h3 className="text-sm font-semibold text-slate-900">Wizytówka i zapytania</h3>
+            <h3 className="text-base font-semibold text-slate-900">Wizytówka i zapytania</h3>
             <p className="mt-1.5 text-sm leading-relaxed text-slate-600">
               Publiczna strona obiektu z formularzem — zapytania trafiają prosto do systemu.
             </p>
           </div>
 
           {/* Zespół z rolami */}
-          <div className={`${cardBase} md:col-span-3 lg:col-span-4`}>
+          <div className={`${cardBase} md:col-span-3 lg:col-span-3`}>
             <div className="mb-4 flex items-start justify-between gap-3">
               <span className={iconTile}>
                 <Users2 className="h-6 w-6" />
               </span>
             </div>
-            <h3 className="text-sm font-semibold text-slate-900">Zespół z rolami</h3>
+            <h3 className="text-base font-semibold text-slate-900">Zespół z rolami</h3>
             <p className="mt-1.5 text-sm leading-relaxed text-slate-600">
               Właściciel, manager, kuchnia, obsługa, bar — każdy widzi i akceptuje swoje kroki.
             </p>
