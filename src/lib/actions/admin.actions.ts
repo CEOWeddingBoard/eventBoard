@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { assigneeRoleLabel } from "@/lib/workflow-roles";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { hashPassword } from "@/lib/auth/password";
 import { revalidatePath } from "next/cache";
@@ -864,4 +865,96 @@ export async function removeSpaceNote(id: string): Promise<{ ok: boolean; error?
   await prisma.orgAdminNote.deleteMany({ where: { id } });
   revalidatePath("/admin");
   return { ok: true };
+}
+
+/** Proces zdefiniowany w przestrzeni klienta. */
+export type ProcesPrzestrzeni = {
+  id: string;
+  name: string;
+  liczbaKrokow: number;
+  /** Ile przyjęć faktycznie tego procesu używa — proces bez użyć to sygnał. */
+  liczbaEventow: number;
+};
+
+/** Konto w przestrzeni klienta, z danymi potrzebnymi do resetu hasła. */
+export type KontoPrzestrzeni = {
+  userId: string;
+  email: string;
+  name: string | null;
+  role: string;
+  isAdmin: boolean;
+  /** Role operacyjne (Kucharz, Kelner…), gotowe do pokazania. */
+  roleOperacyjne: string[];
+};
+
+export type SzczegolyPrzestrzeni = {
+  procesy: ProcesPrzestrzeni[];
+  konta: KontoPrzestrzeni[];
+};
+
+/**
+ * Szczegóły przestrzeni doczytywane przy rozwinięciu wiersza.
+ *
+ * Świadomie NIE są częścią `listEventSpaces`: lista klientów ma się otwierać
+ * od razu, a procesy i konta to dwa dodatkowe zapytania na każdą przestrzeń.
+ * Przy kilkudziesięciu klientach lista ładowałaby się zauważalnie wolniej,
+ * żeby pokazać dane, na które patrzy się przy jednym kliencie naraz.
+ */
+export async function getSpaceDetails(orgId: string): Promise<SzczegolyPrzestrzeni> {
+  await assertPlatformAdmin();
+
+  const [workflows, members] = await Promise.all([
+    prisma.organizationWorkflow.findMany({
+      where: { organizationId: orgId },
+      orderBy: { createdAt: "asc" },
+      select: { id: true, name: true, _count: { select: { nodes: true } } },
+    }),
+    prisma.organizationMember.findMany({
+      where: { organizationId: orgId },
+      orderBy: [{ role: "asc" }, { createdAt: "asc" }],
+      select: {
+        role: true,
+        isAdmin: true,
+        rolesJson: true,
+        user: { select: { id: true, email: true, name: true } },
+      },
+    }),
+  ]);
+
+  const uzycia = await prisma.event.groupBy({
+    by: ["workflowId"],
+    where: { organizationId: orgId, workflowId: { not: null } },
+    _count: { _all: true },
+  });
+  const licznik = new Map(uzycia.map((u) => [u.workflowId, u._count._all]));
+
+  return {
+    procesy: workflows.map((w) => ({
+      id: w.id,
+      name: w.name,
+      liczbaKrokow: w._count.nodes,
+      liczbaEventow: licznik.get(w.id) ?? 0,
+    })),
+    // Konto serwisowe należy do każdej przestrzeni — na liście klienta
+    // tylko myli, bo to nasze konto, nie jego.
+    konta: members
+      .filter((m) => m.role !== "SERVICE")
+      .map((m) => ({
+        userId: m.user.id,
+        email: m.user.email,
+        name: m.user.name,
+        role: m.role,
+        isAdmin: m.isAdmin,
+        roleOperacyjne: (() => {
+          try {
+            const r = JSON.parse(m.rolesJson ?? "[]");
+            return Array.isArray(r)
+              ? r.filter((x): x is string => typeof x === "string").map(assigneeRoleLabel)
+              : [];
+          } catch {
+            return [];
+          }
+        })(),
+      })),
+  };
 }

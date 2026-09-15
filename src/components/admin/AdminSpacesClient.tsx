@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { SpaceDetailsPanel } from "@/components/admin/SpaceDetailsPanel";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,7 +28,7 @@ import {
   type TemplateLibrary,
   setSpaceContact,
 } from "@/lib/actions/admin.actions";
-import { LogIn, UserPlus, ShieldCheck, Library, Workflow, ArrowRightLeft, Archive, Trash2 } from "lucide-react";
+import { LogIn, UserPlus, ShieldCheck, Library, Workflow, ArrowRightLeft, Archive, Trash2, ListTree } from "lucide-react";
 import { PLANS, PLAN_KEYS, type PlanKey } from "@/lib/plans";
 import { SpaceNotes } from "@/components/admin/SpaceNotes";
 
@@ -376,6 +377,7 @@ export function AdminSpacesClient({
     } else toast.error(res.error ?? "Nie udało się zapisać");
   }
 
+  const [szczegolyDla, setSzczegolyDla] = useState<string | null>(null);
   const [resetEmail, setResetEmail] = useState("");
   const [resetCreds, setResetCreds] = useState<{ email: string; password: string } | null>(null);
   async function handleResetByEmail() {
@@ -592,6 +594,13 @@ export function AdminSpacesClient({
                       <ExternalLink className="h-3.5 w-3.5" /> Link logowania
                     </a>
                     <CopyBtn value={s.loginUrl} label="Kopiuj link" />
+                    <button
+                      onClick={() => setSzczegolyDla(szczegolyDla === s.id ? null : s.id)}
+                      className="inline-flex items-center gap-1 rounded-md border border-neutral-300 px-2.5 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
+                    >
+                      <ListTree className="h-3.5 w-3.5" />
+                      {szczegolyDla === s.id ? "Ukryj szczegóły" : "Szczegóły"}
+                    </button>
                     <button onClick={() => handleReset(s.id)} className="inline-flex items-center gap-1 rounded-md border border-neutral-300 px-2.5 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50">
                       <KeyRound className="h-3.5 w-3.5" /> Nowe hasło
                     </button>
@@ -603,6 +612,8 @@ export function AdminSpacesClient({
                     </button>
                   </div>
                 </div>
+                {szczegolyDla === s.id && <SpaceDetailsPanel orgId={s.id} />}
+
                 {memberFor === s.id && (
                   <div className="mt-3 rounded-lg border border-neutral-200 bg-neutral-50 p-3">
                     {/* Limity licencji per przestrzeń */}
