@@ -15,6 +15,7 @@ import {
   type StepField,
 } from "@/lib/workflow-agenda-fields";
 import { tableAgendaEntries } from "@/lib/workflow-table-summary";
+import { czyLinkAktywny, czyLinkMozeZamknacKrok, krokiDlaRoli } from "@/lib/event-access";
 
 export type ProcessNodeStatus = "pending" | "current" | "completed";
 
@@ -341,6 +342,28 @@ async function assertCanCompleteNode(
   if (role === "CLIENT") {
     if (!clientToken) throw new Error("Brak tokenu dostępu do tego przyjęcia.");
     const hashed = createHash("sha256").update(clientToken).digest("hex");
+
+    // Link imienny (zamawiający, planner, podwykonawca) — każdy w swojej roli.
+    const link = await prisma.eventAccessLink.findFirst({
+      where: { eventId, tokenHash: hashed },
+      select: { id: true, role: true, expiresAt: true, revokedAt: true },
+    });
+
+    if (link) {
+      if (!czyLinkAktywny(link)) throw new Error("Link jest nieaktualny.");
+      // Token to jedyny dowód tożsamości, więc rola linku musi ograniczać
+      // to, co wolno zamknąć — inaczej planner domyka kroki zamawiającego.
+      if (step && !czyLinkMozeZamknacKrok(link.role, step)) {
+        throw new Error("Ten krok wypełnia kto inny.");
+      }
+      await prisma.eventAccessLink.update({
+        where: { id: link.id },
+        data: { lastUsedAt: new Date() },
+      });
+      return;
+    }
+
+    // Stary, pojedynczy link klienta — zawsze w roli CLIENT.
     const event = await prisma.event.findFirst({
       where: {
         id: eventId,
@@ -351,6 +374,9 @@ async function assertCanCompleteNode(
     if (!event) throw new Error("Link jest nieaktualny.");
     if (event.clientLinkExpiresAt && event.clientLinkExpiresAt < new Date()) {
       throw new Error("Link wygasł.");
+    }
+    if (step && !czyLinkMozeZamknacKrok("CLIENT", step)) {
+      throw new Error("Ten krok wypełnia kto inny.");
     }
     return;
   }
@@ -604,6 +630,21 @@ export async function getEventProcessStateForPortal(token: string): Promise<Proc
   // jest surowy (portal WeddingBoard). Wcześniej porównywano surowy token do hasha,
   // więc portal EventBoard nigdy nie odnajdywał procesu i krok klienta nie pokazywał się.
   const hashed = createHash("sha256").update(token).digest("hex");
+
+  // Link imienny — rola zapisana przy linku decyduje, co posiadacz zobaczy.
+  const link = await prisma.eventAccessLink.findUnique({
+    where: { tokenHash: hashed },
+    select: { eventId: true, role: true, expiresAt: true, revokedAt: true },
+  });
+  if (link) {
+    if (!czyLinkAktywny(link)) return null;
+    const state = await getEventProcessState(link.eventId);
+    if (!state) return null;
+    // Portal pokazuje wyłącznie kroki tej roli. Pełna lista zdradzałaby osobie
+    // z zewnątrz, jak obiekt prowadzi przyjęcie i kto co zatwierdza.
+    return { ...state, nodes: krokiDlaRoli(link.role, state.nodes) };
+  }
+
   const event = await prisma.event.findFirst({
     where: {
       OR: [
@@ -614,5 +655,8 @@ export async function getEventProcessStateForPortal(token: string): Promise<Proc
     select: { id: true },
   });
   if (!event) return null;
-  return getEventProcessState(event.id);
+
+  const state = await getEventProcessState(event.id);
+  if (!state) return null;
+  return { ...state, nodes: krokiDlaRoli("CLIENT", state.nodes) };
 }

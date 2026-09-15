@@ -9,6 +9,7 @@ import { DayScheduleAndMenu } from "@/components/day-schedule/day-schedule-and-m
 import { MenuVariantEditor } from "@/components/menu/MenuVariantEditor";
 import { ExportEventToGoogle } from "@/components/google/ExportEventToGoogle";
 import { EventStaffPanel } from "@/components/eventboard/EventStaffPanel";
+import { EventAccessLinksPanel } from "@/components/eventboard/EventAccessLinksPanel";
 import { AgendaApprovalPanel } from "@/components/agenda/AgendaApprovalPanel";
 import { GenerateAgendaButton } from "@/components/agenda/generate-agenda-button";
 import { EventClientLinkButton } from "@/components/eventboard/event-client-link-button";
@@ -193,6 +194,8 @@ export default async function EventBoardEventPage({
       )}
 
       <EventStaffPanel eventId={event.id} canEdit={canManage} />
+
+      <EventAccessLinksPanel eventId={event.id} canEdit={canManage} locale={locale} />
 
       {canManage && (
         <div className="flex flex-wrap gap-2">

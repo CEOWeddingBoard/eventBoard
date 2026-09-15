@@ -130,6 +130,17 @@ Wejście wyłącznie tokenem z `generateEventClientLink`; token nieznany i wygas
 > sesją i przynależnością eventu do aktywnej przestrzeni. **Dodając akcję wołaną z portalu,
 > zweryfikuj token tak samo** — inaczej wystarczy znać ID eventu.
 
+**Kilku uczestników bez konta.** `EventAccessLink` to link imienny z własną **rolą**:
+zamawiający, wedding planner prowadzący przyjęcie w imieniu klienta, podwykonawca.
+Reguły w `src/lib/event-access.ts` (`czyLinkMozeZamknacKrok`, `krokiDlaRoli`) decydują,
+co posiadacz linku widzi i co może zamknąć — portal pokazuje **wyłącznie kroki jego roli**,
+a serwer sprawdza rolę przy każdym zapisie, bo token jest jedynym dowodem tożsamości.
+Krok bez wskazanej roli jest wewnętrzny i nie domyka go nikt z zewnątrz.
+Stary, pojedynczy `Event.clientLinkTokenHash` dalej działa w roli `CLIENT`.
+
+> **Uwaga:** w bazie leży wyłącznie skrót tokenu, więc zgubionego linku nie da się
+> odtworzyć — wystawia się nowy. Unieważnienie to `revokedAt`, nie usunięcie wiersza.
+
 ### Routing i dwa drzewa API
 
 `src/middleware.ts` łączy bramę sesji z `next-intl` (`localePrefix: "always"`). Konsekwencje:

@@ -60,11 +60,11 @@ function PoleUwag({
 }
 
 function StepIndicator({ nodes }: { nodes: ProcessNodeView[] }) {
-  // Pokazujemy parze wyłącznie jej kroki — wewnętrzne akceptacje zespołu
-  // tylko by ją zdezorientowały. Lista pionowa: ukończone, bieżący, kolejne.
-  const clientNodes = nodes.filter(
-    (n) => n.assigneeRole === "CLIENT" || n.assigneeRole === "BOTH"
-  );
+  // Lista jest już zawężona po stronie serwera do kroków roli, w której
+  // wystawiono ten link (`krokiDlaRoli`) — zamawiający widzi swoje,
+  // planner swoje. Drugie filtrowanie tutaj ukrywało wszystko każdemu,
+  // kto nie jest klientem.
+  const clientNodes = nodes;
   if (clientNodes.length === 0) return null;
   const done = clientNodes.filter((n) => n.status === "completed").length;
 
@@ -584,11 +584,16 @@ export function ClientProcessStep({
     (n) => n.id === processState.currentNodeId
   );
 
-  const isClientNode =
-    currentNode &&
-    (currentNode.assigneeRole === "CLIENT" || currentNode.assigneeRole === "BOTH");
+  // Bieżący krok jest „mój”, jeśli w ogóle przyszedł z serwera — filtr roli
+  // odsiał kroki zespołu obiektu, więc obecność w liście jest tu dowodem.
+  const isClientNode = !!currentNode;
 
-  const isDone = processState.nodes.every((n) => n.status === "completed");
+  // Pusta lista znaczy „nie mam tu żadnych kroków”, a nie „wszystko zrobione” —
+  // `every` na pustej tablicy zwraca true i pokazywało podziękowanie komuś,
+  // kto nic nie wypełnił.
+  const isDone =
+    processState.nodes.length > 0 &&
+    processState.nodes.every((n) => n.status === "completed");
 
   function reload() {
     window.location.reload();

@@ -13,8 +13,11 @@ export const ASSIGNEE_ROLE_OPTIONS: { value: string; label: string }[] = [
   { value: "MANAGER", label: "Manager" },
   { value: "OWNER", label: "Właściciel" },
   { value: "STAFF", label: "Pracownik" },
-  { value: "CLIENT", label: "Klient (para/gość)" },
+  { value: "CLIENT", label: "Klient (zamawiający)" },
   { value: "BOTH", label: "Klient + Manager" },
+  // Planner prowadzi przyjęcie w imieniu klienta i nie ma konta w systemie —
+  // wchodzi własnym linkiem decyzyjnym, jak zamawiający, ale w swojej roli.
+  { value: "PLANNER", label: "Wedding / event planner" },
   { value: "CHEF", label: "Kucharz" },
   { value: "WAITER", label: "Kelner" },
   { value: "BARTENDER", label: "Barman" },
@@ -34,6 +37,7 @@ const DISPLAY_LABELS: Record<string, string> = {
   STAFF: "Pracownik",
   CLIENT: "Klient",
   BOTH: "Klient + Manager",
+  PLANNER: "Planner",
   CHEF: "Kucharz",
   WAITER: "Kelner",
   BARTENDER: "Barman",

@@ -29,7 +29,9 @@ const store: {
   historia: Array<{ fromStage?: string; toStage: string }>;
   powiadomienia: Array<{ title: string }>;
   eventDostepny: boolean;
-} = { agenda: {}, state: null, nodes: [], historia: [], powiadomienia: [], eventDostepny: true };
+  /** Link imienny zwracany przez mock — null znaczy „event ma tylko stary link klienta". */
+  link: { id: string; role: string; expiresAt: Date; revokedAt: Date | null } | null;
+} = { agenda: {}, state: null, nodes: [], historia: [], powiadomienia: [], eventDostepny: true, link: null };
 
 const sesja: {
   user: { id: string } | null;
@@ -80,6 +82,14 @@ jest.mock("@/lib/prisma", () => ({
         store.eventDostepny ? { organizationId: "org-1", name: "Wesele Kowalskich" } : null,
       ),
     },
+    // Linki imienne — domyślnie event ich nie ma, więc autoryzacja spada
+    // na stary, pojedynczy token klienta. Testy roli linku siedzą osobno,
+    // w src/lib/__tests__/event-access.test.ts.
+    eventAccessLink: {
+      findFirst: jest.fn(async () => store.link),
+      findUnique: jest.fn(async () => store.link),
+      update: jest.fn(async () => ({})),
+    },
     eventWorkflowHistory: {
       create: jest.fn(async ({ data }: { data: { fromStage?: string; toStage: string } }) => {
         store.historia.push(data);
@@ -117,6 +127,7 @@ function ustawProces(nodes: Node[], currentNodeId = nodes[0].id) {
   store.powiadomienia = [];
   store.nodes = nodes;
   store.eventDostepny = true;
+  store.link = null;
   store.state = {
     eventId: EVENT,
     workflowId: "wf-1",
@@ -259,7 +270,7 @@ describe("mapowania pól (starszy mechanizm)", () => {
 
 describe("wybór menu", () => {
   it("trafia do agendy nawet bez skonfigurowanego mapowania", async () => {
-    ustawProces([node({ id: "n1", name: "Wybór menu", actionType: "MENU_SELECTION" })]);
+    ustawProces([node({ id: "n1", name: "Wybór menu", actionType: "MENU_SELECTION", assigneeRole: "CLIENT" })]);
 
     await completeProcessNode(
       EVENT,
@@ -274,7 +285,7 @@ describe("wybór menu", () => {
   });
 
   it("ukończenie kroku przez klienta powiadamia obiekt", async () => {
-    ustawProces([node({ id: "n1", name: "Wybór menu", actionType: "MENU_SELECTION" })]);
+    ustawProces([node({ id: "n1", name: "Wybór menu", actionType: "MENU_SELECTION", assigneeRole: "CLIENT" })]);
 
     await completeProcessNode(EVENT, "n1", { menuSummary: "Wariant Złoty" }, "CLIENT", TOKEN);
 
@@ -312,6 +323,7 @@ describe("przejście do następnego kroku", () => {
         id: "n1",
         name: "Wybór wariantu",
         actionType: "MENU_SELECTION",
+        assigneeRole: "CLIENT",
         conditionsJson: JSON.stringify([
           { label: "Złoty", conditionType: "client_choice", conditionValue: "Złoty", nextNodeId: "n-zloty" },
           { label: "Srebrny", conditionType: "client_choice", conditionValue: "Srebrny", nextNodeId: "n-srebrny" },
@@ -340,17 +352,67 @@ describe("przejście do następnego kroku", () => {
 
 describe("kto może zamknąć krok", () => {
   it("klient bez tokenu nie zamknie kroku", async () => {
-    ustawProces([node({ id: "n1", name: "Wybór menu", actionType: "MENU_SELECTION" })]);
+    ustawProces([node({ id: "n1", name: "Wybór menu", actionType: "MENU_SELECTION", assigneeRole: "CLIENT" })]);
 
     await expect(completeProcessNode(EVENT, "n1", {}, "CLIENT")).rejects.toThrow(/tokenu/i);
   });
 
   it("klient z tokenem, którego event nie zna, nie zamknie kroku", async () => {
-    ustawProces([node({ id: "n1", name: "Wybór menu", actionType: "MENU_SELECTION" })]);
+    ustawProces([node({ id: "n1", name: "Wybór menu", actionType: "MENU_SELECTION", assigneeRole: "CLIENT" })]);
     store.eventDostepny = false;
 
     await expect(
       completeProcessNode(EVENT, "n1", {}, "CLIENT", "nie-ten-token"),
+    ).rejects.toThrow(/nieaktualny/i);
+  });
+
+  it("klient z linkiem nie zamknie kroku kuchni", async () => {
+    ustawProces([node({ id: "n1", name: "Akceptacja menu", assigneeRole: "CHEF" })]);
+
+    await expect(
+      completeProcessNode(EVENT, "n1", {}, "CLIENT", TOKEN),
+    ).rejects.toThrow(/wypełnia kto inny/i);
+  });
+
+  it("planner zamyka swój krok", async () => {
+    ustawProces([node({ id: "n1", name: "Harmonogram", assigneeRole: "PLANNER" })]);
+    store.link = {
+      id: "l1",
+      role: "PLANNER",
+      expiresAt: new Date(Date.now() + 86_400_000),
+      revokedAt: null,
+    };
+
+    await expect(
+      completeProcessNode(EVENT, "n1", {}, "CLIENT", "token-plannera"),
+    ).resolves.toBeDefined();
+  });
+
+  it("planner nie zamknie kroku zamawiającego", async () => {
+    ustawProces([node({ id: "n1", name: "Wybór menu", assigneeRole: "CLIENT" })]);
+    store.link = {
+      id: "l1",
+      role: "PLANNER",
+      expiresAt: new Date(Date.now() + 86_400_000),
+      revokedAt: null,
+    };
+
+    await expect(
+      completeProcessNode(EVENT, "n1", {}, "CLIENT", "token-plannera"),
+    ).rejects.toThrow(/wypełnia kto inny/i);
+  });
+
+  it("link unieważniony nie działa, choć jest w terminie", async () => {
+    ustawProces([node({ id: "n1", name: "Harmonogram", assigneeRole: "PLANNER" })]);
+    store.link = {
+      id: "l1",
+      role: "PLANNER",
+      expiresAt: new Date(Date.now() + 86_400_000),
+      revokedAt: new Date(Date.now() - 1000),
+    };
+
+    await expect(
+      completeProcessNode(EVENT, "n1", {}, "CLIENT", "token-plannera"),
     ).rejects.toThrow(/nieaktualny/i);
   });
 
@@ -377,7 +439,7 @@ describe("krok tabelaryczny", () => {
   ]);
 
   it("wiersze tabeli trafiają do agendy kolumna po kolumnie", async () => {
-    ustawProces([node({ id: "n1", name: "Lista gości", actionType: "TABLE", fieldsJson: KOLUMNY })]);
+    ustawProces([node({ id: "n1", name: "Lista gości", actionType: "TABLE", fieldsJson: KOLUMNY, assigneeRole: "CLIENT" })]);
 
     await completeProcessNode(
       EVENT,
@@ -397,7 +459,7 @@ describe("krok tabelaryczny", () => {
   });
 
   it("puste wiersze nie zaśmiecają agendy", async () => {
-    ustawProces([node({ id: "n1", name: "Lista gości", actionType: "TABLE", fieldsJson: KOLUMNY })]);
+    ustawProces([node({ id: "n1", name: "Lista gości", actionType: "TABLE", fieldsJson: KOLUMNY, assigneeRole: "CLIENT" })]);
 
     await completeProcessNode(
       EVENT,
@@ -411,7 +473,7 @@ describe("krok tabelaryczny", () => {
   });
 
   it("brak wierszy nie wywraca kroku", async () => {
-    ustawProces([node({ id: "n1", name: "Lista gości", actionType: "TABLE", fieldsJson: KOLUMNY })]);
+    ustawProces([node({ id: "n1", name: "Lista gości", actionType: "TABLE", fieldsJson: KOLUMNY, assigneeRole: "CLIENT" })]);
 
     const wynik = await completeProcessNode(EVENT, "n1", {}, "CLIENT", TOKEN);
 

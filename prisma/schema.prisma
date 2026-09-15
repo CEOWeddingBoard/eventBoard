@@ -12,19 +12,19 @@ datasource db {
 
 // User model for authentication
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  password     String
-  name         String?
-  clerkId      String?  @unique
-  role         String   @default("STAFF") // ADMIN | STAFF
-  isActive     Boolean  @default(true)
-  metadataJson String? // JSON: billing/trial (stripeCustomerId, plan, trialEndsAt...)
+  id                   String    @id @default(cuid())
+  email                String    @unique
+  password             String
+  name                 String?
+  clerkId              String?   @unique
+  role                 String    @default("STAFF") // ADMIN | STAFF
+  isActive             Boolean   @default(true)
+  metadataJson         String? // JSON: billing/trial (stripeCustomerId, plan, trialEndsAt...)
   // Akceptacja regulaminu — wersja i moment. Brak/nieaktualna = brama akceptacji.
   acceptedTermsVersion String?
   acceptedTermsAt      DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 
   // Relations
   weddings            Wedding[]
@@ -34,7 +34,7 @@ model User {
   eventParticipants   EventParticipant[]
   googleCalendars     GoogleCalendarConnection[]
   organizationMembers OrganizationMember[]
-  ownedOrganizations  Organization[]            @relation("OrganizationOwner")
+  ownedOrganizations  Organization[]             @relation("OrganizationOwner")
 
   @@map("users")
 }
@@ -156,9 +156,9 @@ model Organization {
   // Uprawnienia modułowe per rola: { [roleValue]: { [moduleKey]: none|view|edit } }.
   modulePermissionsJson  String?
   // Powiadomienia o krokach czekających na akceptację.
-  notifyDaysBefore       Int?     @default(7) // ile dni przed eventem wysyłać
-  notifyEmail            Boolean  @default(true)
-  notifySms              Boolean  @default(false)
+  notifyDaysBefore       Int?      @default(7) // ile dni przed eventem wysyłać
+  notifyEmail            Boolean   @default(true)
+  notifySms              Boolean   @default(false)
   // Notatka admina platformy o kliencie (wewnętrzna) + archiwizacja przestrzeni.
   adminNote              String?
   /// Osoba kontaktowa po stronie klienta — kto faktycznie odbiera telefon.
@@ -457,6 +457,7 @@ model Event {
   processState          EventProcessState?
   staff                 EventStaff[]
   agendaData            EventAgendaData?
+  accessLinks           EventAccessLink[]
   // Ostatnie wysłane przypomnienie o kroku czekającym na akceptację (dedup).
   approvalReminderAt    DateTime?
   modulesOverrideJson   String? // JSON: nadpisanie modułów per event (null = użyj kategorii)
@@ -617,18 +618,18 @@ model MenuCourse {
 }
 
 model MenuVariant {
-  id          String              @id @default(cuid())
-  eventId     String
-  event       Event               @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  label       String // "MENU A", "MENU B", "MENU C", "MENU WIGILIJNE"
-  description String? // opis tekstowy wariantu
-  imageUrl    String? // skan menu (URL lub base64 data URL)
-  notes       String? // uwagi, alergeny itp.
+  id             String              @id @default(cuid())
+  eventId        String
+  event          Event               @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  label          String // "MENU A", "MENU B", "MENU C", "MENU WIGILIJNE"
+  description    String? // opis tekstowy wariantu
+  imageUrl       String? // skan menu (URL lub base64 data URL)
+  notes          String? // uwagi, alergeny itp.
   pricePerPerson Float? // cena za osobę dla całego wariantu (np. bufet 250 zł/os.)
-  courses     MenuVariantCourse[]
-  sortOrder   Int                 @default(0)
-  createdAt   DateTime            @default(now())
-  updatedAt   DateTime            @updatedAt
+  courses        MenuVariantCourse[]
+  sortOrder      Int                 @default(0)
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
 
   @@map("menu_variants")
 }
@@ -1865,4 +1866,36 @@ model EventWidget {
   updatedAt  DateTime @updatedAt
 
   @@map("event_widgets")
+}
+
+/// Link decyzyjny dla osoby BEZ konta w systemie.
+///
+/// Wcześniej event miał dokładnie jeden taki link (`Event.clientLinkTokenHash`)
+/// i zawsze w roli klienta. Przy jednym przyjęciu decyzje podejmuje jednak
+/// więcej osób z zewnątrz: zamawiający, wedding planner prowadzący przyjęcie
+/// w imieniu klienta, czasem podwykonawca. Każde z nich potrzebuje własnego
+/// linku i widzi wyłącznie kroki swojej roli — inaczej planner zamykałby kroki
+/// zamawiającego i odwrotnie.
+model EventAccessLink {
+  id      String @id @default(cuid())
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  /// Rola kroku procesu, którą ten link obsługuje (CLIENT, PLANNER, własna).
+  role  String
+  /// Do rozpoznania w panelu: „Państwo Kowalscy", „Ania — planner".
+  label String
+  email String?
+
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  lastUsedAt DateTime?
+
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([eventId])
+  @@map("event_access_links")
 }
