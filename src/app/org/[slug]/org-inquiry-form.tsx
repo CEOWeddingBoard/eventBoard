@@ -7,7 +7,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { createOrgLead } from "@/lib/actions/org-ecosystem.actions";
 
-export function OrgInquiryForm({ organizationId }: { organizationId: string }) {
+export function OrgInquiryForm({
+  organizationId,
+  brandColor = "#0f172a",
+}: {
+  organizationId: string;
+  /** Kolor przewodni obiektu — formularz jest jego wizytówką, nie naszą. */
+  brandColor?: string;
+}) {
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -71,12 +78,17 @@ export function OrgInquiryForm({ organizationId }: { organizationId: string }) {
         value={form.phone}
         onChange={(e) => setForm({ ...form, phone: e.target.value })}
       />
-      <Input
-        type="date"
-        placeholder="Preferowana data"
-        value={form.eventDate}
-        onChange={(e) => setForm({ ...form, eventDate: e.target.value })}
-      />
+      <div>
+        <label htmlFor="lead-date" className="mb-1 block text-xs font-medium text-neutral-600">
+          Preferowana data
+        </label>
+        <Input
+          id="lead-date"
+          type="date"
+          value={form.eventDate}
+          onChange={(e) => setForm({ ...form, eventDate: e.target.value })}
+        />
+      </div>
       <Input
         type="number"
         placeholder="Liczba gości (opcjonalnie)"
@@ -89,9 +101,17 @@ export function OrgInquiryForm({ organizationId }: { organizationId: string }) {
         onChange={(e) => setForm({ ...form, message: e.target.value })}
         rows={4}
       />
-      <Button type="submit" disabled={busy} className="w-full">
-        Wyślij zapytanie
+      <Button
+        type="submit"
+        disabled={busy}
+        className="w-full border-0 text-white hover:opacity-90"
+        style={{ backgroundColor: brandColor }}
+      >
+        {busy ? "Wysyłanie…" : "Wyślij zapytanie"}
       </Button>
+      <p className="text-center text-[11px] text-neutral-400">
+        Odpowiadamy zwykle w ciągu jednego dnia roboczego.
+      </p>
     </form>
   );
 }

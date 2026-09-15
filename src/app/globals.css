@@ -36,7 +36,14 @@
  * (h1) i serifowy (h2–h6), przez co strona główna wyglądała inaczej niż aplikacja.
  */
 @layer base {
-  .landing-clean :is(h1, h2, h3, h4, h5, h6) {
+  /*
+   * Landing i publiczny profil obiektu sprzedają ten sam produkt co panel,
+   * więc trzymają tę samą, czystą typografię. Bez tego globalne nagłówki
+   * wchodziły w krój kaligraficzny (h1) i szeryfowy (h2–h6), przez co strony
+   * wyglądały jak z innego produktu niż aplikacja.
+   */
+  .landing-clean :is(h1, h2, h3, h4, h5, h6),
+  .org-public :is(h1, h2, h3, h4, h5, h6) {
     font-family: inherit;
   }
 }

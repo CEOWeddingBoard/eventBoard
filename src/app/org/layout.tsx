@@ -14,7 +14,7 @@ import "../globals.css";
 
 const montserrat = Montserrat({
   subsets: ["latin", "latin-ext"],
-  variable: "--font-montserrat",
+  variable: "--font-sans",
   display: "swap",
 });
 
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 export default function OrgLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pl" className={montserrat.variable} suppressHydrationWarning>
-      <body className="min-h-screen bg-neutral-50 font-sans antialiased text-neutral-800">
+      <body className="org-public min-h-screen bg-[#faf9f7] font-sans antialiased text-neutral-800">
         {children}
       </body>
     </html>
